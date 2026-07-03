@@ -1,7 +1,7 @@
 /**
  * Fathom API — Cloud Run service.
  *
- *   GET  /healthz
+ *   GET  /api/health          (note: /healthz is reserved by Google's frontend on run.app)
  *   GET  /api/search?q=voo     catalog search; falls through to Tiingo search
  *                              for symbols we haven't cached yet
  *   GET  /api/ticker/:SYM      returns the series; unknown tickers are fetched
@@ -160,7 +160,7 @@ function send(res, status, body, headers = {}) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`)
   try {
-    if (req.method === 'GET' && url.pathname === '/healthz') {
+    if (req.method === 'GET' && url.pathname === '/api/health') {
       return send(res, 200, { ok: true })
     }
 
