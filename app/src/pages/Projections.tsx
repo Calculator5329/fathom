@@ -45,6 +45,7 @@ const DEMO: Projection = {
     bull: { revenueGrowth: 0.13, netMargin: 0.29, exitPe: 36, dividendYield: 0.005, buybackYield: 0.03 },
   },
   notes: '',
+  manualPrice: false,
   createdAt: 0,
   updatedAt: 0,
 }
@@ -94,8 +95,15 @@ function ProjectionsInner() {
     if (!user || !draft) return
     setSaving(true)
     try {
-      // Persist with the live price snapshotted in.
-      const toSave = { ...draft, inputs: { ...draft.inputs, currentPrice: info?.price ?? draft.inputs.currentPrice } }
+      // Persist with live price unless the thesis explicitly uses a manual quote.
+      const livePrice = Number.isFinite(info?.price) && (info?.price ?? 0) > 0 ? info?.price : null
+      const toSave = {
+        ...draft,
+        inputs: {
+          ...draft.inputs,
+          currentPrice: draft.manualPrice ? draft.inputs.currentPrice : livePrice ?? draft.inputs.currentPrice,
+        },
+      }
       await saveProjection(user.uid, toSave)
       setBaseline(JSON.stringify(toSave))
       setDraft(toSave)
@@ -159,8 +167,8 @@ function ProjectionsInner() {
   const ranked = [...saved].sort((a, b) => baseCagr(b) - baseCagr(a))
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl px-6">
-      <aside className="w-72 shrink-0 border-r py-8 pr-6">
+    <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl flex-col px-6 lg:flex-row">
+      <aside className="border-b py-6 lg:w-72 lg:shrink-0 lg:border-r lg:border-b-0 lg:py-8 lg:pr-6">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="font-semibold tracking-tight">Projections</h1>
           <Button variant="ghost" size="icon-sm" aria-label="New projection" onClick={() => setPickingNew(true)}>
@@ -219,12 +227,12 @@ function ProjectionsInner() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 py-8 pl-8">
+      <main className="min-w-0 flex-1 py-6 lg:py-8 lg:pl-8">
         {draft ? (
           <ProjectionEditor
             key={draft.ticker}
             draft={draft}
-            currentPrice={info?.price ?? null}
+            currentPrice={Number.isFinite(info?.price) && (info?.price ?? 0) > 0 ? info?.price ?? null : null}
             priceAsOf={info?.asOf ?? null}
             onChange={setDraft}
             onSave={onSave}
@@ -249,14 +257,14 @@ function DemoEditor() {
   const { info } = usePrice(draft.ticker)
   const { signInWithGoogle } = useAuth()
   const outcome = projectScenario(
-    { ...draft.inputs, currentPrice: info?.price ?? draft.inputs.currentPrice },
+    { ...draft.inputs, currentPrice: draft.manualPrice ? draft.inputs.currentPrice : info?.price ?? draft.inputs.currentPrice },
     draft.scenarios.base,
   )
   return (
     <>
       <ProjectionEditor
         draft={draft}
-        currentPrice={info?.price ?? draft.inputs.currentPrice}
+        currentPrice={draft.manualPrice ? null : info?.price ?? draft.inputs.currentPrice}
         priceAsOf={info?.asOf ?? null}
         onChange={setDraft}
         onSave={() => signInWithGoogle().catch(() => {})}

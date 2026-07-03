@@ -19,7 +19,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-        <nav className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-6">
+        <nav className="mx-auto flex h-14 max-w-7xl items-center gap-4 overflow-x-auto px-6 sm:gap-6">
           <Link to="/" className="font-mono text-base font-semibold tracking-tight">
             fathom
           </Link>

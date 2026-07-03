@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { Download } from 'lucide-react'
 import * as echarts from 'echarts'
 
 /** Resolve a CSS custom property from :root (e.g. chart token colors). */
@@ -57,11 +58,27 @@ interface EChartProps {
   /** Charts with the same group id share tooltips/zoom (linked x-axes). */
   group?: string
   className?: string
+  /** When set, a hover-revealed button downloads the chart as a PNG named this. */
+  exportName?: string
 }
 
-export function EChart({ option, group, className }: EChartProps) {
+export function EChart({ option, group, className, exportName }: EChartProps) {
   const ref = useRef<HTMLDivElement>(null)
   const chartRef = useRef<echarts.ECharts | null>(null)
+
+  const exportPng = () => {
+    const chart = chartRef.current
+    if (!chart) return
+    const url = chart.getDataURL({
+      type: 'png',
+      pixelRatio: 2,
+      backgroundColor: cssVar('--background'),
+    })
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${exportName}.png`
+    a.click()
+  }
 
   useEffect(() => {
     const el = ref.current
@@ -85,5 +102,19 @@ export function EChart({ option, group, className }: EChartProps) {
     chartRef.current?.setOption(option, { notMerge: true })
   }, [option])
 
-  return <div ref={ref} className={className} />
+  if (!exportName) return <div ref={ref} className={className} />
+
+  return (
+    <div className="group/chart relative">
+      <div ref={ref} className={className} />
+      <button
+        type="button"
+        aria-label="Download chart as PNG"
+        onClick={exportPng}
+        className="absolute top-0 right-0 rounded-md border bg-surface-2 p-1.5 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover/chart:opacity-100"
+      >
+        <Download className="size-4" />
+      </button>
+    </div>
+  )
 }

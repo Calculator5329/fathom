@@ -241,13 +241,13 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
           </label>
         </CardHeader>
         <CardContent>
-          <EChart option={growth} className="h-80 w-full" />
+          <EChart option={growth} exportName="fathom-portfolio-value" className="h-80 w-full" />
           <EChart option={drawdown} className="mt-1 h-40 w-full" />
         </CardContent>
       </Card>
 
       <Tabs defaultValue="annual">
-        <TabsList>
+        <TabsList className="max-w-full justify-start overflow-x-auto">
           <TabsTrigger value="annual">Annual returns</TabsTrigger>
           <TabsTrigger value="risk">Risk</TabsTrigger>
           <TabsTrigger value="rolling" disabled={windows.length === 0}>

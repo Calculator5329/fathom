@@ -83,14 +83,14 @@ export function Allocation() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl px-6">
+    <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl flex-col px-6 lg:flex-row">
       {builderOpen && (
-        <aside className="w-96 shrink-0 border-r py-8 pr-8">
-          <div className="sticky top-20">{builder}</div>
+        <aside className="border-b py-6 lg:w-96 lg:shrink-0 lg:border-r lg:border-b-0 lg:py-8 lg:pr-8">
+          <div className="lg:sticky lg:top-20">{builder}</div>
         </aside>
       )}
 
-      <main className="min-w-0 flex-1 py-8 pl-8">
+      <main className="min-w-0 flex-1 py-6 lg:py-8 lg:pl-8">
         <div className="mb-3 -ml-2 flex items-center justify-between">
           <Button
             variant="ghost"

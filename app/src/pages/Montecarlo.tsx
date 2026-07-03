@@ -73,9 +73,9 @@ export function Montecarlo() {
   const setAlloc = (allocation: MonteCarloConfig['allocation']) => update({ ...config, allocation })
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl px-6">
-      {/* Builder rail */}
-      <aside className="w-80 shrink-0 border-r py-8 pr-6">
+    <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl flex-col px-6 lg:flex-row">
+      {/* Builder rail — stacks above results on narrow screens */}
+      <aside className="border-b py-6 lg:w-80 lg:shrink-0 lg:border-r lg:border-b-0 lg:py-8 lg:pr-6">
         <h1 className="mb-4 font-semibold tracking-tight">Retirement simulator</h1>
 
         {/* Allocation */}
@@ -241,7 +241,7 @@ export function Montecarlo() {
       </aside>
 
       {/* Results */}
-      <main className={`min-w-0 flex-1 py-8 pl-8 transition-opacity duration-200 ${sim.running ? 'opacity-60' : ''}`}>
+      <main className={`min-w-0 flex-1 py-6 transition-opacity duration-200 lg:py-8 lg:pl-8 ${sim.running ? 'opacity-60' : ''}`}>
         {sim.error ? (
           <p className="text-sm text-loss">{sim.error}</p>
         ) : !sim.result ? (
@@ -318,7 +318,7 @@ function Results({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <EChart option={fan} className="h-80 w-full" />
+          <EChart option={fan} exportName="fathom-montecarlo" className="h-80 w-full" />
         </CardContent>
       </Card>
 
