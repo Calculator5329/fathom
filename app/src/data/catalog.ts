@@ -19,6 +19,13 @@ const FALLBACK: CatalogEntry[] = [
   { ticker: 'KO', name: 'The Coca-Cola Company', type: 'Stock', startDate: '1970-01-02' },
 ]
 
+/**
+ * Where ticker data lives. Dev serves copies from public/; production points
+ * at the public GCS bucket via VITE_DATA_BASE_URL (see .env.production).
+ */
+const DATA_BASE: string =
+  import.meta.env.VITE_DATA_BASE_URL ?? `${import.meta.env.BASE_URL}data/`
+
 let catalog: CatalogEntry[] = FALLBACK
 let catalogLoaded: Promise<CatalogEntry[]> | null = null
 
@@ -28,7 +35,7 @@ let catalogLoaded: Promise<CatalogEntry[]> | null = null
  */
 export function loadCatalog(): Promise<CatalogEntry[]> {
   if (!catalogLoaded) {
-    catalogLoaded = fetch(`${import.meta.env.BASE_URL}data/tickers/catalog.json`)
+    catalogLoaded = fetch(`${DATA_BASE}tickers/catalog.json`)
       .then((res) => (res.ok ? res.json() : FALLBACK))
       .then((entries: CatalogEntry[]) => {
         catalog = entries
@@ -77,7 +84,7 @@ export function loadSeries(ticker: string): Promise<TickerSeries> {
   const key = ticker.toUpperCase()
   let promise = seriesCache.get(key)
   if (!promise) {
-    promise = fetch(`${import.meta.env.BASE_URL}data/tickers/${key}.json`)
+    promise = fetch(`${DATA_BASE}tickers/${key}.json`)
       .then((res) => {
         if (!res.ok) throw new Error(`No data for ${key} (${res.status})`)
         return res.json()

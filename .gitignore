@@ -5,5 +5,7 @@ data/tickers/
 app/public/data/
 .env
 .env.*
+# No secrets in it — just the public data bucket URL
+!app/.env.production
 *.local
 .DS_Store
