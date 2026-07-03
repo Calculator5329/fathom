@@ -26,9 +26,14 @@ Cloud Run API + nightly refresh. Two QA rounds passed.
 1. **Firebase Hosting deploy** — `npm run build` in app/, `firebase init hosting` against project
    `ethan-488900`, SPA rewrite to index.html, deploy. Then the whole pipeline is public.
    (Also: pick the real name/domain — "Fathom" is a working title Ethan hasn't ratified.)
-2. **Shiller data refresh** — us-monthly ends 2023-06. Rebuild from the retirement-sim pipeline
-   (`npm run build:data` there, per context/README.md) or re-download ie_data.xls; rerun
-   build-asset-classes; re-sync bucket. Extends stocks/bonds/cash ~3 years.
+2. **Shiller data refresh** — us-monthly ends 2023-06. INVESTIGATED 2026-07-03 (Opus): a fresh
+   Yale fetch via the retirement-sim pipeline (cache deleted, re-downloaded from
+   econ.yale.edu/~shiller/data/ie_data.xls) STILL parses to 2023-06 / 1830 rows. So this is NOT
+   cache staleness — either Yale's public file lags or `retirement-sim/scripts/build-data.ts`
+   drops trailing rows with incomplete CAPE/earnings columns. To actually extend: inspect the
+   raw ie_data.xls tail and the script's row-completeness filter (it likely requires all derived
+   columns present; recent months may lack finalized earnings). LOW priority — 3 years on a
+   150-year series. Deferred until someone wants it.
 3. **Polish debt:** empty/loading skeletons, mobile audit below 900px, PNG/CSV export on results,
    OG/social meta tags, favicon-quality logo pass.
 
