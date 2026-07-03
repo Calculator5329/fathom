@@ -34,6 +34,8 @@ function PctCell({ v, dp = 1 }: { v: number; dp?: number }) {
 
 interface ResultsPanelProps {
   runs: NamedResult[]
+  /** Off for total-return-only data (asset classes) where income is not tracked. */
+  showIncome?: boolean
 }
 
 /** Summary metrics: big cards for one portfolio, comparison grid for several. */
@@ -127,7 +129,7 @@ function correlationMatrix(runs: NamedResult[]): number[][] {
 
 const ROLLING_WINDOWS = [1, 3, 5, 10]
 
-export function ResultsPanel({ runs }: ResultsPanelProps) {
+export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
   const [logScale, setLogScale] = useState(false)
   const [copied, setCopied] = useState(false)
   const [rollingWindow, setRollingWindow] = useState(3)
@@ -229,7 +231,7 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
           <TabsTrigger value="rolling" disabled={windows.length === 0}>
             Rolling
           </TabsTrigger>
-          <TabsTrigger value="income">Income</TabsTrigger>
+          {showIncome && <TabsTrigger value="income">Income</TabsTrigger>}
           <TabsTrigger value="holdings">Holdings</TabsTrigger>
         </TabsList>
 
@@ -332,6 +334,7 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
           </Card>
         </TabsContent>
 
+        {showIncome && (
         <TabsContent value="income" className="animate-enter space-y-4">
           <Card>
             <CardContent>
@@ -373,6 +376,7 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
             </CardContent>
           </Card>
         </TabsContent>
+        )}
 
         <TabsContent value="holdings" className="animate-enter space-y-4">
           {runs
@@ -390,7 +394,7 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
                         <TableHead className="text-right">Target</TableHead>
                         <TableHead className="text-right">End weight</TableHead>
                         <TableHead className="text-right">Asset return</TableHead>
-                        <TableHead className="text-right">Dividends paid</TableHead>
+                        {showIncome && <TableHead className="text-right">Dividends paid</TableHead>}
                         <TableHead className="text-right">End value</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -412,9 +416,11 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
                           <TableCell className="text-right font-mono">
                             <PctCell v={h.assetTotalReturn} />
                           </TableCell>
-                          <TableCell className="text-right font-mono tnum">
-                            {usd(h.income)}
-                          </TableCell>
+                          {showIncome && (
+                            <TableCell className="text-right font-mono tnum">
+                              {usd(h.income)}
+                            </TableCell>
+                          )}
                           <TableCell className="text-right font-mono tnum">
                             {usd(h.endValue)}
                           </TableCell>
@@ -430,7 +436,9 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
                             {((r.result.endingCash / r.result.values.at(-1)!) * 100).toFixed(1)}%
                           </TableCell>
                           <TableCell className="text-right font-mono tnum">—</TableCell>
-                          <TableCell className="text-right font-mono tnum">—</TableCell>
+                          {showIncome && (
+                            <TableCell className="text-right font-mono tnum">—</TableCell>
+                          )}
                           <TableCell className="text-right font-mono tnum">
                             {usd(r.result.endingCash)}
                           </TableCell>

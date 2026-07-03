@@ -1,4 +1,5 @@
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
+import { Allocation } from './pages/Allocation'
 import { Backtest } from './pages/Backtest'
 import { Landing } from './pages/Landing'
 import { Styleguide } from './pages/Styleguide'
@@ -21,10 +22,16 @@ function Shell({ children }: { children: React.ReactNode }) {
           >
             Backtest
           </NavLink>
-          <span className="cursor-default text-sm text-muted-foreground/50">
+          <NavLink
+            to="/allocation"
+            className={({ isActive }) =>
+              `text-sm transition-colors ${
+                isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`
+            }
+          >
             Asset allocation
-            <span className="ml-2 rounded border px-1.5 py-0.5 font-mono text-xs">soon</span>
-          </span>
+          </NavLink>
         </nav>
       </header>
       {children}
@@ -39,6 +46,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/backtest" element={<Backtest />} />
+          <Route path="/allocation" element={<Allocation />} />
           <Route path="/styleguide" element={<Styleguide />} />
         </Routes>
       </Shell>

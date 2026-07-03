@@ -33,19 +33,20 @@ export function Landing() {
             </CardContent>
           </Card>
         </Link>
-        <Card className="h-full opacity-60">
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold tracking-tight">Asset allocation</h2>
-              <span className="rounded border px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
-                soon
-              </span>
-            </div>
-            <p className="mt-2 text-muted-foreground">
-              Backtest asset-class mixes across 100+ years of market history.
-            </p>
-          </CardContent>
-        </Card>
+        <Link to="/allocation" className="group">
+          <Card className="h-full transition-colors group-hover:bg-surface-2">
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold tracking-tight">Asset allocation</h2>
+                <ArrowUpRight className="size-5 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
+              </div>
+              <p className="mt-2 text-muted-foreground">
+                Backtest asset-class mixes across 150 years of market history,
+                in nominal or inflation-adjusted terms.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </div>
   )
