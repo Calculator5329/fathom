@@ -52,18 +52,27 @@ export function useAllocationBacktests(setup: AllocationSetup): AllocationOutput
       const series = new Map(ids.map((id) => [id, toTickerSeries(id, data, setup.real)]))
 
       // Shared range across every asset in play, so comparisons line up.
+      // Both ends matter: datasets end at different dates too (Shiller monthly
+      // stops earlier than Fama-French), and without a shared end one
+      // portfolio's line would keep going after another's stops.
       let inception = '0000-00-00'
+      let commonEnd = '9999-99-99'
       let limitingAsset: string | null = null
       for (const id of ids) {
-        const first = series.get(id)!.records[0].date
+        const records = series.get(id)!.records
+        const first = records[0].date
+        const last = records[records.length - 1].date
         if (first > inception) {
           inception = first
           limitingAsset = id
         }
+        if (last < commonEnd) commonEnd = last
       }
       const userStart = setup.config.start
       const start = userStart && userStart > inception ? userStart : inception
-      const config = { ...setup.config, start }
+      const userEnd = setup.config.end
+      const end = userEnd && userEnd < commonEnd ? userEnd : commonEnd
+      const config = { ...setup.config, start, end }
 
       const runs: NamedResult[] = valid.map((p) => ({
         label: p.name,

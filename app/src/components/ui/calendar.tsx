@@ -14,13 +14,6 @@ import {
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 function Calendar({
   className,
@@ -163,39 +156,14 @@ function Calendar({
           )
         },
         DayButton: CalendarDayButton,
-        // Native <select> popups can't be themed — swap in our Select so the
-        // month/year dropdown lists match the rest of the UI.
-        Dropdown: ({ value, onChange, options, ...props }) => (
-          <Select
-            value={String(value)}
-            disabled={props.disabled}
-            onValueChange={(v) => {
-              onChange?.({
-                target: { value: v },
-                currentTarget: { value: v },
-              } as unknown as React.ChangeEvent<HTMLSelectElement>)
-            }}
-          >
-            <SelectTrigger
-              size="sm"
-              className="h-8 gap-1 border-none px-2 font-medium shadow-none"
-              aria-label={props["aria-label"]}
-              disabled={props.disabled}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" className="max-h-72 min-w-0 font-mono">
-              {options?.map((opt) => (
-                <SelectItem
-                  key={opt.value}
-                  value={String(opt.value)}
-                  disabled={opt.disabled}
-                >
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        Dropdown: ({ value, onChange, options, className, ...props }) => (
+          <CaptionDropdown
+            value={value}
+            onChange={onChange}
+            options={options}
+            className={className}
+            aria-label={props["aria-label"]}
+          />
         ),
         WeekNumber: ({ children, ...props }) => {
           return (
@@ -210,6 +178,103 @@ function Calendar({
       }}
       {...props}
     />
+  )
+}
+
+/**
+ * Month/year dropdown for the calendar caption. Portal-free and non-native on
+ * purpose: native <select> popups can't be themed and don't reliably open
+ * inside a Radix popover, and portaled Selects fight the popover's dismiss
+ * layer. This renders its list inside the popover's own DOM.
+ */
+function CaptionDropdown({
+  value,
+  onChange,
+  options,
+  className,
+  "aria-label": ariaLabel,
+}: {
+  value?: string | number | readonly string[]
+  onChange?: React.ChangeEventHandler<HTMLSelectElement>
+  options?: Array<{ value: number; label: string; disabled?: boolean }>
+  className?: string
+  "aria-label"?: string
+}) {
+  const [open, setOpen] = React.useState(false)
+  const rootRef = React.useRef<HTMLDivElement>(null)
+  const listRef = React.useRef<HTMLUListElement>(null)
+
+  React.useEffect(() => {
+    if (!open) return
+    const away = (e: PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener("pointerdown", away)
+    return () => document.removeEventListener("pointerdown", away)
+  }, [open])
+
+  React.useEffect(() => {
+    if (open) {
+      listRef.current
+        ?.querySelector('[data-selected="true"]')
+        ?.scrollIntoView({ block: "center" })
+    }
+  }, [open])
+
+  const selected = options?.find((o) => String(o.value) === String(value))
+
+  return (
+    <div ref={rootRef} className={cn("relative", className)}>
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        className="flex h-8 items-center gap-1 rounded-md px-2 text-sm font-medium transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+        onClick={() => setOpen((v) => !v)}
+      >
+        {selected?.label ?? String(value)}
+        <ChevronDownIcon
+          className={cn("size-3.5 text-muted-foreground transition-transform", open && "rotate-180")}
+        />
+      </button>
+      {open && (
+        <ul
+          ref={listRef}
+          role="listbox"
+          aria-label={ariaLabel}
+          className="absolute top-9 left-1/2 z-50 max-h-64 min-w-20 -translate-x-1/2 overflow-y-auto rounded-md border bg-popover py-1 font-mono text-sm shadow-lg"
+        >
+          {options?.map((opt) => {
+            const isSelected = String(opt.value) === String(value)
+            return (
+              <li key={opt.value}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  data-selected={isSelected}
+                  disabled={opt.disabled}
+                  className={cn(
+                    "w-full px-3 py-1 text-left transition-colors hover:bg-surface-3 disabled:opacity-40",
+                    isSelected && "bg-surface-3 text-primary"
+                  )}
+                  onClick={() => {
+                    setOpen(false)
+                    onChange?.({
+                      target: { value: String(opt.value) },
+                      currentTarget: { value: String(opt.value) },
+                    } as unknown as React.ChangeEvent<HTMLSelectElement>)
+                  }}
+                >
+                  {opt.label}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
   )
 }
 

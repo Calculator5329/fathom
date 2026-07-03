@@ -158,7 +158,7 @@ export function incomeOption(runs: NamedResult[]): EChartsCoreOption {
     },
     tooltip: {
       ...(base.tooltip as object),
-      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(255,255,255,0.04)' } },
+      axisPointer: { type: 'shadow' },
       valueFormatter: (v: unknown) => (v == null ? '—' : formatUsd(v as number)),
     },
     series: runs.map((r, i) => {
@@ -172,6 +172,9 @@ export function incomeOption(runs: NamedResult[]): EChartsCoreOption {
           color: r.isBenchmark ? cssVar('--muted-foreground') : palette[i],
           borderRadius: [3, 3, 0, 0],
         },
+        // Hover emphasis restyles bars unpredictably on the dark theme
+        // (observed: hovered bar vanishing) — the shadow pointer is enough.
+        emphasis: { disabled: true },
       }
     }),
   }
@@ -199,7 +202,7 @@ export function annualReturnsOption(runs: NamedResult[]): EChartsCoreOption {
     },
     tooltip: {
       ...(base.tooltip as object),
-      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(255,255,255,0.04)' } },
+      axisPointer: { type: 'shadow' },
       valueFormatter: (v: unknown) => (v == null ? '—' : fmtPct(v as number)),
     },
     series: runs.map((r, i) => {
@@ -213,6 +216,7 @@ export function annualReturnsOption(runs: NamedResult[]): EChartsCoreOption {
           color: r.isBenchmark ? cssVar('--muted-foreground') : palette[i],
           borderRadius: [3, 3, 0, 0],
         },
+        emphasis: { disabled: true },
       }
     }),
   }

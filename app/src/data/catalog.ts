@@ -118,14 +118,17 @@ export function loadSeries(ticker: string): Promise<TickerSeries> {
   if (!promise) {
     promise = fetch(`${DATA_BASE}tickers/${key}.json`)
       .then(async (res) => {
-        if (res.ok) return res.json()
+        // Dev static hosting answers unknown paths with index.html (200 text/html)
+        // — treat anything non-JSON as a miss so users see a clean message
+        // instead of a JSON parse error.
+        if (res.ok && res.headers.get('content-type')?.includes('json')) return res.json()
         // Not in the cache — ask the API to admit it (fetches from Tiingo,
         // stores to the bucket, returns the series).
         if (API_BASE) {
           const admitted = await fetch(`${API_BASE}/api/ticker/${key}`)
           if (admitted.ok) return admitted.json()
         }
-        throw new Error(`No data for ${key} (${res.status})`)
+        throw new Error(`No data available for ${key} — check the ticker symbol.`)
       })
       .then((raw): TickerSeries => {
         upsertCatalogEntry({

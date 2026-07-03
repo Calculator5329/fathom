@@ -78,7 +78,7 @@ function PortfolioEditor({
             </Button>
           )}
           {onRemove && (
-            <Button variant="ghost" size="icon-xs" aria-label="Remove portfolio" onClick={onRemove}>
+            <Button variant="ghost" size="icon-xs" aria-label={`Remove ${portfolio.name}`} onClick={onRemove}>
               <X />
             </Button>
           )}

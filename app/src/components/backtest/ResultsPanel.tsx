@@ -225,8 +225,8 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
           </label>
         </CardHeader>
         <CardContent>
-          <EChart option={growth} group="backtest" className="h-80 w-full" />
-          <EChart option={drawdown} group="backtest" className="mt-1 h-40 w-full" />
+          <EChart option={growth} className="h-80 w-full" />
+          <EChart option={drawdown} className="mt-1 h-40 w-full" />
         </CardContent>
       </Card>
 
