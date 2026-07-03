@@ -1,7 +1,8 @@
 node_modules/
 dist/
-# Bulk ticker series live in Cloud Storage, not git
+# Derived/fetchable data lives in Cloud Storage, not git (re-runnable scripts)
 data/tickers/
+data/fundamentals/
 app/public/data/
 .env
 .env.*
