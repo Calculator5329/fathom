@@ -19,9 +19,12 @@ Two companion apps, one clean boundary:
 
 Tool 1 Backtest (any of 65k tickers via on-demand admission; all tabs), Tool 2 Asset Allocation
 (1871+, real-returns mode), Tool 3 Stock Projections (Firebase Auth + Firestore; bear/base/bull
-editor, implied-price chart, saved theses ranked by CAGR), engine + projection model (47 tests),
-Ledger Dark system, GCS data lake + Cloud Run API + nightly refresh, route code-splitting, CSV
-export, social meta. Deployed to Firebase Hosting. Two QA rounds passed.
+editor, implied-price chart, saved theses ranked by CAGR), Tool 4 Monte Carlo (FiCalc-class
+retirement simulator: historical-sequence + block-bootstrap, fixed-real/percent/VPW withdrawals,
+Web Worker, percentile fan + worst-starts + max-SWR solver; Trinity-validated at 4%/50-50/30y =
+94.7%), engine + projection + simulation models (64 tests), Ledger Dark system, GCS data lake +
+Cloud Run API + nightly refresh, route code-splitting, CSV export, social meta. Deployed to
+Firebase Hosting. Two QA rounds passed.
 
 **One manual step outstanding for Tool 3 sign-in:** enable Google provider in the Firebase
 console (Authentication → Sign-in method → Google → Enable — auto-provisions the OAuth client;
@@ -64,7 +67,12 @@ as an option, not the default.
 - Port the projection MATH from the existing project (see `context/external-paths.json` engines);
   re-skin entirely in Ledger Dark; state the user story per screen as usual.
 
-## Tool 4 — Monte Carlo (FiCalc-class retirement/withdrawal simulator)
+## Tool 4 — Monte Carlo (FiCalc-class retirement/withdrawal simulator) — SHIPPED
+
+_Built 2026-07-03. `app/src/montecarlo/`, `/montecarlo` route. Trinity-validated
+(4%/50-50/30y = 94.7% with fees). Follow-ups NOT yet done: Guyton-Klinger guardrails
+withdrawal strategy (fixed-real/percent/VPW shipped), a parametric mode, and a nominal display
+toggle (sim is correctly real-only). Guardrails is the main gap vs the full FiCalc feature set._
 
 Reuses the allocation datasets + engine. Modes:
 - **Historical sequence** (FiCalc's core): run every rolling N-year window since 1871 as its own

@@ -7,46 +7,54 @@ import { Card, CardContent } from '@/components/ui/card'
  * User story: "I want to immediately understand what this site does and
  * jump into a tool in one click."
  */
+const TOOLS = [
+  {
+    to: '/backtest',
+    title: 'Portfolio backtest',
+    body: 'Compare up to three ticker portfolios over any date range, with full risk and income analysis.',
+  },
+  {
+    to: '/allocation',
+    title: 'Asset allocation',
+    body: 'Backtest asset-class mixes across 150 years of market history, in nominal or inflation-adjusted terms.',
+  },
+  {
+    to: '/montecarlo',
+    title: 'Monte Carlo',
+    body: 'Test a retirement plan against every market era in history — success odds, safe withdrawal rates, worst cases.',
+  },
+  {
+    to: '/projections',
+    title: 'Stock projections',
+    body: 'Model bear / base / bull cases for any stock and track the implied return versus today’s real price.',
+  },
+]
+
 export function Landing() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-24">
       <h1 className="text-5xl font-semibold tracking-tight">
-        Backtest portfolios with decades of real data.
+        Understand any market decision with decades of real data.
       </h1>
       <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-        Any stock, ETF, or mutual fund. Dividends, splits, rebalancing, and
-        contributions — computed instantly, shareable by link, no account.
+        Backtesting, allocation, retirement simulation, and stock projections —
+        computed instantly, shareable by link, no account for the core tools.
       </p>
 
       <div className="mt-12 grid gap-4 sm:grid-cols-2">
-        <Link to="/backtest" className="group">
-          <Card className="h-full transition-colors group-hover:bg-surface-2">
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold tracking-tight">Portfolio backtest</h2>
-                <ArrowUpRight className="size-5 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
-              </div>
-              <p className="mt-2 text-muted-foreground">
-                Compare up to three ticker portfolios over any date range, with
-                full risk and income analysis.
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link to="/allocation" className="group">
-          <Card className="h-full transition-colors group-hover:bg-surface-2">
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold tracking-tight">Asset allocation</h2>
-                <ArrowUpRight className="size-5 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
-              </div>
-              <p className="mt-2 text-muted-foreground">
-                Backtest asset-class mixes across 150 years of market history,
-                in nominal or inflation-adjusted terms.
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+        {TOOLS.map((t) => (
+          <Link key={t.to} to={t.to} className="group">
+            <Card className="h-full transition-colors group-hover:bg-surface-2">
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold tracking-tight">{t.title}</h2>
+                  <ArrowUpRight className="size-5 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
+                </div>
+                <p className="mt-2 text-muted-foreground">{t.body}</p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
     </div>
   )
