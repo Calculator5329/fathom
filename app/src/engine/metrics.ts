@@ -1,4 +1,4 @@
-import type { DrawdownInfo, MetricSet, YearReturn } from './types'
+import type { DrawdownInfo, MetricSet, RollingPoint, YearReturn } from './types'
 
 const DAY_MS = 86_400_000
 
@@ -48,6 +48,57 @@ export function annualReturns(dates: string[], twrIndex: number[]): YearReturn[]
     return: twrIndex[dates.length - 1] / twrIndex[yearStartIdx] - 1,
   })
   return out
+}
+
+/** Indices of the last trading day of each calendar month (incl. the final day). */
+function monthEndIndices(dates: string[]): number[] {
+  const out: number[] = []
+  for (let t = 1; t < dates.length; t++) {
+    if (dates[t].slice(0, 7) !== dates[t - 1].slice(0, 7)) out.push(t - 1)
+  }
+  out.push(dates.length - 1)
+  return out
+}
+
+/**
+ * Trailing-window annualized returns, one observation per month-end.
+ * Empty when the history is shorter than the window.
+ */
+export function rollingReturns(
+  dates: string[],
+  twrIndex: number[],
+  windowYears: number,
+): RollingPoint[] {
+  const ends = monthEndIndices(dates)
+  const w = windowYears * 12
+  const out: RollingPoint[] = []
+  for (let k = w; k < ends.length; k++) {
+    const start = ends[k - w]
+    const end = ends[k]
+    const years = yearsBetween(dates[start], dates[end])
+    if (years <= 0) continue
+    out.push({
+      date: dates[end],
+      value: (twrIndex[end] / twrIndex[start]) ** (1 / years) - 1,
+    })
+  }
+  return out
+}
+
+/** Cash dividend income summed per calendar year. */
+export function annualIncome(
+  dates: string[],
+  dividendIncome: number[],
+): Array<{ year: number; income: number }> {
+  const byYear = new Map<number, number>()
+  for (let t = 0; t < dates.length; t++) {
+    if (dividendIncome[t] === 0) continue
+    const year = Number(dates[t].slice(0, 4))
+    byYear.set(year, (byYear.get(year) ?? 0) + dividendIncome[t])
+  }
+  return [...byYear.entries()]
+    .map(([year, income]) => ({ year, income }))
+    .sort((a, b) => a.year - b.year)
 }
 
 export function maxDrawdown(dates: string[], twrIndex: number[]): DrawdownInfo {

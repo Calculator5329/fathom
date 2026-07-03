@@ -1,5 +1,5 @@
 import type { EChartsCoreOption } from 'echarts'
-import type { BacktestResult } from '@/engine'
+import { annualIncome, rollingReturns, type BacktestResult } from '@/engine'
 import { baseOption, chartPalette, cssVar } from './EChart'
 
 const fmtUsd = (v: number) =>
@@ -13,11 +13,10 @@ export interface NamedResult {
   isBenchmark?: boolean
 }
 
-/** Growth of the initial investment (TWR-scaled), optional log axis. */
+/** Actual portfolio value over time — includes contributions/withdrawals. */
 export function growthOption(runs: NamedResult[], logScale: boolean): EChartsCoreOption {
   const base = baseOption()
   const palette = chartPalette()
-  const initial = runs[0].result.values[0]
 
   return {
     ...base,
@@ -42,10 +41,7 @@ export function growthOption(runs: NamedResult[], logScale: boolean): EChartsCor
       type: 'line',
       showSymbol: false,
       sampling: 'lttb',
-      data: r.result.twrIndex.map((x, t) => [
-        r.result.dates[t],
-        Math.round(x * initial * 100) / 100,
-      ]),
+      data: r.result.values.map((v, t) => [r.result.dates[t], Math.round(v * 100) / 100]),
       lineStyle: r.isBenchmark
         ? { width: 1.5, type: 'dashed', color: cssVar('--muted-foreground') }
         : { width: 2 },
@@ -100,6 +96,84 @@ export function drawdownOption(runs: NamedResult[]): EChartsCoreOption {
         areaStyle: i === 0 ? { color: loss, opacity: 0.12 } : { opacity: 0.06 },
         emphasis: { disabled: true },
       })),
+  }
+}
+
+/** Rolling annualized returns for a trailing window, one point per month-end. */
+export function rollingOption(runs: NamedResult[], windowYears: number): EChartsCoreOption {
+  const base = baseOption()
+  const palette = chartPalette()
+
+  return {
+    ...base,
+    color: palette,
+    xAxis: { ...(base.xAxis as object), type: 'time', boundaryGap: false },
+    yAxis: {
+      ...(base.yAxis as object),
+      type: 'value',
+      scale: true,
+      axisLabel: {
+        ...(base.yAxis as { axisLabel: object }).axisLabel,
+        formatter: (v: number) => fmtPct(v),
+      },
+    },
+    tooltip: {
+      ...(base.tooltip as object),
+      valueFormatter: (v: unknown) => fmtPct(v as number),
+    },
+    series: runs.map((r, i) => ({
+      name: r.label,
+      type: 'line',
+      showSymbol: false,
+      data: rollingReturns(r.result.dates, r.result.twrIndex, windowYears).map((p) => [
+        p.date,
+        Math.round(p.value * 10000) / 10000,
+      ]),
+      lineStyle: r.isBenchmark
+        ? { width: 1.5, type: 'dashed', color: cssVar('--muted-foreground') }
+        : { width: 2 },
+      itemStyle: r.isBenchmark ? { color: cssVar('--muted-foreground') } : { color: palette[i] },
+      emphasis: { disabled: true },
+    })),
+  }
+}
+
+/** Dividend income received per calendar year, grouped bars per portfolio. */
+export function incomeOption(runs: NamedResult[]): EChartsCoreOption {
+  const base = baseOption()
+  const palette = chartPalette()
+  const perRun = runs.map((r) => annualIncome(r.result.dates, r.result.dividendIncome))
+  const years = [...new Set(perRun.flatMap((list) => list.map((y) => y.year)))].sort()
+
+  return {
+    ...base,
+    color: palette,
+    xAxis: { ...(base.xAxis as object), type: 'category', data: years.map(String) },
+    yAxis: {
+      ...(base.yAxis as object),
+      type: 'value',
+      axisLabel: {
+        ...(base.yAxis as { axisLabel: object }).axisLabel,
+        formatter: (v: number) => fmtUsd(v),
+      },
+    },
+    tooltip: {
+      ...(base.tooltip as object),
+      valueFormatter: (v: unknown) => (v == null ? '—' : fmtUsd(v as number)),
+    },
+    series: runs.map((r, i) => {
+      const byYear = new Map(perRun[i].map((y) => [y.year, Math.round(y.income)]))
+      return {
+        name: r.label,
+        type: 'bar',
+        barMaxWidth: 26,
+        data: years.map((y) => byYear.get(y) ?? null),
+        itemStyle: {
+          color: r.isBenchmark ? cssVar('--muted-foreground') : palette[i],
+          borderRadius: [3, 3, 0, 0],
+        },
+      }
+    }),
   }
 }
 

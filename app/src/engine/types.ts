@@ -61,6 +61,11 @@ export interface BacktestResult {
   twrIndex: number[]
   /** External flow applied at the start of each day (contributions/withdrawals). */
   flows: number[]
+  /**
+   * Cash dividends received each day (before any reinvestment). When
+   * reinvesting, this money bought shares the same day — it is still income.
+   */
+  dividendIncome: number[]
   endingCash: number
   totalContributions: number
   metrics: MetricSet
@@ -77,6 +82,13 @@ export interface DrawdownInfo {
 export interface YearReturn {
   year: number
   return: number
+}
+
+/** One rolling-window observation, keyed by the window's end date. */
+export interface RollingPoint {
+  date: string
+  /** Annualized return over the trailing window. */
+  value: number
 }
 
 export interface MetricSet {

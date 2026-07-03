@@ -39,6 +39,7 @@ export function runBacktest(
   const values = new Array<number>(n)
   const twrIndex = new Array<number>(n)
   const flows = new Array<number>(n).fill(0)
+  const dividendIncome = new Array<number>(n).fill(0)
   values[0] = config.initialAmount
   twrIndex[0] = 1
   let totalContributions = 0
@@ -67,10 +68,12 @@ export function runBacktest(
     // 3. Apply the day's returns.
     for (let i = 0; i < holdings.length; i++) {
       const asset = prepared[i]
+      const income = holdings[i] * asset.divYield[t]
+      dividendIncome[t] += income
       if (config.reinvestDividends) {
         holdings[i] *= asset.totalReturn[t]
       } else {
-        cash += holdings[i] * asset.divYield[t]
+        cash += income
         holdings[i] *= asset.priceReturn[t]
       }
     }
@@ -90,6 +93,7 @@ export function runBacktest(
     values,
     twrIndex,
     flows,
+    dividendIncome,
     endingCash: cash,
     totalContributions,
     metrics,

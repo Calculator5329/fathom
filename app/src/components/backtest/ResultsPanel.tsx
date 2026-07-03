@@ -5,6 +5,8 @@ import {
   annualReturnsOption,
   drawdownOption,
   growthOption,
+  incomeOption,
+  rollingOption,
   type NamedResult,
 } from '@/components/charts/options'
 import { Button } from '@/components/ui/button'
@@ -19,7 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { monthlyReturns } from '@/engine'
+import { monthlyReturns, rollingReturns } from '@/engine'
 
 const usd = (v: number) =>
   v.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
@@ -123,14 +125,65 @@ function correlationMatrix(runs: NamedResult[]): number[][] {
   return trimmed.map((a) => trimmed.map((b) => corr(a, b)))
 }
 
+const ROLLING_WINDOWS = [1, 3, 5, 10]
+
 export function ResultsPanel({ runs }: ResultsPanelProps) {
   const [logScale, setLogScale] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [rollingWindow, setRollingWindow] = useState(3)
 
   const growth = useMemo(() => growthOption(runs, logScale), [runs, logScale])
   const drawdown = useMemo(() => drawdownOption(runs), [runs])
   const annual = useMemo(() => annualReturnsOption(runs), [runs])
   const corr = useMemo(() => (runs.length > 1 ? correlationMatrix(runs) : null), [runs])
+
+  // Only offer rolling windows the history can actually fill.
+  const horizonYears =
+    (Date.parse(runs[0].result.dates.at(-1)!) - Date.parse(runs[0].result.dates[0])) /
+    86_400_000 /
+    365.25
+  const windows = ROLLING_WINDOWS.filter((w) => w <= horizonYears)
+  const activeWindow = windows.includes(rollingWindow) ? rollingWindow : windows[0]
+  const rolling = useMemo(
+    () => (activeWindow ? rollingOption(runs, activeWindow) : null),
+    [runs, activeWindow],
+  )
+  const rollingStats = useMemo(
+    () =>
+      activeWindow
+        ? runs.map((r) => {
+            const pts = rollingReturns(r.result.dates, r.result.twrIndex, activeWindow)
+            const values = pts.map((p) => p.value)
+            return {
+              label: r.label,
+              count: values.length,
+              avg: values.reduce((s, v) => s + v, 0) / (values.length || 1),
+              min: Math.min(...values),
+              max: Math.max(...values),
+              positive: values.filter((v) => v > 0).length / (values.length || 1),
+            }
+          })
+        : [],
+    [runs, activeWindow],
+  )
+
+  const income = useMemo(() => incomeOption(runs), [runs])
+  const incomeSummary = useMemo(
+    () =>
+      runs.map((r) => {
+        const { dates, dividendIncome, values } = r.result
+        const cutoff = new Date(Date.parse(dates.at(-1)!) - 365 * 86_400_000)
+          .toISOString()
+          .slice(0, 10)
+        let trailing = 0
+        for (let t = dates.length - 1; t >= 0 && dates[t] > cutoff; t--) {
+          trailing += dividendIncome[t]
+        }
+        const total = dividendIncome.reduce((s, x) => s + x, 0)
+        return { label: r.label, trailing, yieldOnValue: trailing / values.at(-1)!, total }
+      }),
+    [runs],
+  )
 
   const dates = runs[0].result.dates
   const copyLink = () => {
@@ -157,7 +210,7 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
 
       <Card>
         <CardHeader className="flex-row items-center justify-between">
-          <CardTitle className="text-base font-medium">Growth of {usd(runs[0].result.values[0])}</CardTitle>
+          <CardTitle className="text-base font-medium">Portfolio value</CardTitle>
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <Switch checked={logScale} onCheckedChange={setLogScale} />
             Log scale
@@ -173,12 +226,10 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
         <TabsList>
           <TabsTrigger value="annual">Annual returns</TabsTrigger>
           <TabsTrigger value="risk">Risk</TabsTrigger>
-          <TabsTrigger value="rolling" disabled>
+          <TabsTrigger value="rolling" disabled={windows.length === 0}>
             Rolling
           </TabsTrigger>
-          <TabsTrigger value="income" disabled>
-            Income
-          </TabsTrigger>
+          <TabsTrigger value="income">Income</TabsTrigger>
         </TabsList>
 
         <TabsContent value="annual" className="animate-enter space-y-4">
@@ -216,6 +267,108 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
                   ))}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="rolling" className="animate-enter space-y-4">
+          <Card>
+            <CardHeader className="flex-row items-center justify-between">
+              <CardTitle className="text-base font-medium">
+                Rolling {activeWindow}-year annualized return
+              </CardTitle>
+              <div className="flex gap-1">
+                {windows.map((w) => (
+                  <Button
+                    key={w}
+                    variant={w === activeWindow ? 'secondary' : 'ghost'}
+                    size="xs"
+                    className="font-mono"
+                    onClick={() => setRollingWindow(w)}
+                  >
+                    {w}y
+                  </Button>
+                ))}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {rolling && <EChart option={rolling} className="h-72 w-full" />}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead />
+                    <TableHead className="text-right">Average</TableHead>
+                    <TableHead className="text-right">Best</TableHead>
+                    <TableHead className="text-right">Worst</TableHead>
+                    <TableHead className="text-right">Positive windows</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rollingStats.map((s) => (
+                    <TableRow key={s.label}>
+                      <TableCell className="text-muted-foreground">{s.label}</TableCell>
+                      <TableCell className="text-right font-mono">
+                        <PctCell v={s.avg} />
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        <PctCell v={s.max} />
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        <PctCell v={s.min} />
+                      </TableCell>
+                      <TableCell className="text-right font-mono tnum">
+                        {pct(s.positive, 0)} of {s.count}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="income" className="animate-enter space-y-4">
+          <Card>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead />
+                    <TableHead className="text-right">Dividends, trailing 12 mo</TableHead>
+                    <TableHead className="text-right">Yield on value</TableHead>
+                    <TableHead className="text-right">Total dividends received</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {incomeSummary.map((s) => (
+                    <TableRow key={s.label}>
+                      <TableCell className="text-muted-foreground">{s.label}</TableCell>
+                      <TableCell className="text-right font-mono tnum">{usd(s.trailing)}</TableCell>
+                      <TableCell className="text-right font-mono tnum">
+                        {pct(s.yieldOnValue, 2)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono tnum">{usd(s.total)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-medium">
+                Dividend income by year
+                <span className="ml-2 font-normal text-muted-foreground">
+                  cash received; grows with reinvestment and contributions
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EChart option={income} className="h-72 w-full" />
             </CardContent>
           </Card>
         </TabsContent>

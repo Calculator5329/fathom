@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadManySeries } from '@/data/catalog'
 import { runBacktest, type TickerSeries } from '@/engine'
 import type { BacktestSetup } from '@/lib/urlState'
@@ -59,7 +59,7 @@ export function useBacktests(setup: BacktestSetup): BacktestOutput {
     }
   }, [tickers.join(',')]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return useMemo(() => {
+  const current = useMemo(() => {
     const empty: BacktestOutput = {
       runs: [],
       effectiveStart: null,
@@ -119,4 +119,17 @@ export function useBacktests(setup: BacktestSetup): BacktestOutput {
       return { ...empty, error: err instanceof Error ? err.message : String(err) }
     }
   }, [series, loading, error, JSON.stringify(setup)]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Stale-while-revalidate: while data loads or a portfolio is mid-edit
+  // (weights not summing yet), keep showing the last good results instead of
+  // unmounting the whole results panel — no layout-destroying flicker.
+  const lastGood = useRef<BacktestOutput | null>(null)
+  if (current.runs.length > 0) lastGood.current = current
+
+  const hasAnyAllocations = setup.portfolios.some((p) => p.allocations.length > 0)
+  if (current.runs.length === 0 && !current.error && hasAnyAllocations && lastGood.current) {
+    return { ...lastGood.current, loading: current.loading }
+  }
+  if (!hasAnyAllocations) lastGood.current = null
+  return current
 }

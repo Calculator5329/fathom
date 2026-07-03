@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch'
 import { getCatalog, lookup } from '@/data/catalog'
 import type { PortfolioSpec, RebalanceFrequency } from '@/engine'
 import type { BacktestSetup } from '@/lib/urlState'
+import { DatePicker } from './DatePicker'
 import { TickerPicker } from './TickerPicker'
 
 interface BuilderPanelProps {
@@ -228,24 +229,20 @@ export function BuilderPanel({ setup, onChange, effectiveStart, limitingTicker }
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="start">Start</Label>
-          <Input
+          <DatePicker
             id="start"
-            type="date"
-            value={setup.config.start ?? ''}
-            onChange={(e) =>
-              onChange({ ...setup, config: { ...setup.config, start: e.target.value || undefined } })
-            }
+            value={setup.config.start}
+            placeholder="Earliest"
+            onChange={(v) => onChange({ ...setup, config: { ...setup.config, start: v } })}
           />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="end">End</Label>
-          <Input
+          <DatePicker
             id="end"
-            type="date"
-            value={setup.config.end ?? ''}
-            onChange={(e) =>
-              onChange({ ...setup, config: { ...setup.config, end: e.target.value || undefined } })
-            }
+            value={setup.config.end}
+            placeholder="Latest"
+            onChange={(v) => onChange({ ...setup, config: { ...setup.config, end: v } })}
           />
         </div>
       </div>

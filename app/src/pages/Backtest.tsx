@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
-import { BuilderPanel, weightSum } from '@/components/backtest/BuilderPanel'
+import { BuilderPanel } from '@/components/backtest/BuilderPanel'
 import { ResultsPanel } from '@/components/backtest/ResultsPanel'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -53,10 +53,7 @@ export function Backtest() {
   }
 
   const output = useBacktests(setup)
-  const hasValidPortfolio = setup.portfolios.some(
-    (p) => p.allocations.length > 0 && Math.abs(weightSum(p) - 100) < 0.005,
-  )
-  const showResults = hasValidPortfolio && output.runs.length > 0
+  const showResults = output.runs.length > 0
 
   if (!catalogReady) return null
 
@@ -112,7 +109,11 @@ export function Backtest() {
         {output.error ? (
           <p className="text-sm text-loss">{output.error}</p>
         ) : (
-          <ResultsPanel runs={output.runs} />
+          <div
+            className={`transition-opacity duration-200 ${output.loading ? 'opacity-60' : ''}`}
+          >
+            <ResultsPanel runs={output.runs} />
+          </div>
         )}
       </main>
     </div>
