@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# Bulk ticker series live in Cloud Storage, not git
+data/tickers/
 .env
 .env.*
 *.local
