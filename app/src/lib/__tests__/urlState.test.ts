@@ -54,6 +54,14 @@ describe('urlState', () => {
     ])
   })
 
+  it('keeps zero-weight allocations (a just-added ticker must survive the round-trip)', () => {
+    const decoded = decodeSetup(new URLSearchParams('p1=VTI:100,BND:0'))
+    expect(decoded.portfolios[0].allocations).toEqual([
+      { ticker: 'VTI', weight: 100 },
+      { ticker: 'BND', weight: 0 },
+    ])
+  })
+
   it('ignores invalid rebalance and non-numeric amounts', () => {
     const decoded = decodeSetup(new URLSearchParams('p1=SPY:100&rebal=hourly&amt=abc&contrib=xyz'))
     expect(decoded.config.rebalance).toBe(DEFAULT_CONFIG.rebalance)

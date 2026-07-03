@@ -136,17 +136,26 @@ function PortfolioEditor({
         exclude={portfolio.allocations.map((a) => a.ticker)}
         autoFocus={index === 0 && portfolio.allocations.length === 0}
         onPick={(entry) => {
-          const remaining = Math.max(0, Math.round((100 - sum) * 100) / 100)
-          onChange({
-            ...portfolio,
-            allocations: [
-              ...portfolio.allocations,
-              {
-                ticker: entry.ticker,
-                weight: portfolio.allocations.length === 0 ? 100 : remaining,
-              },
-            ],
-          })
+          const remaining = Math.round((100 - sum) * 100) / 100
+          let allocations
+          if (portfolio.allocations.length === 0) {
+            allocations = [{ ticker: entry.ticker, weight: 100 }]
+          } else if (remaining > 0) {
+            // There's unallocated room — the new ticker takes it.
+            allocations = [...portfolio.allocations, { ticker: entry.ticker, weight: remaining }]
+          } else {
+            // Portfolio is already fully allocated — split evenly so adding
+            // a ticker always yields a runnable portfolio (smart default).
+            const n = portfolio.allocations.length + 1
+            const even = Math.floor(10000 / n) / 100
+            allocations = [...portfolio.allocations, { ticker: entry.ticker, weight: 0 }].map(
+              (a, i) => ({
+                ...a,
+                weight: i === 0 ? Math.round((100 - even * (n - 1)) * 100) / 100 : even,
+              }),
+            )
+          }
+          onChange({ ...portfolio, allocations })
         }}
       />
 

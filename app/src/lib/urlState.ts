@@ -55,7 +55,9 @@ export function decodeSetup(params: URLSearchParams): BacktestSetup {
         const [ticker, w] = part.split(':')
         return { ticker: (ticker ?? '').toUpperCase(), weight: Number(w) }
       })
-      .filter((a) => a.ticker && Number.isFinite(a.weight) && a.weight > 0)
+      // Keep zero weights: a just-added ticker awaiting its weight must
+      // survive the URL round-trip that happens on every edit.
+      .filter((a) => a.ticker && Number.isFinite(a.weight) && a.weight >= 0)
     if (allocations.length) {
       portfolios.push({ name: `Portfolio ${portfolios.length + 1}`, allocations })
     }
