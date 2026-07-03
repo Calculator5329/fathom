@@ -24,6 +24,11 @@ const TOOLS = [
     body: 'Test a retirement plan against every market era in history — success odds, safe withdrawal rates, worst cases.',
   },
   {
+    to: '/stock',
+    title: 'Stock research',
+    body: 'Long-run price with market-era context and fundamentals from SEC filings — revenue, margins, valuation.',
+  },
+  {
     to: '/projections',
     title: 'Stock projections',
     body: 'Model bear / base / bull cases for any stock and track the implied return versus today’s real price.',
