@@ -1,0 +1,135 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/*
+ * Ledger Dark — the site theme. Dark-only by design.
+ * Near-black canvas with a faint green cast, a 4-step surface ladder,
+ * hairline borders for hierarchy, and a single emerald accent.
+ * All colors in OKLCH so lightness steps are perceptually uniform.
+ */
+:root {
+  --background: oklch(0.145 0.006 170);
+  --foreground: oklch(0.94 0.005 170);
+
+  --surface-1: oklch(0.18 0.006 170);
+  --surface-2: oklch(0.205 0.006 170);
+  --surface-3: oklch(0.23 0.007 170);
+  --surface-4: oklch(0.255 0.007 170);
+
+  --card: var(--surface-1);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface-2);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.78 0.125 163);
+  --primary-foreground: oklch(0.17 0.02 165);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface-2);
+  --muted-foreground: oklch(0.72 0.012 170);
+  --accent: var(--surface-3);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.66 0.15 22);
+  --destructive-foreground: oklch(0.96 0.01 22);
+
+  --gain: var(--primary);
+  --loss: oklch(0.66 0.15 22);
+
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.78 0.125 163 / 55%);
+
+  /* Chart series: portfolio 1-3 + benchmark + extra */
+  --chart-1: oklch(0.78 0.125 163);
+  --chart-2: oklch(0.75 0.1 230);
+  --chart-3: oklch(0.8 0.12 85);
+  --chart-4: oklch(0.7 0.12 300);
+  --chart-5: oklch(0.7 0.13 20);
+
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-4: var(--surface-4);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-gain: var(--gain);
+  --color-loss: var(--loss);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  /* Readability floor: nothing below 15px. text-xs and text-sm both map to 15px. */
+  --text-xs: 0.9375rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.5;
+
+  --animate-enter: enter 0.18s ease-out;
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    line-height: 1.5;
+  }
+
+  ::selection {
+    background: oklch(0.78 0.125 163 / 30%);
+  }
+}
+
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
