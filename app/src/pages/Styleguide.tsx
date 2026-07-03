@@ -102,20 +102,20 @@ export function Styleguide() {
       {/* Typography */}
       <SectionTitle>Typography</SectionTitle>
       <Card>
-        <CardContent className="space-y-5 pt-6">
+        <CardContent className="space-y-4">
           <p className="text-4xl font-semibold tracking-tight">Backtest any portfolio</p>
           <p className="text-2xl font-semibold tracking-tight">
-            Growth of $10,000 · 1993–2026
+            Growth of $10,000 &middot; 1993&ndash;2026
           </p>
           <p className="text-base">
             Body text is Inter at 16px with 1.5 line height. It stays readable at a
-            glance — no squinting at dense finance tables.
+            glance &mdash; no squinting at dense finance tables.
           </p>
           <p className="text-sm text-muted-foreground">
             Secondary text bottoms out at 15px. This is the smallest text on the site.
           </p>
           <p className="font-mono text-base tnum">
-            VTI · 1993-01-29 → 2026-07-02 · $10,000.00 → $87,432.19
+            VTI &middot; 1993-01-29 &rarr; 2026-07-02 &middot; $10,000.00 &rarr; $87,432.19
           </p>
         </CardContent>
       </Card>
@@ -124,8 +124,8 @@ export function Styleguide() {
       <SectionTitle>Metric cards</SectionTitle>
       <div className="grid grid-cols-4 gap-4">
         {metrics.map((m) => (
-          <Card key={m.label}>
-            <CardHeader className="pb-2">
+          <Card key={m.label} className="gap-1">
+            <CardHeader>
               <CardTitle className="text-sm font-normal text-muted-foreground">
                 {m.label}
               </CardTitle>
@@ -138,7 +138,7 @@ export function Styleguide() {
               >
                 {m.value}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">{m.sub}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">{m.sub}</p>
             </CardContent>
           </Card>
         ))}
@@ -161,17 +161,17 @@ export function Styleguide() {
           Copy link
         </Button>
         <Button variant="destructive">Remove</Button>
-        <Button disabled>Running…</Button>
+        <Button disabled>Running&hellip;</Button>
       </div>
 
       {/* Progressive disclosure */}
       <SectionTitle>Progressive disclosure</SectionTitle>
       <p className="mb-4 text-muted-foreground">
-        Row actions stay hidden until the row is hovered or focused — controls appear
-        when the user needs them.
+        Row actions stay hidden until the row is hovered or focused &mdash; controls
+        appear when the user needs them.
       </p>
       <Card>
-        <CardContent className="pt-6">
+        <CardContent>
           {[
             { t: 'VTI', n: 'Vanguard Total Stock Market ETF', w: '60%', type: 'ETF' },
             { t: 'BND', n: 'Vanguard Total Bond Market ETF', w: '30%', type: 'ETF' },
@@ -179,7 +179,7 @@ export function Styleguide() {
           ].map((row) => (
             <div
               key={row.t}
-              className="group -mx-3 flex items-center gap-4 rounded-md px-3 py-2.5 transition-colors hover:bg-surface-2"
+              className="group -mx-3 flex items-center gap-4 rounded-md px-3 py-2 transition-colors hover:bg-surface-2"
             >
               <span className="w-14 font-mono font-medium">{row.t}</span>
               <Badge variant="secondary">{row.type}</Badge>
@@ -201,7 +201,7 @@ export function Styleguide() {
       {/* Form controls */}
       <SectionTitle>Form controls</SectionTitle>
       <Card>
-        <CardContent className="grid grid-cols-3 gap-8 pt-6">
+        <CardContent className="grid grid-cols-3 gap-6">
           <div className="space-y-2">
             <Label htmlFor="ticker">Add ticker</Label>
             <Input id="ticker" placeholder="e.g. VTI, AAPL, VTSAX" />
@@ -254,7 +254,7 @@ export function Styleguide() {
         </TabsList>
         <TabsContent value="annual" className="animate-enter">
           <Card>
-            <CardContent className="pt-6">
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -286,21 +286,21 @@ export function Styleguide() {
         </TabsContent>
         <TabsContent value="rolling" className="animate-enter">
           <Card>
-            <CardContent className="pt-6 text-muted-foreground">
+            <CardContent className="text-muted-foreground">
               Rolling 1/3/5/10-year return charts land here.
             </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="risk" className="animate-enter">
           <Card>
-            <CardContent className="pt-6 text-muted-foreground">
+            <CardContent className="text-muted-foreground">
               Sortino, best/worst year, correlation matrix.
             </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="income" className="animate-enter">
           <Card>
-            <CardContent className="pt-6 text-muted-foreground">
+            <CardContent className="text-muted-foreground">
               Dividend history and yield-on-cost over time.
             </CardContent>
           </Card>
@@ -309,8 +309,8 @@ export function Styleguide() {
 
       <Separator className="my-16" />
       <p className="text-sm text-muted-foreground">
-        Fathom · Ledger Dark styleguide · every token above is a CSS variable in{' '}
-        <span className="font-mono">src/index.css</span>
+        Fathom &middot; Ledger Dark styleguide &middot; every token above is a CSS
+        variable in <span className="font-mono">src/index.css</span>
       </p>
     </div>
   )
