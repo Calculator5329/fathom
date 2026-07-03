@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Check, Link as LinkIcon } from 'lucide-react'
+import { Check, Download, Link as LinkIcon } from 'lucide-react'
 import { EChart } from '@/components/charts/EChart'
 import {
   annualReturnsOption,
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { monthlyReturns, rollingReturns } from '@/engine'
+import { buildResultsCsv, downloadCsv } from '@/lib/export'
 import { formatUsd, formatUsdCompact } from '@/lib/format'
 
 const pct = (v: number, dp = 1) => `${v >= 0 ? '' : '−'}${Math.abs(v * 100).toFixed(dp)}%`
@@ -208,10 +209,25 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
           <span className="font-mono tnum">{dates[0]}</span> &rarr;{' '}
           <span className="font-mono tnum">{dates[dates.length - 1]}</span>
         </p>
-        <Button variant="outline" size="sm" onClick={copyLink}>
-          {copied ? <Check className="text-gain" /> : <LinkIcon />}
-          {copied ? 'Copied' : 'Copy link'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              downloadCsv(
+                `fathom-backtest-${dates[dates.length - 1]}.csv`,
+                buildResultsCsv(runs),
+              )
+            }
+          >
+            <Download />
+            Export CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={copyLink}>
+            {copied ? <Check className="text-gain" /> : <LinkIcon />}
+            {copied ? 'Copied' : 'Copy link'}
+          </Button>
+        </div>
       </div>
 
       <MetricSummary runs={runs} />
