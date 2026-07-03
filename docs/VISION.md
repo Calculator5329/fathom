@@ -26,6 +26,10 @@ Web Worker, percentile fan + worst-starts + max-SWR solver; Trinity-validated at
 Cloud Run API + nightly refresh, route code-splitting, CSV export, social meta. Deployed to
 Firebase Hosting. Two QA rounds passed.
 
+Tool 5 Stock Research (`/stock/:symbol`): SEC-EDGAR fundamentals for all 22 catalog stocks
+(`scripts/build-fundamentals.mjs`), long-run price with market-era shading, revenue/margin
+charts, cross-links. PNG chart export + mobile-responsive layouts also shipped.
+
 **One manual step outstanding for Tool 3 sign-in:** enable Google provider in the Firebase
 console (Authentication → Sign-in method → Google → Enable — auto-provisions the OAuth client;
 can't be done via API/CLI cleanly). Everything else (rules, config, UI, demo) is live; sign-in
@@ -87,7 +91,16 @@ percentile fan chart (5/25/50/75/95), ending-balance distribution, worst-start-y
 max-safe-withdrawal solver. All client-side; a Web Worker keeps the UI responsive at 10k trials.
 URL-encode the full config like the other tools (shareable scenarios).
 
-## Tool 5 — Fundamentals data layer + ticker pages
+## Tool 5 — Fundamentals data layer + ticker pages — SHIPPED (core)
+
+_Built 2026-07-03. `scripts/build-fundamentals.mjs` (EDGAR companyfacts → per-year revenue/
+income/margins/EPS/shares/FCF/dividends/debt for all 22 catalog stocks, in GCS bucket
+`fundamentals/`), `app/src/fundamentals/`, `app/src/pages/Stock.tsx`, route `/stock/:symbol`.
+Long-run price with market-era shading, headline stats (P/E, market cap, 1yr, from-high),
+revenue/income + margin charts, cross-links to backtest/project. Degrades to price-only for
+ETFs/funds. FOLLOW-UPS not done: valuation ratios vs their own history (percentile bands),
+dividend-record view, price-vs-EPS overlay, expanding fundamentals coverage beyond the 22
+catalog stocks (the pipeline handles any US stock — just run it on more tickers)._
 
 "Gather huge amounts of data and display it intuitively" — phase 2.
 - **Source decision to make first:** SEC EDGAR `companyfacts` XBRL API (free, official,
