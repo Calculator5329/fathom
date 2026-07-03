@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { LineChart, LogIn, Plus } from 'lucide-react'
 import { TickerPicker } from '@/components/backtest/TickerPicker'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/auth/AuthContext'
+import { AuthProvider, useAuth } from '@/auth/AuthContext'
 import { formatUsd } from '@/lib/format'
 import { baseCagr } from '@/projections/chart'
 import { defaultScenarios, projectScenario, type Projection } from '@/projections/model'
@@ -49,7 +49,20 @@ const DEMO: Projection = {
   updatedAt: 0,
 }
 
+/**
+ * AuthProvider is scoped to this route (not the whole app in main.tsx) so the
+ * Firebase SDK loads only inside this lazy chunk — keeping firebase off the
+ * landing/backtest/allocation pages.
+ */
 export function Projections() {
+  return (
+    <AuthProvider>
+      <ProjectionsInner />
+    </AuthProvider>
+  )
+}
+
+function ProjectionsInner() {
   const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth()
   const [saved, setSaved] = useState<Projection[]>([])
   const [draft, setDraft] = useState<Projection | null>(null)
