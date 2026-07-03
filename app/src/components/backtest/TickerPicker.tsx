@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { searchCatalog, type CatalogEntry } from '@/data/catalog'
+import { searchCatalog, searchTickers, type CatalogEntry } from '@/data/catalog'
 
 interface TickerPickerProps {
   placeholder?: string
@@ -10,14 +10,32 @@ interface TickerPickerProps {
   autoFocus?: boolean
 }
 
-/** Autocomplete input: recognition over recall — ticker, full name, type badge. */
+/**
+ * Autocomplete input: recognition over recall — ticker, full name, type badge.
+ * Local catalog answers instantly; the API extends results to Tiingo's full
+ * universe (marked "new" — their first load fetches and caches the history).
+ */
 export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: TickerPickerProps) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [highlight, setHighlight] = useState(0)
+  const [results, setResults] = useState<CatalogEntry[]>(() => searchCatalog(''))
   const rootRef = useRef<HTMLDivElement>(null)
 
-  const results = searchCatalog(query).filter((e) => !exclude.includes(e.ticker))
+  useEffect(() => {
+    // Show local matches immediately, then refine with API results.
+    setResults(searchCatalog(query))
+    const t = setTimeout(() => {
+      let stale = false
+      searchTickers(query).then((r) => {
+        if (!stale) setResults(r)
+      })
+      return () => {
+        stale = true
+      }
+    }, 180)
+    return () => clearTimeout(t)
+  }, [query])
 
   useEffect(() => {
     const onClickAway = (e: MouseEvent) => {
@@ -26,6 +44,8 @@ export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: Ticker
     document.addEventListener('mousedown', onClickAway)
     return () => document.removeEventListener('mousedown', onClickAway)
   }, [])
+
+  const visible = results.filter((e) => !exclude.includes(e.ticker))
 
   const pick = (entry: CatalogEntry) => {
     onPick(entry)
@@ -47,24 +67,24 @@ export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: Ticker
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={(e) => {
-          if (!open || results.length === 0) return
+          if (!open || visible.length === 0) return
           if (e.key === 'ArrowDown') {
             e.preventDefault()
-            setHighlight((h) => Math.min(h + 1, results.length - 1))
+            setHighlight((h) => Math.min(h + 1, visible.length - 1))
           } else if (e.key === 'ArrowUp') {
             e.preventDefault()
             setHighlight((h) => Math.max(h - 1, 0))
           } else if (e.key === 'Enter') {
             e.preventDefault()
-            pick(results[highlight])
+            pick(visible[highlight])
           } else if (e.key === 'Escape') {
             setOpen(false)
           }
         }}
       />
-      {open && results.length > 0 && (
+      {open && visible.length > 0 && (
         <ul className="animate-enter absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-popover shadow-lg">
-          {results.map((e, i) => (
+          {visible.map((e, i) => (
             <li key={e.ticker}>
               <button
                 type="button"
@@ -76,6 +96,11 @@ export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: Ticker
               >
                 <span className="w-16 shrink-0 font-mono font-medium">{e.ticker}</span>
                 <span className="flex-1 truncate text-sm text-muted-foreground">{e.name}</span>
+                {e.cached === false && (
+                  <Badge variant="outline" className="shrink-0 border-chart-3/50 text-chart-3">
+                    new
+                  </Badge>
+                )}
                 <Badge variant="secondary" className="shrink-0">
                   {e.type}
                 </Badge>

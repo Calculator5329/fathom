@@ -8,6 +8,8 @@ export interface CatalogEntry {
   type: AssetType
   /** Earliest date available, for inception / limiting-ticker hints. */
   startDate: string
+  /** false = known to Tiingo but not yet in our data cache (first load is slower). */
+  cached?: boolean
 }
 
 /** Fallback when catalog.json hasn't been generated yet (scripts/build-catalog.mjs). */
@@ -25,6 +27,9 @@ const FALLBACK: CatalogEntry[] = [
  */
 const DATA_BASE: string =
   import.meta.env.VITE_DATA_BASE_URL ?? `${import.meta.env.BASE_URL}data/`
+
+/** Cloud Run API for search + admitting tickers we haven't cached. Optional in dev. */
+const API_BASE: string = import.meta.env.VITE_API_BASE_URL ?? ''
 
 let catalog: CatalogEntry[] = FALLBACK
 let catalogLoaded: Promise<CatalogEntry[]> | null = null
@@ -77,6 +82,33 @@ export function searchCatalog(query: string, limit = 8): CatalogEntry[] {
     .map((x) => x.e)
 }
 
+/**
+ * Async search: local catalog first; when it comes up short and the API is
+ * configured, extend with Tiingo's full ticker universe.
+ */
+export async function searchTickers(query: string, limit = 8): Promise<CatalogEntry[]> {
+  const local = searchCatalog(query, limit).map((e) => ({ ...e, cached: true }))
+  if (local.length >= 3 || !API_BASE || query.trim().length < 2) return local
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+    )
+    if (!res.ok) return local
+    const remote: CatalogEntry[] = await res.json()
+    const seen = new Set(local.map((e) => e.ticker))
+    return [...local, ...remote.filter((e) => !seen.has(e.ticker))].slice(0, limit)
+  } catch {
+    return local
+  }
+}
+
+/** Make a just-admitted ticker resolvable by lookup() without a full reload. */
+export function upsertCatalogEntry(entry: CatalogEntry): void {
+  if (!catalog.some((e) => e.ticker === entry.ticker)) {
+    catalog = [...catalog, entry].sort((a, b) => a.ticker.localeCompare(b.ticker))
+  }
+}
+
 const seriesCache = new Map<string, Promise<TickerSeries>>()
 
 /** Load a full ticker series from the static data directory (cached per session). */
@@ -85,15 +117,26 @@ export function loadSeries(ticker: string): Promise<TickerSeries> {
   let promise = seriesCache.get(key)
   if (!promise) {
     promise = fetch(`${DATA_BASE}tickers/${key}.json`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`No data for ${key} (${res.status})`)
-        return res.json()
+      .then(async (res) => {
+        if (res.ok) return res.json()
+        // Not in the cache — ask the API to admit it (fetches from Tiingo,
+        // stores to the bucket, returns the series).
+        if (API_BASE) {
+          const admitted = await fetch(`${API_BASE}/api/ticker/${key}`)
+          if (admitted.ok) return admitted.json()
+        }
+        throw new Error(`No data for ${key} (${res.status})`)
       })
-      .then((raw): TickerSeries => ({
-        ticker: raw.ticker ?? key,
-        name: raw.name,
-        records: raw.records,
-      }))
+      .then((raw): TickerSeries => {
+        upsertCatalogEntry({
+          ticker: raw.ticker ?? key,
+          name: raw.name ?? key,
+          type: 'Stock',
+          startDate: raw.startDate ?? raw.records?.[0]?.date ?? '',
+          cached: true,
+        })
+        return { ticker: raw.ticker ?? key, name: raw.name, records: raw.records }
+      })
       .catch((err) => {
         seriesCache.delete(key) // allow retry after a failure
         throw err
