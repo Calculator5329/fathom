@@ -230,6 +230,7 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
             Rolling
           </TabsTrigger>
           <TabsTrigger value="income">Income</TabsTrigger>
+          <TabsTrigger value="holdings">Holdings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="annual" className="animate-enter space-y-4">
@@ -371,6 +372,83 @@ export function ResultsPanel({ runs }: ResultsPanelProps) {
               <EChart option={income} className="h-72 w-full" />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="holdings" className="animate-enter space-y-4">
+          {runs
+            .filter((r) => !r.isBenchmark)
+            .map((r) => (
+              <Card key={r.label}>
+                <CardHeader>
+                  <CardTitle className="text-base font-medium">{r.label}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Ticker</TableHead>
+                        <TableHead className="text-right">Target</TableHead>
+                        <TableHead className="text-right">End weight</TableHead>
+                        <TableHead className="text-right">Asset return</TableHead>
+                        <TableHead className="text-right">Dividends paid</TableHead>
+                        <TableHead className="text-right">End value</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {r.result.holdings.map((h) => (
+                        <TableRow key={h.ticker}>
+                          <TableCell className="font-mono font-medium">{h.ticker}</TableCell>
+                          <TableCell className="text-right font-mono tnum">
+                            {h.targetWeight.toFixed(0)}%
+                          </TableCell>
+                          <TableCell className="text-right font-mono tnum">
+                            {h.endWeight.toFixed(1)}%
+                            {Math.abs(h.endWeight - h.targetWeight) >= 5 && (
+                              <span className="ml-1.5 text-chart-3" title="Drifted 5%+ from target">
+                                •
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right font-mono">
+                            <PctCell v={h.assetTotalReturn} />
+                          </TableCell>
+                          <TableCell className="text-right font-mono tnum">
+                            {usd(h.income)}
+                          </TableCell>
+                          <TableCell className="text-right font-mono tnum">
+                            {usd(h.endValue)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {r.result.endingCash > 0.005 && (
+                        <TableRow>
+                          <TableCell className="text-muted-foreground">
+                            Dividend cash (not reinvested)
+                          </TableCell>
+                          <TableCell className="text-right font-mono tnum">—</TableCell>
+                          <TableCell className="text-right font-mono tnum">
+                            {((r.result.endingCash / r.result.values.at(-1)!) * 100).toFixed(1)}%
+                          </TableCell>
+                          <TableCell className="text-right font-mono tnum">—</TableCell>
+                          <TableCell className="text-right font-mono tnum">—</TableCell>
+                          <TableCell className="text-right font-mono tnum">
+                            {usd(r.result.endingCash)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                  {r.result.holdings.some(
+                    (h) => Math.abs(h.endWeight - h.targetWeight) >= 5,
+                  ) && (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      <span className="text-chart-3">•</span> drifted 5%+ from target — consider
+                      a rebalancing setting.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
         </TabsContent>
 
         <TabsContent value="risk" className="animate-enter space-y-4">

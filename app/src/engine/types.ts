@@ -68,7 +68,22 @@ export interface BacktestResult {
   dividendIncome: number[]
   endingCash: number
   totalContributions: number
+  /** Per-ticker breakdown at the end of the period. */
+  holdings: HoldingBreakdown[]
   metrics: MetricSet
+}
+
+export interface HoldingBreakdown {
+  ticker: string
+  /** Target weight in percent, from the portfolio spec. */
+  targetWeight: number
+  endValue: number
+  /** Share of final portfolio value (incl. dividend cash), percent. */
+  endWeight: number
+  /** The asset's own cumulative total return over the period (standalone). */
+  assetTotalReturn: number
+  /** Dividends this holding paid into the portfolio over the period. */
+  income: number
 }
 
 export interface DrawdownInfo {

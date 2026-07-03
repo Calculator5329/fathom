@@ -126,6 +126,21 @@ describe('two assets with monthly rebalancing', () => {
     expect(r.values[2]).toBeCloseTo(11_000, 8)
   })
 
+  it('reports per-holding breakdown with drifted end weights', () => {
+    const r = runBacktest([a, b], spec, base)
+    expect(r.holdings).toHaveLength(2)
+    const [ha, hb] = r.holdings
+    expect(ha.ticker).toBe('A')
+    expect(ha.targetWeight).toBe(60)
+    expect(ha.endValue).toBeCloseTo(6_600, 8)
+    expect(ha.endWeight).toBeCloseTo(60, 8)
+    expect(ha.assetTotalReturn).toBeCloseTo(0.1, 10)
+    expect(hb.endValue).toBeCloseTo(4_400, 8)
+    expect(hb.endWeight).toBeCloseTo(40, 8)
+    expect(hb.assetTotalReturn).toBeCloseTo(0.1, 10)
+    expect(ha.income).toBe(0)
+  })
+
   it('monthly rebalancing resets to 60/40 at the month boundary', () => {
     const r = runBacktest([a, b], spec, { ...base, rebalance: 'monthly' })
     // Feb 3 starts a new month: rebalance 10600 -> A 6360, B 4240.

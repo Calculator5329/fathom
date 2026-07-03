@@ -40,6 +40,7 @@ export function runBacktest(
   const twrIndex = new Array<number>(n)
   const flows = new Array<number>(n).fill(0)
   const dividendIncome = new Array<number>(n).fill(0)
+  const incomeByHolding = new Array<number>(holdings.length).fill(0)
   values[0] = config.initialAmount
   twrIndex[0] = 1
   let totalContributions = 0
@@ -70,6 +71,7 @@ export function runBacktest(
       const asset = prepared[i]
       const income = holdings[i] * asset.divYield[t]
       dividendIncome[t] += income
+      incomeByHolding[i] += income
       if (config.reinvestDividends) {
         holdings[i] *= asset.totalReturn[t]
       } else {
@@ -87,6 +89,16 @@ export function runBacktest(
 
   const metrics = computeMetrics(dates, twrIndex, values, flows, config.riskFreeRate ?? 0)
 
+  const finalValue = values[n - 1]
+  const holdingBreakdowns = portfolio.allocations.map((a, i) => ({
+    ticker: a.ticker,
+    targetWeight: a.weight,
+    endValue: holdings[i],
+    endWeight: finalValue > 0 ? (holdings[i] / finalValue) * 100 : 0,
+    assetTotalReturn: prepared[i].totalReturn.reduce((p, r) => p * r, 1) - 1,
+    income: incomeByHolding[i],
+  }))
+
   return {
     portfolio,
     dates,
@@ -96,6 +108,7 @@ export function runBacktest(
     dividendIncome,
     endingCash: cash,
     totalContributions,
+    holdings: holdingBreakdowns,
     metrics,
   }
 }
