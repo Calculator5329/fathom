@@ -42,8 +42,13 @@ export function Allocation() {
   }, [searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = (next: AllocationSetup) => {
+    // Push on structural changes so Back steps through checkpoints; replace
+    // on continuous tweaks so history doesn't flood (see Backtest.tsx).
+    const structural = (s: AllocationSetup) =>
+      s.portfolios.map((p) => p.allocations.map((a) => a.ticker).join(',')).join('|')
+    const replace = structural(next) === structural(setup)
     setSetup(next)
-    setSearchParams(encodeAllocation(next), { replace: true })
+    setSearchParams(encodeAllocation(next), { replace })
   }
 
   const output = useAllocationBacktests(setup)

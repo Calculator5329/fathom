@@ -48,8 +48,14 @@ export function Backtest() {
   }, [searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = (next: BacktestSetup) => {
+    // Structural changes (tickers/portfolios added or removed) PUSH so the
+    // back button steps through meaningful checkpoints; continuous tweaks
+    // (weights, dates, toggles) REPLACE so history doesn't flood.
+    const structural = (s: BacktestSetup) =>
+      s.portfolios.map((p) => p.allocations.map((a) => a.ticker).join(',')).join('|')
+    const replace = structural(next) === structural(setup)
     setSetup(next)
-    setSearchParams(encodeSetup(next), { replace: true })
+    setSearchParams(encodeSetup(next), { replace })
   }
 
   const output = useBacktests(setup)
