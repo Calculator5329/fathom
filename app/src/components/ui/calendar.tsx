@@ -14,6 +14,13 @@ import {
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 function Calendar({
   className,
@@ -73,14 +80,7 @@ function Calendar({
           "flex h-(--cell-size) w-full items-center justify-center gap-1.5 text-sm font-medium",
           defaultClassNames.dropdowns
         ),
-        dropdown_root: cn(
-          "relative rounded-md border border-input shadow-xs has-focus:border-ring has-focus:ring-[3px] has-focus:ring-ring/50",
-          defaultClassNames.dropdown_root
-        ),
-        dropdown: cn(
-          "absolute inset-0 bg-popover opacity-0",
-          defaultClassNames.dropdown
-        ),
+        dropdown_root: cn("relative", defaultClassNames.dropdown_root),
         caption_label: cn(
           "font-medium select-none",
           captionLayout === "label"
@@ -163,6 +163,37 @@ function Calendar({
           )
         },
         DayButton: CalendarDayButton,
+        // Native <select> popups can't be themed — swap in our Select so the
+        // month/year dropdown lists match the rest of the UI.
+        Dropdown: ({ value, onChange, options, ...props }) => (
+          <Select
+            value={String(value)}
+            onValueChange={(v) => {
+              onChange?.({
+                target: { value: v },
+              } as unknown as React.ChangeEvent<HTMLSelectElement>)
+            }}
+          >
+            <SelectTrigger
+              size="sm"
+              className="h-8 gap-1 border-none px-2 font-medium shadow-none"
+              aria-label={props["aria-label"]}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper" className="max-h-72 min-w-0 font-mono">
+              {options?.map((opt) => (
+                <SelectItem
+                  key={opt.value}
+                  value={String(opt.value)}
+                  disabled={opt.disabled}
+                >
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ),
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>

@@ -159,6 +159,7 @@ export function incomeOption(runs: NamedResult[]): EChartsCoreOption {
     },
     tooltip: {
       ...(base.tooltip as object),
+      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(255,255,255,0.04)' } },
       valueFormatter: (v: unknown) => (v == null ? '—' : fmtUsd(v as number)),
     },
     series: runs.map((r, i) => {
@@ -199,6 +200,7 @@ export function annualReturnsOption(runs: NamedResult[]): EChartsCoreOption {
     },
     tooltip: {
       ...(base.tooltip as object),
+      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(255,255,255,0.04)' } },
       valueFormatter: (v: unknown) => (v == null ? '—' : fmtPct(v as number)),
     },
     series: runs.map((r, i) => {
