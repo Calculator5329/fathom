@@ -1,9 +1,8 @@
 import type { EChartsCoreOption } from 'echarts'
 import { annualIncome, rollingReturns, type BacktestResult } from '@/engine'
+import { formatUsd, formatUsdCompact } from '@/lib/format'
 import { baseOption, chartPalette, cssVar } from './EChart'
 
-const fmtUsd = (v: number) =>
-  v.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 const fmtPct = (v: number) => `${(v * 100).toFixed(1)}%`
 
 export interface NamedResult {
@@ -28,13 +27,13 @@ export function growthOption(runs: NamedResult[], logScale: boolean): EChartsCor
       logBase: 10,
       axisLabel: {
         ...(base.yAxis as { axisLabel: object }).axisLabel,
-        formatter: (v: number) => fmtUsd(v),
+        formatter: (v: number) => formatUsdCompact(v),
       },
       scale: true,
     },
     tooltip: {
       ...(base.tooltip as object),
-      valueFormatter: (v: unknown) => fmtUsd(v as number),
+      valueFormatter: (v: unknown) => formatUsd(v as number),
     },
     series: runs.map((r, i) => ({
       name: r.label,
@@ -154,13 +153,13 @@ export function incomeOption(runs: NamedResult[]): EChartsCoreOption {
       type: 'value',
       axisLabel: {
         ...(base.yAxis as { axisLabel: object }).axisLabel,
-        formatter: (v: number) => fmtUsd(v),
+        formatter: (v: number) => formatUsdCompact(v),
       },
     },
     tooltip: {
       ...(base.tooltip as object),
       axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(255,255,255,0.04)' } },
-      valueFormatter: (v: unknown) => (v == null ? '—' : fmtUsd(v as number)),
+      valueFormatter: (v: unknown) => (v == null ? '—' : formatUsd(v as number)),
     },
     series: runs.map((r, i) => {
       const byYear = new Map(perRun[i].map((y) => [y.year, Math.round(y.income)]))

@@ -168,9 +168,11 @@ function Calendar({
         Dropdown: ({ value, onChange, options, ...props }) => (
           <Select
             value={String(value)}
+            disabled={props.disabled}
             onValueChange={(v) => {
               onChange?.({
                 target: { value: v },
+                currentTarget: { value: v },
               } as unknown as React.ChangeEvent<HTMLSelectElement>)
             }}
           >
@@ -178,6 +180,7 @@ function Calendar({
               size="sm"
               className="h-8 gap-1 border-none px-2 font-medium shadow-none"
               aria-label={props["aria-label"]}
+              disabled={props.disabled}
             >
               <SelectValue />
             </SelectTrigger>

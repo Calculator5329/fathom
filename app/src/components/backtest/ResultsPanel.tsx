@@ -22,9 +22,8 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { monthlyReturns, rollingReturns } from '@/engine'
+import { formatUsd, formatUsdCompact } from '@/lib/format'
 
-const usd = (v: number) =>
-  v.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 const pct = (v: number, dp = 1) => `${v >= 0 ? '' : '−'}${Math.abs(v * 100).toFixed(dp)}%`
 const num = (v: number) => v.toFixed(2)
 
@@ -41,7 +40,14 @@ interface ResultsPanelProps {
 /** Summary metrics: big cards for one portfolio, comparison grid for several. */
 function MetricSummary({ runs }: { runs: NamedResult[] }) {
   const rows: Array<{ label: string; render: (r: NamedResult) => React.ReactNode }> = [
-    { label: 'Final value', render: (r) => <span className="tnum">{usd(r.result.values.at(-1)!)}</span> },
+    {
+      label: 'Final value',
+      render: (r) => (
+        <span className="tnum" title={formatUsd(r.result.values.at(-1)!)}>
+          {formatUsdCompact(r.result.values.at(-1)!)}
+        </span>
+      ),
+    },
     { label: 'CAGR', render: (r) => <PctCell v={r.result.metrics.cagr} dp={2} /> },
     { label: 'Volatility', render: (r) => <span className="tnum">{pct(r.result.metrics.volatility)}</span> },
     { label: 'Max drawdown', render: (r) => <span className="tnum text-loss">{pct(r.result.metrics.drawdown.maxDrawdown)}</span> },
@@ -351,11 +357,15 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
                   {incomeSummary.map((s) => (
                     <TableRow key={s.label}>
                       <TableCell className="text-muted-foreground">{s.label}</TableCell>
-                      <TableCell className="text-right font-mono tnum">{usd(s.trailing)}</TableCell>
+                      <TableCell className="text-right font-mono tnum">
+                        <span title={formatUsd(s.trailing)}>{formatUsdCompact(s.trailing)}</span>
+                      </TableCell>
                       <TableCell className="text-right font-mono tnum">
                         {pct(s.yieldOnValue, 2)}
                       </TableCell>
-                      <TableCell className="text-right font-mono tnum">{usd(s.total)}</TableCell>
+                      <TableCell className="text-right font-mono tnum">
+                        <span title={formatUsd(s.total)}>{formatUsdCompact(s.total)}</span>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -418,11 +428,11 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
                           </TableCell>
                           {showIncome && (
                             <TableCell className="text-right font-mono tnum">
-                              {usd(h.income)}
+                              <span title={formatUsd(h.income)}>{formatUsdCompact(h.income)}</span>
                             </TableCell>
                           )}
                           <TableCell className="text-right font-mono tnum">
-                            {usd(h.endValue)}
+                            <span title={formatUsd(h.endValue)}>{formatUsdCompact(h.endValue)}</span>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -440,7 +450,9 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
                             <TableCell className="text-right font-mono tnum">—</TableCell>
                           )}
                           <TableCell className="text-right font-mono tnum">
-                            {usd(r.result.endingCash)}
+                            <span title={formatUsd(r.result.endingCash)}>
+                              {formatUsdCompact(r.result.endingCash)}
+                            </span>
                           </TableCell>
                         </TableRow>
                       )}
