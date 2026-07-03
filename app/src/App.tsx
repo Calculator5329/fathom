@@ -6,6 +6,7 @@ import { Landing } from './pages/Landing'
 // a tool page is visited, keeping the landing page instant.
 const Backtest = lazy(() => import('./pages/Backtest').then((m) => ({ default: m.Backtest })))
 const Allocation = lazy(() => import('./pages/Allocation').then((m) => ({ default: m.Allocation })))
+const Projections = lazy(() => import('./pages/Projections').then((m) => ({ default: m.Projections })))
 const Styleguide = lazy(() => import('./pages/Styleguide').then((m) => ({ default: m.Styleguide })))
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -27,6 +28,9 @@ function Shell({ children }: { children: React.ReactNode }) {
           <NavLink to="/allocation" className={navLinkClass}>
             Asset allocation
           </NavLink>
+          <NavLink to="/projections" className={navLinkClass}>
+            Projections
+          </NavLink>
         </nav>
       </header>
       {children}
@@ -43,6 +47,7 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/backtest" element={<Backtest />} />
             <Route path="/allocation" element={<Allocation />} />
+          <Route path="/projections" element={<Projections />} />
             <Route path="/styleguide" element={<Styleguide />} />
           </Routes>
         </Suspense>
