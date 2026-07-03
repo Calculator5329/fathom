@@ -3,7 +3,9 @@
 const TIINGO = 'https://api.tiingo.com'
 
 function token() {
-  const t = process.env.TIINGO_API_TOKEN
+  // trim: secrets created via shell pipes can carry a trailing newline,
+  // which Tiingo rejects with HTTP 403
+  const t = process.env.TIINGO_API_TOKEN?.trim()
   if (!t) throw new Error('TIINGO_API_TOKEN not set')
   return t
 }
