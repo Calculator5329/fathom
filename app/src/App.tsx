@@ -1,8 +1,17 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
-import { Allocation } from './pages/Allocation'
-import { Backtest } from './pages/Backtest'
 import { Landing } from './pages/Landing'
-import { Styleguide } from './pages/Styleguide'
+
+// Route-level code splitting: ECharts (~400KB) and the engine load only when
+// a tool page is visited, keeping the landing page instant.
+const Backtest = lazy(() => import('./pages/Backtest').then((m) => ({ default: m.Backtest })))
+const Allocation = lazy(() => import('./pages/Allocation').then((m) => ({ default: m.Allocation })))
+const Styleguide = lazy(() => import('./pages/Styleguide').then((m) => ({ default: m.Styleguide })))
+
+const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+  `text-sm transition-colors ${
+    isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+  }`
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -12,24 +21,10 @@ function Shell({ children }: { children: React.ReactNode }) {
           <Link to="/" className="font-mono text-base font-semibold tracking-tight">
             fathom
           </Link>
-          <NavLink
-            to="/backtest"
-            className={({ isActive }) =>
-              `text-sm transition-colors ${
-                isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`
-            }
-          >
+          <NavLink to="/backtest" className={navLinkClass}>
             Backtest
           </NavLink>
-          <NavLink
-            to="/allocation"
-            className={({ isActive }) =>
-              `text-sm transition-colors ${
-                isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`
-            }
-          >
+          <NavLink to="/allocation" className={navLinkClass}>
             Asset allocation
           </NavLink>
         </nav>
@@ -43,12 +38,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <Shell>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/backtest" element={<Backtest />} />
-          <Route path="/allocation" element={<Allocation />} />
-          <Route path="/styleguide" element={<Styleguide />} />
-        </Routes>
+        <Suspense fallback={<div className="px-6 py-16 text-sm text-muted-foreground">Loading…</div>}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/backtest" element={<Backtest />} />
+            <Route path="/allocation" element={<Allocation />} />
+            <Route path="/styleguide" element={<Styleguide />} />
+          </Routes>
+        </Suspense>
       </Shell>
     </BrowserRouter>
   )
