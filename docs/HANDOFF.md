@@ -29,7 +29,11 @@ f551f85 Add master plan for stock analysis suite
 3. **Data layer (local half)** — [scripts/fetch-tiingo.mjs](../scripts/fetch-tiingo.mjs) fetches any ticker's full history to `data/tickers/<T>.json` (gitignored) in canonical schema `{date, close, adjClose, divCash, splitFactor}`; rate-limited for Tiingo free tier. SPY/VTI/AAPL/KO/BND already on disk. `--validate` cross-checks vs a legacy 1,570-ticker archive (see data-notes.md). **Decision: Tiingo is canonical; archive is validation-only.**
 4. **Credentials/infra ready**: Tiingo token in root `.env` (`TIINGO_API_TOKEN`, gitignored — never commit/print it). GCP project **ethan-488900** (billing on), gcloud CLI authenticated, Firebase CLI 15.2.1 installed. APIs already enabled: Cloud Run, Firestore, Cloud Scheduler, Secret Manager, Cloud Storage.
 
-## Next task (Ethan approved): Builder + Results screens
+## ~~Next task: Builder + Results screens~~ DONE (commit 375f453)
+
+Built and verified live: react-router shell (/, /backtest, /styleguide), URL-as-source-of-truth setup encoding with copy-link, Builder (autocomplete over 23 local tickers, weight auto-balance/validation, up to 3 portfolios, limiting-ticker hint, Advanced section), Results (adaptive metric summary, ECharts growth+linked drawdown with log toggle, Annual + Risk tabs incl. correlation matrix, docked collapsible builder, instant recompute). 25/25 tests. NEXT: cloud infra per PLAN.md §2, then Rolling/Income/Holdings tabs, then Tool 2.
+
+## Original screen spec (kept for reference)
 
 Build Tool 1's two real screens per PLAN.md §4, wired to the engine with the local data files. Concretely:
 
