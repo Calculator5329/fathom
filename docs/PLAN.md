@@ -55,9 +55,12 @@ Linear's recipe, adapted: near-black canvas (never pure `#000`), a ladder of sli
 ```
 Browser — React SPA (Firebase Hosting + CDN)
    │  HTTPS/JSON
-Cloud Run — API (Node/TypeScript)
+Cloud Run — API (Node/TypeScript): ticker search, on-demand new-ticker fetch
    │
-Firestore — ticker metadata + daily price/dividend/split series (cache)
+Firestore — ticker metadata + search index (small docs only)
+Cloud Storage — one JSON per ticker: full daily series (close, adjClose,
+   │            divCash, splitFactor). A full series can exceed Firestore's
+   │            1 MB doc limit, so series NEVER go in Firestore.
    ▲
 Cloud Scheduler — nightly job (~6pm ET weekdays)
    └─> Cloud Run job: append latest day for every cached ticker (Tiingo)
