@@ -7,6 +7,7 @@ import { Landing } from './pages/Landing'
 const Backtest = lazy(() => import('./pages/Backtest').then((m) => ({ default: m.Backtest })))
 const Allocation = lazy(() => import('./pages/Allocation').then((m) => ({ default: m.Allocation })))
 const Projections = lazy(() => import('./pages/Projections').then((m) => ({ default: m.Projections })))
+const Montecarlo = lazy(() => import('./pages/Montecarlo').then((m) => ({ default: m.Montecarlo })))
 const Styleguide = lazy(() => import('./pages/Styleguide').then((m) => ({ default: m.Styleguide })))
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -31,6 +32,9 @@ function Shell({ children }: { children: React.ReactNode }) {
           <NavLink to="/projections" className={navLinkClass}>
             Projections
           </NavLink>
+          <NavLink to="/montecarlo" className={navLinkClass}>
+            Monte Carlo
+          </NavLink>
         </nav>
       </header>
       {children}
@@ -48,6 +52,7 @@ export default function App() {
             <Route path="/backtest" element={<Backtest />} />
             <Route path="/allocation" element={<Allocation />} />
           <Route path="/projections" element={<Projections />} />
+          <Route path="/montecarlo" element={<Montecarlo />} />
             <Route path="/styleguide" element={<Styleguide />} />
           </Routes>
         </Suspense>
