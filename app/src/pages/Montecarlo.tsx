@@ -76,8 +76,6 @@ export function Montecarlo() {
     <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl flex-col px-6 lg:flex-row">
       {/* Builder rail — stacks above results on narrow screens */}
       <aside className="border-b py-6 lg:w-80 lg:shrink-0 lg:border-r lg:border-b-0 lg:py-8 lg:pr-6">
-        <h1 className="mb-4 font-semibold tracking-tight">Retirement simulator</h1>
-
         {/* Allocation */}
         <div className="space-y-2">
           <Label>Portfolio</Label>
@@ -115,8 +113,20 @@ export function Montecarlo() {
             <Select
               value=""
               onValueChange={(id) => {
-                const remaining = Math.max(0, Math.round((100 - sum) * 100) / 100)
-                setAlloc([...config.allocation, { assetId: id, weight: remaining }])
+                const remaining = Math.round((100 - sum) * 100) / 100
+                if (remaining > 0.005) {
+                  setAlloc([...config.allocation, { assetId: id, weight: remaining }])
+                } else {
+                  // Portfolio already full — equalize so the new asset is usable.
+                  const n = config.allocation.length + 1
+                  const even = Math.floor(10000 / n) / 100
+                  setAlloc(
+                    [...config.allocation, { assetId: id, weight: 0 }].map((a, i) => ({
+                      ...a,
+                      weight: i === 0 ? Math.round((100 - even * (n - 1)) * 100) / 100 : even,
+                    })),
+                  )
+                }
               }}
             >
               <SelectTrigger className="w-full text-muted-foreground">
@@ -211,7 +221,7 @@ export function Montecarlo() {
               <Input
                 id="fee"
                 type="number"
-                step={0.05}
+                step={0.01}
                 value={config.feeRate}
                 onChange={(e) => update({ ...config, feeRate: Math.max(0, Number(e.target.value)) })}
                 className="pr-7 font-mono tnum"

@@ -30,7 +30,7 @@ export const DEFAULT_MC: MonteCarloConfig = {
   horizonYears: 30,
   withdrawalRate: 4,
   strategy: 'fixedReal',
-  feeRate: 0.1,
+  feeRate: 0.02,
   mode: 'historical',
   trials: 10_000,
 }
@@ -42,8 +42,10 @@ const num = (raw: string | null, fallback: number, min: number, max: number) => 
 
 export function encodeMonteCarlo(c: MonteCarloConfig): URLSearchParams {
   const p = new URLSearchParams()
+  // Keep zero-weight entries so a just-added asset (or one being edited to 0)
+  // survives the URL round-trip that drives this form's state.
   const alloc = c.allocation
-    .filter((a) => a.weight > 0)
+    .filter((a) => a.weight >= 0)
     .map((a) => `${a.assetId}:${Math.round(a.weight * 100) / 100}`)
     .join(',')
   if (alloc) p.set('a', alloc)
