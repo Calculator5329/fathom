@@ -29,6 +29,11 @@ product spec, [docs/data-notes.md](docs/data-notes.md) before touching data.
   math lives here and ONLY here.
 - `app/src/data/` — catalog + series loaders (local `public/data` in dev, GCS bucket in prod via
   `VITE_DATA_BASE_URL`), asset-class adapter.
+- `app/src/projections/` — Tool 3: projection model (pure, tested), Firestore store, editor.
+  `app/src/auth/AuthContext.tsx` — Firebase Google auth. IMPORTANT: AuthProvider is scoped to the
+  `/projections` route (not main.tsx) so the Firebase SDK stays out of the initial bundle — keep
+  it that way. `app/src/lib/firebase.ts` holds the PUBLIC web config (safe in client; security is
+  rules + auth). Firestore rules in `firestore.rules` (per-uid access, deployed).
 - `server/` — Cloud Run API `fathom-api` (us-central1): `/api/health`, `/api/search`,
   `/api/ticker/:SYM` (admits unknown tickers: Tiingo → bucket → catalog), `/api/refresh`
   (token-gated nightly). Deploy: `gcloud run deploy fathom-api --source server ...` (see git log

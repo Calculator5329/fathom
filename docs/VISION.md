@@ -18,8 +18,15 @@ Two companion apps, one clean boundary:
 ## Shipped (as of 2026-07-03)
 
 Tool 1 Backtest (any of 65k tickers via on-demand admission; all tabs), Tool 2 Asset Allocation
-(1871+, real-returns mode), engine (39 tests), Ledger Dark system, GCS data lake +
-Cloud Run API + nightly refresh. Two QA rounds passed.
+(1871+, real-returns mode), Tool 3 Stock Projections (Firebase Auth + Firestore; bear/base/bull
+editor, implied-price chart, saved theses ranked by CAGR), engine + projection model (47 tests),
+Ledger Dark system, GCS data lake + Cloud Run API + nightly refresh, route code-splitting, CSV
+export, social meta. Deployed to Firebase Hosting. Two QA rounds passed.
+
+**One manual step outstanding for Tool 3 sign-in:** enable Google provider in the Firebase
+console (Authentication → Sign-in method → Google → Enable — auto-provisions the OAuth client;
+can't be done via API/CLI cleanly). Everything else (rules, config, UI, demo) is live; sign-in
+works the moment the provider is on.
 
 ## Immediate next (order matters)
 
