@@ -2,6 +2,14 @@
 
 const TIINGO = 'https://api.tiingo.com'
 
+export class TiingoError extends Error {
+  constructor(path, status) {
+    super(`Tiingo ${path}: HTTP ${status}`)
+    this.name = 'TiingoError'
+    this.status = status
+  }
+}
+
 function token() {
   // trim: secrets created via shell pipes can carry a trailing newline,
   // which Tiingo rejects with HTTP 403
@@ -16,7 +24,7 @@ async function tiingoJson(path, params = {}) {
   url.searchParams.set('token', token())
   const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } })
   if (res.status === 404) return null
-  if (!res.ok) throw new Error(`Tiingo ${path}: HTTP ${res.status}`)
+  if (!res.ok) throw new TiingoError(path, res.status)
   return res.json()
 }
 

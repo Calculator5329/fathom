@@ -20,21 +20,26 @@ export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: Ticker
   const [open, setOpen] = useState(false)
   const [highlight, setHighlight] = useState(0)
   const [results, setResults] = useState<CatalogEntry[]>(() => searchCatalog(''))
+  const [warning, setWarning] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    let stale = false
     // Show local matches immediately, then refine with API results.
     setResults(searchCatalog(query))
+    setWarning(null)
     const t = setTimeout(() => {
-      let stale = false
-      searchTickers(query).then((r) => {
-        if (!stale) setResults(r)
+      searchTickers(query).then(({ entries, warning }) => {
+        if (!stale) {
+          setResults(entries)
+          setWarning(warning)
+        }
       })
-      return () => {
-        stale = true
-      }
-    }, 180)
-    return () => clearTimeout(t)
+    }, 500)
+    return () => {
+      stale = true
+      clearTimeout(t)
+    }
   }, [query])
 
   useEffect(() => {
@@ -82,7 +87,7 @@ export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: Ticker
           }
         }}
       />
-      {open && visible.length > 0 && (
+      {open && (visible.length > 0 || warning) && (
         <ul className="animate-enter absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-popover shadow-lg">
           {visible.map((e, i) => (
             <li key={e.ticker}>
@@ -107,6 +112,11 @@ export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: Ticker
               </button>
             </li>
           ))}
+          {warning && (
+            <li className="border-t px-3 py-2 text-sm text-muted-foreground">
+              {warning}
+            </li>
+          )}
         </ul>
       )}
     </div>

@@ -17,7 +17,7 @@
  */
 import http from 'node:http'
 import { Storage } from '@google-cloud/storage'
-import { fetchTickerFull, searchTiingo } from './tiingo.mjs'
+import { TiingoError, fetchTickerFull, searchTiingo } from './tiingo.mjs'
 
 const PORT = Number(process.env.PORT) || 8080
 const BUCKET = process.env.BUCKET || 'ethan-488900-fathom-data'
@@ -31,6 +31,30 @@ const bucket = storage.bucket(BUCKET)
 // ---- catalog cache -------------------------------------------------------
 let catalog = []
 let catalogLoadedAt = 0
+
+function upstreamMessage(err) {
+  if (err instanceof TiingoError && err.status === 429) {
+    return {
+      status: 429,
+      body: {
+        error: 'Data provider rate limit reached. Try again later.',
+        code: 'DATA_PROVIDER_RATE_LIMITED',
+      },
+      headers: { 'Retry-After': '3600' },
+    }
+  }
+  if (err instanceof TiingoError && err.status >= 500) {
+    return {
+      status: 503,
+      body: {
+        error: 'Data provider is temporarily unavailable. Try again later.',
+        code: 'DATA_PROVIDER_UNAVAILABLE',
+      },
+      headers: { 'Retry-After': '300' },
+    }
+  }
+  return null
+}
 
 async function loadCatalog(force = false) {
   if (!force && Date.now() - catalogLoadedAt < CATALOG_TTL_MS) return catalog
@@ -89,6 +113,7 @@ async function handleSearch(q, limit) {
     remote = (await searchTiingo(q, limit)).filter((e) => !cachedSet.has(e.ticker))
   } catch (err) {
     console.warn('tiingo search failed:', err.message)
+    if (local.length === 0 && upstreamMessage(err)) throw err
   }
   return [...local, ...remote].slice(0, limit)
 }
@@ -203,6 +228,8 @@ const server = http.createServer(async (req, res) => {
     return send(res, 404, { error: 'not found' })
   } catch (err) {
     console.error(`${req.method} ${url.pathname} failed:`, err)
+    const upstream = upstreamMessage(err)
+    if (upstream) return send(res, upstream.status, upstream.body, upstream.headers)
     return send(res, 500, { error: 'internal error' })
   }
 })

@@ -30,6 +30,13 @@ const DATA_BASE: string =
 
 /** Cloud Run API for search + admitting tickers we haven't cached. Optional in dev. */
 const API_BASE: string = import.meta.env.VITE_API_BASE_URL ?? ''
+const REMOTE_SEARCH_MIN_LENGTH = 3
+const REMOTE_SEARCH_COOLDOWN_MS = 15 * 60 * 1000
+
+export interface TickerSearchResult {
+  entries: CatalogEntry[]
+  warning: string | null
+}
 
 let catalog: CatalogEntry[] = FALLBACK
 let catalogLoaded: Promise<CatalogEntry[]> | null = null
@@ -86,20 +93,45 @@ export function searchCatalog(query: string, limit = 8): CatalogEntry[] {
  * Async search: local catalog first; when it comes up short and the API is
  * configured, extend with Tiingo's full ticker universe.
  */
-export async function searchTickers(query: string, limit = 8): Promise<CatalogEntry[]> {
+let remoteSearchBlockedUntil = 0
+const remoteSearchCache = new Map<string, Promise<TickerSearchResult>>()
+
+function providerLimitMessage(): string {
+  return 'New ticker lookup is temporarily rate-limited by the data provider. Cached tickers still work.'
+}
+
+export async function searchTickers(query: string, limit = 8): Promise<TickerSearchResult> {
   const local = searchCatalog(query, limit).map((e) => ({ ...e, cached: true }))
-  if (local.length >= 3 || !API_BASE || query.trim().length < 2) return local
-  try {
-    const res = await fetch(
-      `${API_BASE}/api/search?q=${encodeURIComponent(query)}&limit=${limit}`,
-    )
-    if (!res.ok) return local
-    const remote: CatalogEntry[] = await res.json()
-    const seen = new Set(local.map((e) => e.ticker))
-    return [...local, ...remote.filter((e) => !seen.has(e.ticker))].slice(0, limit)
-  } catch {
-    return local
+  const trimmed = query.trim()
+  if (local.length >= 3 || !API_BASE || trimmed.length < REMOTE_SEARCH_MIN_LENGTH) {
+    return { entries: local, warning: null }
   }
+  if (Date.now() < remoteSearchBlockedUntil) {
+    return { entries: local, warning: providerLimitMessage() }
+  }
+
+  const cacheKey = `${trimmed.toUpperCase()}:${limit}`
+  let pending = remoteSearchCache.get(cacheKey)
+  if (!pending) {
+    pending = (async () => {
+      const res = await fetch(
+        `${API_BASE}/api/search?q=${encodeURIComponent(trimmed)}&limit=${limit}`,
+      )
+      if (res.status === 429) {
+        remoteSearchBlockedUntil = Date.now() + REMOTE_SEARCH_COOLDOWN_MS
+        return { entries: local, warning: providerLimitMessage() }
+      }
+      if (!res.ok) return { entries: local, warning: null }
+      const remote: CatalogEntry[] = await res.json()
+      const seen = new Set(local.map((e) => e.ticker))
+      return {
+        entries: [...local, ...remote.filter((e) => !seen.has(e.ticker))].slice(0, limit),
+        warning: null,
+      }
+    })().catch(() => ({ entries: local, warning: null }))
+    remoteSearchCache.set(cacheKey, pending)
+  }
+  return pending
 }
 
 /** Make a just-admitted ticker resolvable by lookup() without a full reload. */
@@ -126,6 +158,13 @@ export function loadSeries(ticker: string): Promise<TickerSeries> {
         // stores to the bucket, returns the series).
         if (API_BASE) {
           const admitted = await fetch(`${API_BASE}/api/ticker/${key}`)
+          if (admitted.status === 429) throw new Error(providerLimitMessage())
+          if (!admitted.ok) {
+            const body = await admitted.json().catch(() => null)
+            throw new Error(
+              body?.error ?? `No data available for ${key} - check the ticker symbol.`,
+            )
+          }
           if (admitted.ok) return admitted.json()
         }
         throw new Error(`No data available for ${key} — check the ticker symbol.`)
