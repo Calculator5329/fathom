@@ -9,6 +9,7 @@ const Allocation = lazy(() => import('./pages/Allocation').then((m) => ({ defaul
 const Projections = lazy(() => import('./pages/Projections').then((m) => ({ default: m.Projections })))
 const Montecarlo = lazy(() => import('./pages/Montecarlo').then((m) => ({ default: m.Montecarlo })))
 const Stock = lazy(() => import('./pages/Stock').then((m) => ({ default: m.Stock })))
+const Links = lazy(() => import('./pages/Links').then((m) => ({ default: m.Links })))
 const Styleguide = lazy(() => import('./pages/Styleguide').then((m) => ({ default: m.Styleguide })))
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -39,6 +40,9 @@ function Shell({ children }: { children: React.ReactNode }) {
           <NavLink to="/stock" className={navLinkClass}>
             Research
           </NavLink>
+          <NavLink to="/links" className={navLinkClass}>
+            Links
+          </NavLink>
         </nav>
       </header>
       {children}
@@ -59,6 +63,7 @@ export default function App() {
           <Route path="/montecarlo" element={<Montecarlo />} />
           <Route path="/stock" element={<Stock />} />
           <Route path="/stock/:symbol" element={<Stock />} />
+          <Route path="/links" element={<Links />} />
             <Route path="/styleguide" element={<Styleguide />} />
           </Routes>
         </Suspense>
