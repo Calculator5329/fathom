@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { formatUsd } from '@/lib/format'
 import { projectionChartOption } from './chart'
 import {
@@ -51,12 +52,14 @@ function NumField({
   onChange,
   suffix,
   step = 1,
+  disabled = false,
 }: {
   label: string
   value: number
   onChange: (v: number) => void
   suffix?: string
   step?: number
+  disabled?: boolean
 }) {
   return (
     <div className="space-y-1.5">
@@ -67,6 +70,7 @@ function NumField({
           step={step}
           value={Number.isFinite(value) ? value : ''}
           onChange={(e) => onChange(Number(e.target.value))}
+          disabled={disabled}
           className="pr-8 font-mono tnum"
         />
         {suffix && (
@@ -90,11 +94,15 @@ export function ProjectionEditor({
   dirty,
 }: ProjectionEditorProps) {
   const [showNotes, setShowNotes] = useState(!!draft.notes)
+  const hasLivePrice = currentPrice != null && Number.isFinite(currentPrice) && currentPrice > 0
+  const usingManualPrice = draft.manualPrice || !hasLivePrice
+  const effectiveCurrentPrice = usingManualPrice ? draft.inputs.currentPrice : currentPrice
+  const shownCurrentPrice = usingManualPrice ? draft.inputs.currentPrice : effectiveCurrentPrice
 
-  // Model inputs use the LIVE current price from our data layer.
+  // Model inputs use live price unless this thesis explicitly overrides it.
   const inputs = useMemo(
-    () => ({ ...draft.inputs, currentPrice: currentPrice ?? draft.inputs.currentPrice }),
-    [draft.inputs, currentPrice],
+    () => ({ ...draft.inputs, currentPrice: effectiveCurrentPrice }),
+    [draft.inputs, effectiveCurrentPrice],
   )
   const chart = useMemo(
     () => projectionChartOption(inputs, draft.scenarios),
@@ -114,16 +122,33 @@ export function ProjectionEditor({
       },
     })
 
+  const setManualPrice = (checked: boolean) => {
+    if (!hasLivePrice) return
+    onChange({
+      ...draft,
+      manualPrice: checked,
+      inputs: {
+        ...draft.inputs,
+        currentPrice: checked ? draft.inputs.currentPrice : currentPrice,
+      },
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header: ticker + current price + save/delete */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-mono text-2xl font-semibold tracking-tight">{draft.ticker}</h2>
-          {currentPrice != null && (
+          {hasLivePrice ? (
             <p className="text-sm text-muted-foreground">
-              Current <span className="font-mono tnum text-foreground">{formatUsd(currentPrice)}</span>
+              {usingManualPrice ? 'Manual price' : 'Current'}{' '}
+              <span className="font-mono tnum text-foreground">{formatUsd(effectiveCurrentPrice)}</span>
               {priceAsOf && <span className="ml-1">as of {priceAsOf}</span>}
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Manual price <span className="font-mono tnum text-foreground">{formatUsd(effectiveCurrentPrice)}</span>
             </p>
           )}
         </div>
@@ -143,13 +168,39 @@ export function ProjectionEditor({
 
       {/* Base inputs */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-medium">
-            Company inputs
-            <span className="ml-2 font-normal text-muted-foreground">most recent annual figures</span>
-          </CardTitle>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle className="text-base font-medium">
+              Company inputs
+              <span className="ml-2 font-normal text-muted-foreground">most recent annual figures</span>
+            </CardTitle>
+            {!hasLivePrice && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                No live cached quote available.
+              </p>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-2 pt-0.5">
+            <Label htmlFor="manual-price" className="text-sm font-normal text-muted-foreground">
+              Manual price
+            </Label>
+            <Switch
+              id="manual-price"
+              size="sm"
+              checked={usingManualPrice}
+              disabled={!hasLivePrice}
+              onCheckedChange={setManualPrice}
+            />
+          </div>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <CardContent className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+          <NumField
+            label="Current price"
+            value={shownCurrentPrice}
+            step={0.01}
+            disabled={!usingManualPrice}
+            onChange={(v) => setInput('currentPrice', Math.max(0, v))}
+          />
           <NumField label="Revenue ($M)" value={draft.inputs.baseRevenue} step={100} onChange={(v) => setInput('baseRevenue', v)} />
           <NumField label="Net income ($M)" value={draft.inputs.netIncome} step={10} onChange={(v) => setInput('netIncome', v)} />
           <NumField label="Shares out (M)" value={draft.inputs.sharesOut} step={10} onChange={(v) => setInput('sharesOut', v)} />

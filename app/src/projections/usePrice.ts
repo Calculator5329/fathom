@@ -24,6 +24,7 @@ export function usePrice(ticker: string | null) {
       return
     }
     let cancelled = false
+    setInfo(null)
     setLoading(true)
     setError(null)
     loadSeries(ticker)
@@ -32,7 +33,11 @@ export function usePrice(ticker: string | null) {
         const last = series.records[series.records.length - 1]
         setInfo({ ticker: series.ticker, name: series.name, price: last.close, asOf: last.date })
       })
-      .catch((err) => !cancelled && setError(err.message))
+      .catch((err) => {
+        if (cancelled) return
+        setInfo(null)
+        setError(err.message)
+      })
       .finally(() => !cancelled && setLoading(false))
     return () => {
       cancelled = true

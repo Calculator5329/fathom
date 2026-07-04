@@ -1,52 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Fathom">
-  <defs>
-    <linearGradient id="bg" x1="12" x2="54" y1="8" y2="58" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#19211f"/>
-      <stop offset="1" stop-color="#080d0c"/>
-    </linearGradient>
-    <linearGradient id="mark" x1="17" x2="49" y1="46" y2="16" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#7ddfbe"/>
-      <stop offset=".58" stop-color="#41d7c7"/>
-      <stop offset="1" stop-color="#8aa9ff"/>
-    </linearGradient>
-    <linearGradient id="spark" x1="27" x2="48" y1="37" y2="22" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#d6f7a4"/>
-      <stop offset="1" stop-color="#f7c95d"/>
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
-  <path fill="none" stroke="#ffffff" stroke-opacity=".08" d="M14 17.5h36M14 31.5h36M14 45.5h36"/>
+  <rect width="64" height="64" rx="14" fill="#030706"/>
   <path
     fill="none"
-    stroke="url(#mark)"
+    stroke="#42f59b"
     stroke-linecap="round"
     stroke-linejoin="round"
-    stroke-width="5.5"
-    d="M17 18h28M17 31h22M17 44h31"
+    stroke-width="8"
+    d="M22 48V16h27M22 32h22"
   />
-  <path
-    fill="none"
-    stroke="#0b1110"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    stroke-width="3.5"
-    d="M17 18h28M17 31h22M17 44h31"
-  />
-  <path
-    fill="none"
-    stroke="url(#mark)"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    stroke-width="3"
-    d="M17 18h28M17 31h22M17 44h31"
-  />
-  <path
-    fill="none"
-    stroke="url(#spark)"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    stroke-width="4"
-    d="M28 40l7-8 6 4 7-13"
-  />
-  <circle cx="48" cy="23" r="3.5" fill="#f7c95d"/>
 </svg>

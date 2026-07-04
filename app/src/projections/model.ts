@@ -93,6 +93,8 @@ export interface Projection {
   inputs: ProjectionInputs
   scenarios: Record<ScenarioKey, ScenarioAssumptions>
   notes: string
+  /** When true, use inputs.currentPrice instead of the live cached close. */
+  manualPrice?: boolean
   updatedAt: number
   createdAt: number
 }
