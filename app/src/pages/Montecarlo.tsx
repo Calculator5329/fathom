@@ -130,9 +130,8 @@ export function Montecarlo() {
               }}
             >
               <SelectTrigger className="w-full text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <Plus className="size-4" /> Add asset class
-                </span>
+                <Plus className="size-4" />
+                <SelectValue placeholder="Add asset class" />
               </SelectTrigger>
               <SelectContent>
                 {available.map((a) => (
