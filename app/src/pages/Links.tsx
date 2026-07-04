@@ -22,6 +22,31 @@ interface Section {
 
 const SECTIONS: Section[] = [
   {
+    title: 'Calculators & tools',
+    links: [
+      {
+        name: 'Qualtrim insights',
+        desc: 'Dividend and fundamentals research',
+        url: 'https://www.qualtrim.com/app/insights',
+      },
+      {
+        name: 'Compound interest calculator',
+        desc: 'NerdWallet — growth of savings over time',
+        url: 'https://www.nerdwallet.com/banking/calculators/compound-interest-calculator',
+      },
+      {
+        name: 'Amortization calculator',
+        desc: 'Calculator.net — loan paydown schedules',
+        url: 'https://www.calculator.net/amortization-calculator.html',
+      },
+      {
+        name: 'Mortgage calculator',
+        desc: 'Bankrate — payments, interest, and schedules',
+        url: 'https://www.bankrate.com/mortgages/mortgage-calculator/',
+      },
+    ],
+  },
+  {
     title: 'Market charts',
     note: 'Live on Yardeni Research — updated regularly at the source.',
     links: [
@@ -58,31 +83,6 @@ const SECTIONS: Section[] = [
       },
     ],
   },
-  {
-    title: 'Calculators & tools',
-    links: [
-      {
-        name: 'Compound interest calculator',
-        desc: 'NerdWallet — growth of savings over time',
-        url: 'https://www.nerdwallet.com/banking/calculators/compound-interest-calculator',
-      },
-      {
-        name: 'Amortization calculator',
-        desc: 'Calculator.net — loan paydown schedules',
-        url: 'https://www.calculator.net/amortization-calculator.html',
-      },
-      {
-        name: 'Mortgage calculator',
-        desc: 'Bankrate — payments, interest, and schedules',
-        url: 'https://www.bankrate.com/mortgages/mortgage-calculator/',
-      },
-      {
-        name: 'Qualtrim insights',
-        desc: 'Dividend and fundamentals research',
-        url: 'https://www.qualtrim.com/app/insights',
-      },
-    ],
-  },
 ]
 
 const domainOf = (url: string) => {
@@ -96,11 +96,7 @@ const domainOf = (url: string) => {
 export function Links() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-3xl font-semibold tracking-tight">Links</h1>
-      <p className="mt-2 mb-10 text-muted-foreground">
-        Charts and tools worth keeping close. They open on their source sites,
-        where they stay live.
-      </p>
+      <h1 className="mb-10 text-3xl font-semibold tracking-tight">Links</h1>
 
       {SECTIONS.map((section) => (
         <section key={section.title} className="mb-10">
