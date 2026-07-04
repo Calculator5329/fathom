@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowUpRight, LineChart, Search } from 'lucide-react'
+import { ArrowUpRight, ChevronsUpDown, LineChart, Search } from 'lucide-react'
 import { EChart } from '@/components/charts/EChart'
 import { TickerPicker } from '@/components/backtest/TickerPicker'
 import { Button } from '@/components/ui/button'
@@ -9,16 +9,62 @@ import { Switch } from '@/components/ui/switch'
 import { loadSeries, lookup } from '@/data/catalog'
 import type { TickerSeries } from '@/engine'
 import { formatUsd, formatUsdCompact } from '@/lib/format'
-import { marginsOption, priceHistoryOption, revenueIncomeOption } from '@/fundamentals/charts'
-import { loadFundamentals, type Fundamentals } from '@/fundamentals/load'
+import { splitAdjustedCloses } from '@/lib/prices'
+import {
+  VALUATION_LABELS,
+  marginsOption,
+  priceHistoryOption,
+  revenueIncomeOption,
+  valuationOption,
+  type ValuationMetric,
+} from '@/fundamentals/charts'
+import { loadFundamentals, type FiscalYear, type Fundamentals } from '@/fundamentals/load'
 
 /**
  * Tool 5 — Stock research page. The hub that ties the suite together:
- * long-run price + market-era context, fundamentals from SEC filings, and
- * one-click handoffs to backtest and projection. Public, no login.
- * Story: "Show me everything about this company and let me act on it."
+ * split-adjusted long-run price + market-era context, fundamentals from SEC
+ * filings, valuation over time, and one-click handoffs to backtest/projection.
+ * Public, no login. Story: "Show me everything about this company and act on it."
  */
 const pctStr = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(1)}%`
+
+type Range = 'all' | '10y' | '5y'
+const RANGE_OPTS: Array<{ v: Range; label: string }> = [
+  { v: 'all', label: 'All' },
+  { v: '10y', label: '10y' },
+  { v: '5y', label: '5y' },
+]
+
+function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: Array<{ v: T; label: string }>
+  value: T
+  onChange: (v: T) => void
+}) {
+  return (
+    <div className="flex gap-1">
+      {options.map((o) => (
+        <Button
+          key={o.v}
+          variant={o.v === value ? 'secondary' : 'ghost'}
+          size="xs"
+          className="font-mono"
+          onClick={() => onChange(o.v)}
+        >
+          {o.label}
+        </Button>
+      ))}
+    </div>
+  )
+}
+
+function sliceRange(years: FiscalYear[], range: Range): FiscalYear[] {
+  if (range === 'all') return years
+  return years.slice(-(range === '10y' ? 10 : 5))
+}
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -44,6 +90,9 @@ export function Stock() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [logScale, setLogScale] = useState(false)
+  const [switching, setSwitching] = useState(false)
+  const [range, setRange] = useState<Range>('all')
+  const [valMetric, setValMetric] = useState<ValuationMetric>('pe')
 
   useEffect(() => {
     if (!ticker) return
@@ -52,6 +101,7 @@ export function Stock() {
     setError(null)
     setSeries(null)
     setFundamentals(null)
+    setSwitching(false)
     loadSeries(ticker)
       .then((s) => !cancelled && setSeries(s))
       .catch((e) => !cancelled && setError(e.message))
@@ -62,34 +112,42 @@ export function Stock() {
     }
   }, [ticker])
 
-  const priceChart = useMemo(
-    () => (series ? priceHistoryOption(series.records, logScale) : null),
-    [series, logScale],
+  // Split-adjusted closes: continuous price history + accurate from-high.
+  const adjCloses = useMemo(
+    () => (series ? splitAdjustedCloses(series.records) : []),
+    [series],
   )
 
-  // Derived headline stats.
+  const priceChart = useMemo(
+    () => (series ? priceHistoryOption(series.records, adjCloses, logScale) : null),
+    [series, adjCloses, logScale],
+  )
+
   const stats = useMemo(() => {
     if (!series || series.records.length < 2) return null
     const recs = series.records
     const last = recs[recs.length - 1]
-    const yearAgo = recs[Math.max(0, recs.length - 253)]
-    const ath = recs.reduce((m, r) => Math.max(m, r.close), 0)
+    const lastAdj = adjCloses[adjCloses.length - 1]
+    const ath = adjCloses.reduce((m, v) => Math.max(m, v), 0)
+    const curYear = last.date.slice(0, 4)
+    let baseIdx = recs.findIndex((r) => r.date.slice(0, 4) === curYear) - 1
+    if (baseIdx < 0) baseIdx = 0
     const fy = fundamentals?.fiscalYears.at(-1)
     return {
       price: last.close,
       asOf: last.date,
-      oneYear: last.close / yearAgo.close - 1,
-      fromHigh: last.close / ath - 1,
+      ytd: lastAdj / adjCloses[baseIdx] - 1,
+      fromHigh: lastAdj / ath - 1,
       pe: fy?.epsDiluted ? last.close / fy.epsDiluted : null,
       marketCap: fy?.sharesDiluted ? last.close * fy.sharesDiluted : null,
       netMargin: fy?.netMargin ?? null,
       revenue: fy?.revenue ?? null,
-      fcf: fy?.fcf ?? null,
     }
-  }, [series, fundamentals])
+  }, [series, adjCloses, fundamentals])
 
   const meta = lookup(ticker)
-  const yearsWithData = fundamentals?.fiscalYears.filter((y) => y.revenue != null) ?? []
+  const allYears = fundamentals?.fiscalYears.filter((y) => y.revenue != null) ?? []
+  const years = sliceRange(allYears, range)
 
   if (!ticker) {
     return (
@@ -105,19 +163,37 @@ export function Stock() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
-      {/* Header */}
+      {/* Header — click the ticker to switch */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="flex items-center gap-3">
-            <h1 className="font-mono text-3xl font-semibold tracking-tight">{ticker}</h1>
-            <div className="w-56">
+          {switching ? (
+            <div
+              className="w-64"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setSwitching(false)
+              }}
+            >
               <TickerPicker
-                placeholder="Search another ticker"
+                autoFocus
+                placeholder="Search ticker…"
                 exclude={[ticker]}
-                onPick={(e) => navigate(`/stock/${e.ticker}`)}
+                onPick={(e) => {
+                  setSwitching(false)
+                  navigate(`/stock/${e.ticker}`)
+                }}
               />
             </div>
-          </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSwitching(true)}
+              className="group flex items-center gap-1.5 font-mono text-3xl font-semibold tracking-tight transition-colors hover:text-primary"
+              title="Click to switch ticker"
+            >
+              {ticker}
+              <ChevronsUpDown className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            </button>
+          )}
           <p className="mt-1 truncate text-muted-foreground">{fundamentals?.name ?? meta?.name ?? ''}</p>
         </div>
         <div className="flex gap-2">
@@ -135,24 +211,30 @@ export function Stock() {
 
       {stats && (
         <>
-          {/* Stat grid */}
           <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <Stat label="Price" value={formatUsd(stats.price)} sub={`as of ${stats.asOf}`} />
-            <Stat label="1-year" value={pctStr(stats.oneYear)} sub={`${pctStr(stats.fromHigh)} from high`} />
-            {stats.pe != null && <Stat label="P/E (last FY)" value={stats.pe.toFixed(1)} />}
-            {stats.marketCap != null && <Stat label="Market cap" value={formatUsdCompact(stats.marketCap)} />}
-            {stats.pe == null && stats.netMargin != null && (
-              <Stat label="Net margin" value={`${(stats.netMargin * 100).toFixed(1)}%`} />
+            <Stat label="Year to date" value={pctStr(stats.ytd)} sub={`${pctStr(stats.fromHigh)} from high`} />
+            {stats.pe != null ? (
+              <Stat label="P/E" value={`${stats.pe.toFixed(1)}×`} sub="trailing, last FY" />
+            ) : (
+              stats.netMargin != null && (
+                <Stat label="Net margin" value={`${(stats.netMargin * 100).toFixed(1)}%`} sub="last FY" />
+              )
             )}
-            {stats.pe == null && stats.revenue != null && (
-              <Stat label="Revenue" value={formatUsdCompact(stats.revenue)} sub="last FY" />
+            {stats.marketCap != null ? (
+              <Stat label="Market cap" value={formatUsdCompact(stats.marketCap)} />
+            ) : (
+              stats.revenue != null && <Stat label="Revenue" value={formatUsdCompact(stats.revenue)} sub="last FY" />
             )}
           </div>
 
-          {/* Price history */}
+          {/* Split-adjusted price history */}
           <Card className="mt-6">
             <CardHeader className="flex-row items-center justify-between">
-              <CardTitle className="text-base font-medium">Price history</CardTitle>
+              <CardTitle className="text-base font-medium">
+                Price history
+                <span className="ml-2 font-normal text-muted-foreground">split-adjusted</span>
+              </CardTitle>
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Switch checked={logScale} onCheckedChange={setLogScale} />
                 Log scale
@@ -166,27 +248,57 @@ export function Stock() {
       )}
 
       {/* Fundamentals */}
-      {yearsWithData.length > 0 ? (
+      {allYears.length > 0 ? (
         <>
           <Card className="mt-6">
-            <CardHeader>
+            <CardHeader className="flex-row items-center justify-between">
               <CardTitle className="text-base font-medium">
-                Revenue & net income
+                Revenue &amp; net income
                 <span className="ml-2 font-normal text-muted-foreground">SEC filings, by fiscal year</span>
               </CardTitle>
+              <Segmented options={RANGE_OPTS} value={range} onChange={setRange} />
             </CardHeader>
             <CardContent>
-              <EChart option={revenueIncomeOption(yearsWithData)} className="h-72 w-full" />
+              <EChart option={revenueIncomeOption(years)} className="h-72 w-full" />
             </CardContent>
           </Card>
+
           <Card className="mt-6">
-            <CardHeader>
+            <CardHeader className="flex-row items-center justify-between">
               <CardTitle className="text-base font-medium">Margins</CardTitle>
+              <Segmented options={RANGE_OPTS} value={range} onChange={setRange} />
             </CardHeader>
             <CardContent>
-              <EChart option={marginsOption(yearsWithData)} className="h-64 w-full" />
+              <EChart option={marginsOption(years)} className="h-64 w-full" />
             </CardContent>
           </Card>
+
+          {series && (
+            <Card className="mt-6">
+              <CardHeader className="flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle className="text-base font-medium">
+                  Valuation over time
+                  <span className="ml-2 font-normal text-muted-foreground">vs its own history</span>
+                </CardTitle>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Segmented
+                    options={[
+                      { v: 'pe' as ValuationMetric, label: 'P/E' },
+                      { v: 'ps' as ValuationMetric, label: 'P/S' },
+                      { v: 'pfcf' as ValuationMetric, label: 'P/FCF' },
+                    ]}
+                    value={valMetric}
+                    onChange={setValMetric}
+                  />
+                  <Segmented options={RANGE_OPTS} value={range} onChange={setRange} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-2 text-sm text-muted-foreground">{VALUATION_LABELS[valMetric]}</p>
+                <EChart option={valuationOption(series.records, years, valMetric)} className="h-64 w-full" />
+              </CardContent>
+            </Card>
+          )}
         </>
       ) : (
         series && (

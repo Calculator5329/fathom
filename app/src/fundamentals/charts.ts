@@ -14,8 +14,16 @@ const ERAS: Array<[string, string, string]> = [
 
 const fmtPct = (v: number) => `${(v * 100).toFixed(0)}%`
 
-/** Long-run actual price (close) with shaded market-crash eras. */
-export function priceHistoryOption(records: DailyRecord[], logScale: boolean): EChartsCoreOption {
+/**
+ * Long-run split-adjusted price with shaded market-crash eras. Takes the
+ * pre-computed split-adjusted closes so the line is continuous (no split
+ * cliffs) and ends at the actual current price.
+ */
+export function priceHistoryOption(
+  records: DailyRecord[],
+  adjustedCloses: number[],
+  logScale: boolean,
+): EChartsCoreOption {
   const base = baseOption()
   const first = records[0]?.date
   const last = records[records.length - 1]?.date
@@ -41,7 +49,7 @@ export function priceHistoryOption(records: DailyRecord[], logScale: boolean): E
         type: 'line',
         showSymbol: false,
         sampling: 'lttb',
-        data: records.map((r) => [r.date, Math.round(r.close * 100) / 100]),
+        data: records.map((r, i) => [r.date, Math.round(adjustedCloses[i] * 100) / 100]),
         lineStyle: { width: 1.75, color: cssVar('--primary') },
         itemStyle: { color: cssVar('--primary') },
         emphasis: { disabled: true },
@@ -93,6 +101,83 @@ export function revenueIncomeOption(years: FiscalYear[]): EChartsCoreOption {
         data: years.map((y) => y.netIncome),
         itemStyle: { color: cssVar('--primary'), borderRadius: [3, 3, 0, 0] },
         emphasis: { disabled: true },
+      },
+    ],
+  }
+}
+
+export type ValuationMetric = 'pe' | 'ps' | 'pfcf'
+export const VALUATION_LABELS: Record<ValuationMetric, string> = {
+  pe: 'Price / Earnings',
+  ps: 'Price / Sales',
+  pfcf: 'Price / Free cash flow',
+}
+
+/**
+ * A valuation ratio over time. Uses each fiscal year's contemporaneous
+ * year-end price and as-reported figures, so the ratio is split-neutral
+ * (both numerator and denominator are in that era's share basis).
+ */
+export function valuationOption(
+  records: DailyRecord[],
+  years: FiscalYear[],
+  metric: ValuationMetric,
+): EChartsCoreOption {
+  const base = baseOption()
+  // Last close of each calendar year, as the fiscal-year-end price proxy.
+  const yearEndClose = new Map<number, number>()
+  for (const r of records) yearEndClose.set(Number(r.date.slice(0, 4)), r.close)
+
+  const ratio = (fy: FiscalYear): number | null => {
+    const price = yearEndClose.get(fy.year)
+    if (price == null) return null
+    if (metric === 'pe') return fy.epsDiluted ? price / fy.epsDiluted : null
+    if (!fy.sharesDiluted) return null
+    const mktCap = price * fy.sharesDiluted
+    if (metric === 'ps') return fy.revenue ? mktCap / fy.revenue : null
+    return fy.fcf && fy.fcf > 0 ? mktCap / fy.fcf : null
+  }
+
+  const data = years.map((fy) => {
+    const v = ratio(fy)
+    return [String(fy.year), v == null ? null : Math.round(v * 10) / 10]
+  })
+  const vals = data.map((d) => d[1]).filter((v): v is number => v != null)
+  const avg = vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0
+
+  return {
+    ...base,
+    xAxis: { ...(base.xAxis as object), type: 'category', data: years.map((y) => String(y.year)) },
+    yAxis: {
+      ...(base.yAxis as object),
+      type: 'value',
+      scale: true,
+      axisLabel: { ...(base.yAxis as { axisLabel: object }).axisLabel, formatter: '{value}×' },
+    },
+    tooltip: {
+      ...(base.tooltip as object),
+      valueFormatter: (v: unknown) => (v == null ? '—' : `${(v as number).toFixed(1)}×`),
+    },
+    legend: { show: false },
+    series: [
+      {
+        name: VALUATION_LABELS[metric],
+        type: 'line',
+        showSymbol: false,
+        connectNulls: true,
+        data,
+        lineStyle: { width: 2, color: cssVar('--primary') },
+        itemStyle: { color: cssVar('--primary') },
+        areaStyle: { color: cssVar('--primary'), opacity: 0.08 },
+        emphasis: { disabled: true },
+        // Average line for context ("cheap vs its own history").
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          lineStyle: { color: cssVar('--muted-foreground'), type: 'dashed', width: 1 },
+          label: { color: cssVar('--muted-foreground'), fontSize: 12, formatter: `avg ${avg.toFixed(1)}×` },
+          data: [{ yAxis: Math.round(avg * 10) / 10 }],
+        },
       },
     ],
   }
