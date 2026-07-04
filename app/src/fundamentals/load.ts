@@ -6,9 +6,32 @@ export interface FiscalYear {
   operatingIncome: number | null
   epsDiluted: number | null
   sharesDiluted: number | null
+  operatingCashFlow: number | null
   fcf: number | null
   dividendsPaid: number | null
   totalDebt: number | null
+  totalAssets: number | null
+  totalLiabilities: number | null
+  stockholdersEquity: number | null
+  cashAndEquivalents: number | null
+  currentAssets: number | null
+  currentLiabilities: number | null
+  longTermDebt: number | null
+  inventory: number | null
+  grossMargin: number | null
+  operatingMargin: number | null
+  netMargin: number | null
+}
+
+export interface Quarter {
+  fiscalYear: number
+  fiscalQuarter: number
+  periodEnd: string // yyyy-mm-dd
+  revenue: number | null
+  netIncome: number | null
+  grossProfit: number | null
+  operatingIncome: number | null
+  epsDiluted: number | null
   grossMargin: number | null
   operatingMargin: number | null
   netMargin: number | null
@@ -21,6 +44,7 @@ export interface Fundamentals {
   source: string
   fetchedAt: string
   fiscalYears: FiscalYear[]
+  quarters: Quarter[]
 }
 
 const DATA_BASE: string =

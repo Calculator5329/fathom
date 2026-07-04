@@ -12,10 +12,13 @@ import { formatUsd, formatUsdCompact } from '@/lib/format'
 import { splitAdjustedCloses } from '@/lib/prices'
 import {
   VALUATION_LABELS,
+  balanceSheetOption,
   marginsOption,
   priceHistoryOption,
+  quarterRows,
   revenueIncomeOption,
   valuationOption,
+  yearRows,
   type ValuationMetric,
 } from '@/fundamentals/charts'
 import { loadFundamentals, type FiscalYear, type Fundamentals } from '@/fundamentals/load'
@@ -31,8 +34,18 @@ const pctStr = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixe
 type Range = 'all' | '10y' | '5y'
 const RANGE_OPTS: Array<{ v: Range; label: string }> = [
   { v: 'all', label: 'All' },
-  { v: '10y', label: '10y' },
-  { v: '5y', label: '5y' },
+  { v: '10y', label: '10Y' },
+  { v: '5y', label: '5Y' },
+]
+
+// Income/margins add quarterly views (2Y·Q = last 8 quarters, 1Y·Q = last 4).
+type Period = 'all' | '10y' | '5y' | '2yq' | '1yq'
+const PERIOD_OPTS: Array<{ v: Period; label: string }> = [
+  { v: 'all', label: 'All' },
+  { v: '10y', label: '10Y' },
+  { v: '5y', label: '5Y' },
+  { v: '2yq', label: '2Y·Q' },
+  { v: '1yq', label: '1Y·Q' },
 ]
 
 function Segmented<T extends string>({
@@ -66,6 +79,15 @@ function sliceRange(years: FiscalYear[], range: Range): FiscalYear[] {
   return years.slice(-(range === '10y' ? 10 : 5))
 }
 
+/** Income/margins rows for the chosen period: annual or (2yq/1yq) quarterly. */
+function periodRows(period: Period, years: FiscalYear[], f: Fundamentals | null) {
+  if (period === '2yq' || period === '1yq') {
+    return quarterRows((f?.quarters ?? []).slice(-(period === '2yq' ? 8 : 4)))
+  }
+  const n = period === '10y' ? 10 : period === '5y' ? 5 : years.length
+  return yearRows(years.slice(-n))
+}
+
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <Card className="gap-1">
@@ -91,8 +113,11 @@ export function Stock() {
   const [loading, setLoading] = useState(true)
   const [logScale, setLogScale] = useState(false)
   const [switching, setSwitching] = useState(false)
-  const [range, setRange] = useState<Range>('all')
+  const [incomePeriod, setIncomePeriod] = useState<Period>('all')
+  const [valRange, setValRange] = useState<Range>('all')
   const [valMetric, setValMetric] = useState<ValuationMetric>('pe')
+  const [bsRange, setBsRange] = useState<Range>('all')
+  const [bsAdvanced, setBsAdvanced] = useState(false)
 
   useEffect(() => {
     if (!ticker) return
@@ -147,7 +172,8 @@ export function Stock() {
 
   const meta = lookup(ticker)
   const allYears = fundamentals?.fiscalYears.filter((y) => y.revenue != null) ?? []
-  const years = sliceRange(allYears, range)
+  const incomeRows = periodRows(incomePeriod, allYears, fundamentals)
+  const hasBalanceSheet = allYears.some((y) => y.totalAssets != null)
 
   if (!ticker) {
     return (
@@ -251,27 +277,59 @@ export function Stock() {
       {allYears.length > 0 ? (
         <>
           <Card className="mt-6">
-            <CardHeader className="flex-row items-center justify-between">
+            <CardHeader className="flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle className="text-base font-medium">
                 Revenue &amp; net income
-                <span className="ml-2 font-normal text-muted-foreground">SEC filings, by fiscal year</span>
+                <span className="ml-2 font-normal text-muted-foreground">
+                  {incomePeriod.endsWith('q') ? 'by quarter' : 'by fiscal year'}
+                </span>
               </CardTitle>
-              <Segmented options={RANGE_OPTS} value={range} onChange={setRange} />
+              <Segmented options={PERIOD_OPTS} value={incomePeriod} onChange={setIncomePeriod} />
             </CardHeader>
             <CardContent>
-              <EChart option={revenueIncomeOption(years)} className="h-72 w-full" />
+              <EChart option={revenueIncomeOption(incomeRows)} className="h-72 w-full" />
             </CardContent>
           </Card>
 
           <Card className="mt-6">
-            <CardHeader className="flex-row items-center justify-between">
-              <CardTitle className="text-base font-medium">Margins</CardTitle>
-              <Segmented options={RANGE_OPTS} value={range} onChange={setRange} />
+            <CardHeader className="flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <CardTitle className="text-base font-medium">
+                Margins
+                <span className="ml-2 font-normal text-muted-foreground">
+                  {incomePeriod.endsWith('q') ? 'by quarter' : 'by fiscal year'}
+                </span>
+              </CardTitle>
+              <Segmented options={PERIOD_OPTS} value={incomePeriod} onChange={setIncomePeriod} />
             </CardHeader>
             <CardContent>
-              <EChart option={marginsOption(years)} className="h-64 w-full" />
+              <EChart option={marginsOption(incomeRows)} className="h-64 w-full" />
             </CardContent>
           </Card>
+
+          {hasBalanceSheet && (
+            <Card className="mt-6">
+              <CardHeader className="flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle className="text-base font-medium">Balance sheet</CardTitle>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Segmented
+                    options={[
+                      { v: 'simple', label: 'Simple' },
+                      { v: 'advanced', label: 'Advanced' },
+                    ]}
+                    value={bsAdvanced ? 'advanced' : 'simple'}
+                    onChange={(v) => setBsAdvanced(v === 'advanced')}
+                  />
+                  <Segmented options={RANGE_OPTS} value={bsRange} onChange={setBsRange} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <EChart
+                  option={balanceSheetOption(sliceRange(allYears, bsRange), bsAdvanced)}
+                  className="h-72 w-full"
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {series && (
             <Card className="mt-6">
@@ -286,16 +344,21 @@ export function Stock() {
                       { v: 'pe' as ValuationMetric, label: 'P/E' },
                       { v: 'ps' as ValuationMetric, label: 'P/S' },
                       { v: 'pfcf' as ValuationMetric, label: 'P/FCF' },
+                      { v: 'pocf' as ValuationMetric, label: 'P/OCF' },
+                      { v: 'pb' as ValuationMetric, label: 'P/B' },
                     ]}
                     value={valMetric}
                     onChange={setValMetric}
                   />
-                  <Segmented options={RANGE_OPTS} value={range} onChange={setRange} />
+                  <Segmented options={RANGE_OPTS} value={valRange} onChange={setValRange} />
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="mb-2 text-sm text-muted-foreground">{VALUATION_LABELS[valMetric]}</p>
-                <EChart option={valuationOption(series.records, years, valMetric)} className="h-64 w-full" />
+                <EChart
+                  option={valuationOption(series.records, sliceRange(allYears, valRange), valMetric)}
+                  className="h-64 w-full"
+                />
               </CardContent>
             </Card>
           )}

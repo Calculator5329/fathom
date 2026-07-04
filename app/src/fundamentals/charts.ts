@@ -2,7 +2,9 @@ import type { EChartsCoreOption } from 'echarts'
 import type { DailyRecord } from '@/engine'
 import { baseOption, chartPalette, cssVar } from '@/components/charts/EChart'
 import { formatUsd, formatUsdCompact } from '@/lib/format'
-import type { FiscalYear } from './load'
+import type { FiscalYear, Quarter } from './load'
+
+const quarterLabel = (q: Quarter) => `Q${q.fiscalQuarter} '${String(q.fiscalYear).slice(2)}`
 
 // Major drawdown eras to shade on the long-run price chart.
 const ERAS: Array<[string, string, string]> = [
@@ -64,11 +66,43 @@ export function priceHistoryOption(
   }
 }
 
-/** Revenue and net income by fiscal year (grouped bars). */
-export function revenueIncomeOption(years: FiscalYear[]): EChartsCoreOption {
+/** A period (fiscal year or quarter) normalized for the income/margin charts. */
+export interface PeriodRow {
+  label: string
+  revenue: number | null
+  netIncome: number | null
+  grossMargin: number | null
+  operatingMargin: number | null
+  netMargin: number | null
+}
+
+export function yearRows(years: FiscalYear[]): PeriodRow[] {
+  return years.map((y) => ({
+    label: String(y.year),
+    revenue: y.revenue,
+    netIncome: y.netIncome,
+    grossMargin: y.grossMargin,
+    operatingMargin: y.operatingMargin,
+    netMargin: y.netMargin,
+  }))
+}
+
+export function quarterRows(quarters: Quarter[]): PeriodRow[] {
+  return quarters.map((q) => ({
+    label: quarterLabel(q),
+    revenue: q.revenue,
+    netIncome: q.netIncome,
+    grossMargin: q.grossMargin,
+    operatingMargin: q.operatingMargin,
+    netMargin: q.netMargin,
+  }))
+}
+
+/** Revenue and net income by period (grouped bars). */
+export function revenueIncomeOption(rows: PeriodRow[]): EChartsCoreOption {
   const base = baseOption()
   const palette = chartPalette()
-  const labels = years.map((y) => String(y.year))
+  const labels = rows.map((r) => r.label)
   return {
     ...base,
     color: palette,
@@ -91,14 +125,14 @@ export function revenueIncomeOption(years: FiscalYear[]): EChartsCoreOption {
       {
         name: 'Revenue',
         type: 'bar',
-        data: years.map((y) => y.revenue),
+        data: rows.map((r) => r.revenue),
         itemStyle: { color: palette[1], borderRadius: [3, 3, 0, 0] },
         emphasis: { disabled: true },
       },
       {
         name: 'Net income',
         type: 'bar',
-        data: years.map((y) => y.netIncome),
+        data: rows.map((r) => r.netIncome),
         itemStyle: { color: cssVar('--primary'), borderRadius: [3, 3, 0, 0] },
         emphasis: { disabled: true },
       },
@@ -106,11 +140,13 @@ export function revenueIncomeOption(years: FiscalYear[]): EChartsCoreOption {
   }
 }
 
-export type ValuationMetric = 'pe' | 'ps' | 'pfcf'
+export type ValuationMetric = 'pe' | 'ps' | 'pfcf' | 'pocf' | 'pb'
 export const VALUATION_LABELS: Record<ValuationMetric, string> = {
   pe: 'Price / Earnings',
   ps: 'Price / Sales',
   pfcf: 'Price / Free cash flow',
+  pocf: 'Price / Operating cash flow',
+  pb: 'Price / Book',
 }
 
 /**
@@ -135,7 +171,9 @@ export function valuationOption(
     if (!fy.sharesDiluted) return null
     const mktCap = price * fy.sharesDiluted
     if (metric === 'ps') return fy.revenue ? mktCap / fy.revenue : null
-    return fy.fcf && fy.fcf > 0 ? mktCap / fy.fcf : null
+    if (metric === 'pfcf') return fy.fcf && fy.fcf > 0 ? mktCap / fy.fcf : null
+    if (metric === 'pocf') return fy.operatingCashFlow && fy.operatingCashFlow > 0 ? mktCap / fy.operatingCashFlow : null
+    return fy.stockholdersEquity && fy.stockholdersEquity > 0 ? mktCap / fy.stockholdersEquity : null
   }
 
   const data = years.map((fy) => {
@@ -183,16 +221,16 @@ export function valuationOption(
   }
 }
 
-/** Gross / operating / net margin trends. */
-export function marginsOption(years: FiscalYear[]): EChartsCoreOption {
+/** Gross / operating / net margin trends by period. */
+export function marginsOption(rows: PeriodRow[]): EChartsCoreOption {
   const base = baseOption()
   const palette = chartPalette()
-  const labels = years.map((y) => String(y.year))
-  const line = (name: string, key: keyof FiscalYear, color: string) => ({
+  const labels = rows.map((r) => r.label)
+  const line = (name: string, key: 'grossMargin' | 'operatingMargin' | 'netMargin', color: string) => ({
     name,
     type: 'line' as const,
     showSymbol: false,
-    data: years.map((y) => (y[key] == null ? null : Math.round((y[key] as number) * 1000) / 1000)),
+    data: rows.map((r) => (r[key] == null ? null : Math.round((r[key] as number) * 1000) / 1000)),
     lineStyle: { width: 2, color },
     itemStyle: { color },
     emphasis: { disabled: true },
@@ -216,5 +254,56 @@ export function marginsOption(years: FiscalYear[]): EChartsCoreOption {
       line('Operating', 'operatingMargin', palette[1]),
       line('Net', 'netMargin', cssVar('--primary')),
     ],
+  }
+}
+
+/**
+ * Balance sheet over time. Simple mode: assets / liabilities / equity.
+ * Advanced adds cash, current assets/liabilities, long-term debt, inventory.
+ */
+export function balanceSheetOption(years: FiscalYear[], advanced: boolean): EChartsCoreOption {
+  const base = baseOption()
+  const palette = chartPalette()
+  const labels = years.map((y) => String(y.year))
+
+  const bar = (name: string, key: keyof FiscalYear, color: string, stack?: string) => ({
+    name,
+    type: 'bar' as const,
+    stack,
+    data: years.map((y) => y[key] as number | null),
+    itemStyle: { color, borderRadius: stack ? [0, 0, 0, 0] : ([3, 3, 0, 0] as number[]) },
+    emphasis: { disabled: true },
+    barMaxWidth: 40,
+  })
+
+  const simple = [
+    bar('Total assets', 'totalAssets', palette[1]),
+    bar('Total liabilities', 'totalLiabilities', cssVar('--loss')),
+    bar('Equity', 'stockholdersEquity', cssVar('--primary')),
+  ]
+  const advancedSeries = [
+    bar('Cash', 'cashAndEquivalents', palette[1], 'assets'),
+    bar('Other current assets', 'currentAssets', palette[2], 'assets'),
+    bar('Current liabilities', 'currentLiabilities', palette[4], 'liabilities'),
+    bar('Long-term debt', 'longTermDebt', cssVar('--loss'), 'liabilities'),
+    bar('Equity', 'stockholdersEquity', cssVar('--primary')),
+  ]
+
+  return {
+    ...base,
+    color: palette,
+    xAxis: { ...(base.xAxis as object), type: 'category', data: labels },
+    yAxis: {
+      ...(base.yAxis as object),
+      type: 'value',
+      axisLabel: { ...(base.yAxis as { axisLabel: object }).axisLabel, formatter: (v: number) => formatUsdCompact(v) },
+    },
+    tooltip: {
+      ...(base.tooltip as object),
+      axisPointer: { type: 'shadow' },
+      valueFormatter: (v: unknown) => (v == null ? '—' : formatUsdCompact(v as number)),
+    },
+    legend: { ...(base.legend as object) },
+    series: advanced ? advancedSeries : simple,
   }
 }
