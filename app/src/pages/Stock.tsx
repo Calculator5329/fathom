@@ -226,7 +226,7 @@ export function Stock() {
           <Button variant="outline" size="sm" onClick={() => navigate(`/backtest?p1=${ticker}:100`)}>
             Backtest <ArrowUpRight />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/projections')}>
+          <Button variant="outline" size="sm" onClick={() => navigate(`/projections?ticker=${ticker}`)}>
             <LineChart /> Project
           </Button>
         </div>

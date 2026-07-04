@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { LineChart, LogIn, Plus } from 'lucide-react'
 import { TickerPicker } from '@/components/backtest/TickerPicker'
 import { Button } from '@/components/ui/button'
@@ -65,22 +66,33 @@ export function Projections() {
 
 function ProjectionsInner() {
   const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedTicker = searchParams.get('ticker')?.toUpperCase() || null
   const [saved, setSaved] = useState<Projection[]>([])
+  const [savedLoaded, setSavedLoaded] = useState(false)
   const [draft, setDraft] = useState<Projection | null>(null)
   const [baseline, setBaseline] = useState<string>('')
   const [saving, setSaving] = useState(false)
   const [pickingNew, setPickingNew] = useState(false)
   const [signInError, setSignInError] = useState<string | null>(null)
 
-  const { info } = usePrice(draft?.ticker ?? null)
+  const { info } = usePrice(draft?.ticker ?? requestedTicker)
 
   // Subscribe to the signed-in user's saved projections.
   useEffect(() => {
     if (!user) {
       setSaved([])
+      setSavedLoaded(false)
       return
     }
-    return subscribeProjections(user.uid, setSaved, (err) => console.error(err))
+    return subscribeProjections(
+      user.uid,
+      (list) => {
+        setSaved(list)
+        setSavedLoaded(true)
+      },
+      (err) => console.error(err),
+    )
   }, [user])
 
   const dirty = draft ? JSON.stringify(draft) !== baseline : false
@@ -90,6 +102,15 @@ function ProjectionsInner() {
     setBaseline(JSON.stringify(p))
     setPickingNew(false)
   }
+
+  // Deep-link from Research ("Project" on a ticker): open the existing
+  // projection or create a fresh draft, once saved projections have loaded.
+  useEffect(() => {
+    if (!user || !requestedTicker || !savedLoaded || draft) return
+    const existing = saved.find((p) => p.ticker === requestedTicker)
+    openDraft(existing ?? freshProjection(requestedTicker, info?.price ?? 0))
+    setSearchParams({}, { replace: true }) // consume the param
+  }, [user, requestedTicker, savedLoaded]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSave = async () => {
     if (!user || !draft) return

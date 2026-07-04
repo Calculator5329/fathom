@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Plus, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
+import { AssetClassPicker } from '@/components/AssetClassPicker'
 import { EChart } from '@/components/charts/EChart'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -68,9 +69,25 @@ export function Montecarlo() {
 
   const sum = weightSum(config.allocation)
   const balanced = Math.abs(sum - 100) < 0.5
-  const available = ASSET_CLASSES.filter((a) => !config.allocation.some((x) => x.assetId === a.id))
 
   const setAlloc = (allocation: MonteCarloConfig['allocation']) => update({ ...config, allocation })
+
+  const addAsset = (assetId: string) => {
+    const remaining = Math.round((100 - sum) * 100) / 100
+    if (remaining > 0.005) {
+      setAlloc([...config.allocation, { assetId, weight: remaining }])
+    } else {
+      // Portfolio already full — equalize so the new asset is usable.
+      const n = config.allocation.length + 1
+      const even = Math.floor(10000 / n) / 100
+      setAlloc(
+        [...config.allocation, { assetId, weight: 0 }].map((a, i) => ({
+          ...a,
+          weight: i === 0 ? Math.round((100 - even * (n - 1)) * 100) / 100 : even,
+        })),
+      )
+    }
+  }
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl flex-col px-6 lg:flex-row">
@@ -109,38 +126,8 @@ export function Montecarlo() {
               </Button>
             </div>
           ))}
-          {available.length > 0 && (
-            <Select
-              value=""
-              onValueChange={(id) => {
-                const remaining = Math.round((100 - sum) * 100) / 100
-                if (remaining > 0.005) {
-                  setAlloc([...config.allocation, { assetId: id, weight: remaining }])
-                } else {
-                  // Portfolio already full — equalize so the new asset is usable.
-                  const n = config.allocation.length + 1
-                  const even = Math.floor(10000 / n) / 100
-                  setAlloc(
-                    [...config.allocation, { assetId: id, weight: 0 }].map((a, i) => ({
-                      ...a,
-                      weight: i === 0 ? Math.round((100 - even * (n - 1)) * 100) / 100 : even,
-                    })),
-                  )
-                }
-              }}
-            >
-              <SelectTrigger className="w-full text-muted-foreground">
-                <Plus className="size-4" />
-                <SelectValue placeholder="Add asset class" />
-              </SelectTrigger>
-              <SelectContent>
-                {available.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>
-                    {a.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {config.allocation.length < ASSET_CLASSES.length && (
+            <AssetClassPicker exclude={config.allocation.map((a) => a.assetId)} onPick={addAsset} />
           )}
           {!balanced && (
             <p className="text-sm text-loss">

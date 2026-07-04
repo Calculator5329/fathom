@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, Plus, Scale, Trash2, X } from 'lucide-react'
+import { AssetClassPicker } from '@/components/AssetClassPicker'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -133,9 +134,9 @@ function PortfolioEditor({
       })}
 
       {available.length > 0 && (
-        <Select
-          value=""
-          onValueChange={(id) => {
+        <AssetClassPicker
+          exclude={portfolio.allocations.map((a) => a.ticker)}
+          onPick={(id) => {
             const remaining = Math.round((100 - sum) * 100) / 100
             let allocations
             if (portfolio.allocations.length === 0) {
@@ -147,23 +148,7 @@ function PortfolioEditor({
             }
             onChange({ ...portfolio, allocations })
           }}
-        >
-          <SelectTrigger className="w-full text-muted-foreground">
-            <SelectValue placeholder="Add asset class&hellip;" />
-          </SelectTrigger>
-          <SelectContent>
-            {available.map((a) => (
-              <SelectItem key={a.id} value={a.id}>
-                <span className="flex w-full items-center justify-between gap-4">
-                  {a.label}
-                  <span className="font-mono text-sm text-muted-foreground">
-                    {a.startDate.slice(0, 4)}&ndash;
-                  </span>
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        />
       )}
 
       {portfolio.allocations.length > 0 && !balanced && (
