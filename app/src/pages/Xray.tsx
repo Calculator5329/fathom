@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Segmented } from '@/components/ui/segmented'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { loadSeries } from '@/data/catalog'
 import type { TickerSeries } from '@/engine'
@@ -88,6 +89,7 @@ export function Xray() {
   const [insights, setInsights] = useState<PortfolioInsights | null>(null)
   const [master, setMaster] = useState<FathomPortfolioFile | null>(null)
   const [notes, setNotes] = useState<string[]>([])
+  const [range, setRange] = useState<'ytd' | '1y' | '2y' | '3y' | 'all'>('all')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const runPositions = async (posCsv = positionsText) => {
@@ -137,7 +139,7 @@ export function Xray() {
     setNotes([])
     setPosResult(null)
     try {
-      const { trades, errors, skipped, dividends, cashFlows } = parseTrades(tradesCsv)
+      const { trades, errors, dividends, cashFlows } = parseTrades(tradesCsv)
       if (trades.length === 0) {
         setNotes(errors.length ? errors : ['No trades recognized in that CSV.'])
         setHistResult(null)
@@ -161,17 +163,14 @@ export function Xray() {
 
       let allTrades = trades
       let synthetic: typeof trades = []
-      const mergeNotes: string[] = []
+      // Only genuine problems surface as notes — the merge/capture/skip
+      // counts are housekeeping and live in the collapsed "Inputs" summary.
+      const warnNotes: string[] = []
       if (sharePositions.length > 0) {
         const opening = inferOpeningPositions(sharePositions, trades, series)
         synthetic = opening.synthetic
-        if (synthetic.length > 0) {
-          allTrades = [...synthetic, ...trades]
-          mergeNotes.push(
-            `Merged with your positions file — opening holdings inferred for ${synthetic.length} tickers as of ${synthetic[0].date}.`,
-          )
-        }
-        mergeNotes.push(...opening.warnings)
+        if (synthetic.length > 0) allTrades = [...synthetic, ...trades]
+        warnNotes.push(...opening.warnings)
       }
 
       const result = reconstructHistory(allTrades, series)
@@ -197,14 +196,8 @@ export function Xray() {
         benchmark: spy ? { ticker: 'SPY', series: spy } : null,
       })
       setInsights(ins)
-      const allNotes = [
-        ...mergeNotes,
-        ...errors,
-        ...(dividends.length > 0 ? [`${dividends.length} dividend payments captured`] : []),
-        ...(cashFlows.length > 0 ? [`${cashFlows.length} deposits/withdrawals captured`] : []),
-        ...(skipped > 0 ? [`${skipped} other non-trade rows skipped`] : []),
-        ...result.warnings,
-      ]
+      // errors = unparseable rows; warnings = clamps / missing price data.
+      const allNotes = [...warnNotes, ...errors, ...result.warnings]
       setNotes(allNotes)
       setMaster(
         buildMasterFile({
@@ -270,11 +263,31 @@ export function Xray() {
     setNotes((prev) => [...noteLines, ...prev])
   }
 
+  // First index within the selected range window (dates are yyyy-mm-dd).
+  const rangeStartIdx = useMemo(() => {
+    if (!histResult || range === 'all') return 0
+    const dates = histResult.dates
+    const last = dates[dates.length - 1]
+    let cutoff: string
+    if (range === 'ytd') {
+      cutoff = `${last.slice(0, 4)}-01-01`
+    } else {
+      const yrs = range === '1y' ? 1 : range === '2y' ? 2 : 3
+      cutoff = `${Number(last.slice(0, 4)) - yrs}${last.slice(4)}`
+    }
+    const i = dates.findIndex((d) => d >= cutoff)
+    return i < 0 ? 0 : i
+  }, [histResult, range])
+
   const valueChart = useMemo(() => {
     if (!histResult) return null
     const base = baseOption()
+    const dates = histResult.dates.slice(rangeStartIdx)
+    const vals = histResult.values.slice(rangeStartIdx)
+    const bench = insights?.benchmark?.values.slice(rangeStartIdx)
     return {
       ...base,
+      grid: { left: 8, right: 16, top: 16, bottom: 36, containLabel: true },
       xAxis: { ...(base.xAxis as object), type: 'time' as const, boundaryGap: false },
       yAxis: {
         ...(base.yAxis as object),
@@ -286,31 +299,30 @@ export function Xray() {
         },
       },
       tooltip: { ...(base.tooltip as object), valueFormatter: (v: unknown) => formatUsd(v as number) },
-      legend: { show: !!insights?.benchmark },
+      legend: insights?.benchmark
+        ? { ...(base.legend as object), show: true, top: undefined, bottom: 0, left: 'center' }
+        : { show: false },
       series: [
         {
           name: 'Portfolio value',
           type: 'line' as const,
           showSymbol: false,
           sampling: 'lttb' as const,
-          data: histResult.values.map((v, i) => [histResult.dates[i], Math.round(v * 100) / 100]),
+          data: vals.map((v, i) => [dates[i], Math.round(v * 100) / 100]),
           lineStyle: { width: 1.75, color: cssVar('--primary') },
           itemStyle: { color: cssVar('--primary') },
           areaStyle: { color: cssVar('--primary'), opacity: 0.06 },
           emphasis: { disabled: true },
         },
         // Same money, same days, all SPY — the honest benchmark.
-        ...(insights?.benchmark
+        ...(bench
           ? [
               {
-                name: `${insights.benchmark.ticker} (same flows)`,
+                name: `${insights!.benchmark!.ticker} (same flows)`,
                 type: 'line' as const,
                 showSymbol: false,
                 sampling: 'lttb' as const,
-                data: insights.benchmark.values.map((v, i) => [
-                  histResult.dates[i],
-                  Math.round(v * 100) / 100,
-                ]),
+                data: bench.map((v, i) => [dates[i], Math.round(v * 100) / 100]),
                 lineStyle: { width: 1.25, color: cssVar('--chart-4') },
                 itemStyle: { color: cssVar('--chart-4') },
                 emphasis: { disabled: true },
@@ -319,7 +331,7 @@ export function Xray() {
           : []),
       ],
     }
-  }, [histResult, insights])
+  }, [histResult, insights, rangeStartIdx])
 
   // Horizontal bars, biggest movers on top; gains emerald, losses red.
   const attributionChart = useMemo(() => {
@@ -357,6 +369,43 @@ export function Xray() {
           })),
           emphasis: { disabled: true },
           barCategoryGap: '25%',
+        },
+      ],
+    }
+  }, [insights])
+
+  // Dividend income by ticker — horizontal bars, biggest payers on top.
+  const dividendChart = useMemo(() => {
+    if (!insights || insights.dividends.byTicker.length === 0) return null
+    const rows = insights.dividends.byTicker.filter((d) => d.amount > 0).slice(0, 12).reverse()
+    if (rows.length === 0) return null
+    const base = baseOption()
+    return {
+      ...base,
+      grid: { left: 64, right: 24, top: 8, bottom: 24 },
+      xAxis: {
+        ...(base.xAxis as object),
+        type: 'value' as const,
+        axisLabel: {
+          ...(base.xAxis as { axisLabel: object }).axisLabel,
+          formatter: (v: number) => formatUsdCompact(v),
+        },
+      },
+      yAxis: {
+        ...(base.yAxis as object),
+        type: 'category' as const,
+        data: rows.map((r) => r.ticker),
+        axisLabel: { ...(base.yAxis as { axisLabel: object }).axisLabel, fontFamily: 'monospace' },
+      },
+      tooltip: { ...(base.tooltip as object), valueFormatter: (v: unknown) => formatUsd(v as number) },
+      legend: { show: false },
+      series: [
+        {
+          type: 'bar' as const,
+          data: rows.map((r) => Math.round(r.amount * 100) / 100),
+          itemStyle: { color: cssVar('--chart-2'), borderRadius: 2 },
+          emphasis: { disabled: true },
+          barCategoryGap: '30%',
         },
       ],
     }
@@ -495,14 +544,27 @@ export function Xray() {
           </div>
           <Card>
             <CardHeader>
-              <CardTitle className="text-base font-medium">
-                Portfolio value — reconstructed
-                {insights?.benchmark && (
-                  <span className="ml-2 font-normal text-muted-foreground">
-                    vs {insights.benchmark.ticker} with your exact deposits
-                  </span>
-                )}
-              </CardTitle>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <CardTitle className="text-base font-medium">
+                  Portfolio value — reconstructed
+                  {insights?.benchmark && (
+                    <span className="ml-2 font-normal text-muted-foreground">
+                      vs {insights.benchmark.ticker} with your exact deposits
+                    </span>
+                  )}
+                </CardTitle>
+                <Segmented
+                  value={range}
+                  onChange={setRange}
+                  options={[
+                    { v: 'ytd', label: 'YTD' },
+                    { v: '1y', label: '1Y' },
+                    { v: '2y', label: '2Y' },
+                    { v: '3y', label: '3Y' },
+                    { v: 'all', label: 'All' },
+                  ]}
+                />
+              </div>
             </CardHeader>
             <CardContent>{valueChart && <EChart option={valueChart} exportName="fathom-xray-history" className="h-72 w-full" />}</CardContent>
           </Card>
@@ -561,6 +623,63 @@ export function Xray() {
                   </CardHeader>
                   <CardContent>
                     <EChart option={attributionChart} exportName="fathom-xray-attribution" className="h-72 w-full" />
+                  </CardContent>
+                </Card>
+              )}
+
+              {dividendChart && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base font-medium">
+                      Dividend income
+                      <span className="ml-2 font-normal text-muted-foreground">
+                        by ticker this window · {formatUsd(insights.dividends.total)} total
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <EChart option={dividendChart} exportName="fathom-xray-dividends" className="h-64 w-full" />
+                  </CardContent>
+                </Card>
+              )}
+
+              {insights.bought.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base font-medium">
+                      Return on your buys
+                      <span className="ml-2 font-normal text-muted-foreground">
+                        what you paid vs what those shares are worth today
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Ticker</TableHead>
+                          <TableHead className="text-right">You paid</TableHead>
+                          <TableHead className="text-right">Worth today</TableHead>
+                          <TableHead className="text-right">Return</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {insights.bought.map((b) => {
+                          const gain = b.worthNow - b.cost
+                          const pct = b.cost > 0 ? gain / b.cost : 0
+                          return (
+                            <TableRow key={b.ticker}>
+                              <TableCell className="font-mono">{b.ticker}</TableCell>
+                              <TableCell className="text-right font-mono tnum">{formatUsd(b.cost)}</TableCell>
+                              <TableCell className="text-right font-mono tnum">{formatUsd(b.worthNow)}</TableCell>
+                              <TableCell className={`text-right font-mono tnum ${gain >= 0 ? 'text-gain' : 'text-loss'}`}>
+                                {gain >= 0 ? '+' : '−'}{formatUsd(Math.abs(gain))} ({pctStr(pct)})
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
                   </CardContent>
                 </Card>
               )}

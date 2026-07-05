@@ -27,6 +27,12 @@ export interface PortfolioInsights {
   attribution: Array<{ ticker: string; pnl: number; endValue: number }>
   /** For every ticker sold: proceeds then vs what those shares are worth now. */
   sold: Array<{ ticker: string; proceeds: number; worthNow: number }>
+  /**
+   * For every ticker bought: what you paid vs what those exact shares are
+   * worth today — the return your buying decisions actually earned. Excludes
+   * synthetic opening lots (those aren't your buys).
+   */
+  bought: Array<{ ticker: string; cost: number; worthNow: number }>
   behavior: { trades: number; buys: number; sells: number; perMonth: number }
   /** Same dates + same external flows replayed into a benchmark ticker. */
   benchmark: { ticker: string; values: number[]; twr: number } | null
@@ -157,6 +163,24 @@ export function computeInsights(opts: {
     .map(([ticker, v]) => ({ ticker, ...v }))
     .sort((a, b) => b.worthNow - b.proceeds - (a.worthNow - a.proceeds))
 
+  // Return on your buys: what you paid vs what those exact shares are worth
+  // today (split-adjusted). Only the user's real buys — not synthetic opening
+  // lots, which realTrades already excludes.
+  const boughtBy = new Map<string, { cost: number; worthNow: number }>()
+  for (const t of realTrades) {
+    if (t.side !== 'buy') continue
+    const s = series.get(t.ticker)
+    if (!s) continue
+    const px = t.price ?? closeOn(s, t.date)
+    const cur = boughtBy.get(t.ticker) ?? { cost: 0, worthNow: 0 }
+    cur.cost += t.shares * px
+    cur.worthNow += t.shares * splitAfter(s, t.date) * closeOn(s, end)
+    boughtBy.set(t.ticker, cur)
+  }
+  const bought = [...boughtBy.entries()]
+    .map(([ticker, v]) => ({ ticker, ...v }))
+    .sort((a, b) => b.worthNow - b.cost - (a.worthNow - a.cost))
+
   const buys = realTrades.filter((t) => t.side === 'buy').length
   const bench = opts.benchmark ? replayBenchmark(result, opts.benchmark.series) : null
 
@@ -176,6 +200,7 @@ export function computeInsights(opts: {
     },
     attribution,
     sold,
+    bought,
     behavior: {
       trades: realTrades.length,
       buys,

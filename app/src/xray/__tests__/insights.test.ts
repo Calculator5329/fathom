@@ -75,6 +75,11 @@ describe('computeInsights', () => {
     expect(insights.sold).toEqual([{ ticker: 'AAA', proceeds: 800, worthNow: 800 }])
   })
 
+  it('return on buys: cost vs worth today for shares bought', () => {
+    // Bought 10 @ 100 on day 1; AAA now 200 → cost 1000, worth 2000.
+    expect(insights.bought).toEqual([{ ticker: 'AAA', cost: 1000, worthNow: 2000 }])
+  })
+
   it('dividend totals and run-rate', () => {
     expect(insights.dividends.total).toBe(12)
     expect(insights.dividends.byTicker[0]).toEqual({ ticker: 'AAA', amount: 12 })

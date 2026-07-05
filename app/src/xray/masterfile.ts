@@ -43,6 +43,7 @@ export interface FathomPortfolioFile {
   deposits: PortfolioInsights['deposits']
   attribution: PortfolioInsights['attribution']
   soldCounterfactual: PortfolioInsights['sold']
+  buyReturns: PortfolioInsights['bought']
   behavior: PortfolioInsights['behavior']
   valueSeries: { dates: string[]; values: number[] }
   notes: string[]
@@ -106,6 +107,11 @@ export function buildMasterFile(opts: {
       ...s,
       proceeds: r2(s.proceeds),
       worthNow: r2(s.worthNow),
+    })),
+    buyReturns: insights.bought.map((b) => ({
+      ...b,
+      cost: r2(b.cost),
+      worthNow: r2(b.worthNow),
     })),
     behavior: insights.behavior,
     valueSeries: { dates: result.dates, values: result.values.map(r2) },
