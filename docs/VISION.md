@@ -167,6 +167,10 @@ APPROVED, in-flight this pass:
    cash series instead of rf=0).
 5. Architecture: unify the three URL codecs + shared round-trip tests; useUrlSyncedState hook;
    GCS generation-precondition on catalog writes; refresh-report.json observability.
+   STATUS 2026-07-04: catalog preconditions + refresh observability SHIPPED. Codec unification
+   deliberately DEFERRED to roadmap — pure internal refactor of the subsystem that has burned
+   us twice (invariant 3), zero user-visible benefit; do it as a standalone change with
+   round-trip tests written FIRST against the current encodings.
 6. Perf (implementer judged worthwhile): gzip bucket JSONs (content-encoding), ECharts
    tree-shaking, catalog preload at boot.
 7. UI batch: Segmented → ui/, sonner toasts, skeleton loading states, landing mini-chart,
