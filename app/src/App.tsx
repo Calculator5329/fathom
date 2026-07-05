@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { PageSkeleton } from '@/components/LoadingSkeletons'
+import { CommandPalette } from '@/components/CommandPalette'
 import { ShellAuthProvider, useShellAuth } from '@/auth/shellAuth'
 import { Landing } from './pages/Landing'
 
@@ -98,6 +99,7 @@ function AccountNav() {
 
   return (
     <>
+      <CommandPalette accountTools={status === 'in'} />
       {status === 'in' && (
         <>
           <NavLink to="/projections" className={navLinkClass}>

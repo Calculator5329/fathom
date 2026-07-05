@@ -57,7 +57,7 @@ export function Projections() {
 }
 
 function ProjectionsInner() {
-  const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth()
+  const { user, loading: authLoading, signInWithGoogle } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedTicker = searchParams.get('ticker')?.toUpperCase() || null
   const [saved, setSaved] = useState<Projection[]>([])
@@ -255,14 +255,6 @@ function ProjectionsInner() {
           })}
         </ul>
 
-        <div className="mt-8 border-t pt-4">
-          <div className="truncate text-sm text-muted-foreground" title={user.email ?? ''}>
-            {user.email}
-          </div>
-          <Button variant="ghost" size="sm" className="mt-1 -ml-2 text-muted-foreground" onClick={() => signOut()}>
-            Sign out
-          </Button>
-        </div>
       </aside>
 
       <main className="min-w-0 flex-1 py-6 lg:py-8 lg:pl-8">
