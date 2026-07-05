@@ -1,4 +1,5 @@
 import type { BacktestConfig, PortfolioSpec, RebalanceFrequency } from '@/engine'
+import { decodeWeightList, encodeWeightList, enumParam, numParam } from './urlCodec'
 
 /**
  * The entire backtest setup lives in the URL query string so any backtest is
@@ -27,10 +28,7 @@ const REBALANCE_VALUES: RebalanceFrequency[] = ['none', 'annual', 'quarterly', '
 export function encodeSetup(setup: BacktestSetup): URLSearchParams {
   const params = new URLSearchParams()
   setup.portfolios.forEach((p, i) => {
-    const spec = p.allocations
-      .filter((a) => a.ticker)
-      .map((a) => `${a.ticker}:${round2(a.weight)}`)
-      .join(',')
+    const spec = encodeWeightList(p.allocations.map((a) => ({ key: a.ticker, weight: a.weight })))
     if (spec) params.set(`p${i + 1}`, spec)
   })
   const c = setup.config
@@ -49,28 +47,24 @@ export function decodeSetup(params: URLSearchParams): BacktestSetup {
   for (let i = 1; i <= 3; i++) {
     const raw = params.get(`p${i}`)
     if (!raw) continue
-    const allocations = raw
-      .split(',')
-      .map((part) => {
-        const [ticker, w] = part.split(':')
-        return { ticker: (ticker ?? '').toUpperCase(), weight: Number(w) }
-      })
-      // Keep zero weights: a just-added ticker awaiting its weight must
-      // survive the URL round-trip that happens on every edit.
-      .filter((a) => a.ticker && Number.isFinite(a.weight) && a.weight >= 0)
+    // Zero weights are kept: a just-added ticker awaiting its weight must
+    // survive the URL round-trip that happens on every edit.
+    const allocations = decodeWeightList(raw, { uppercase: true }).map((e) => ({
+      ticker: e.key,
+      weight: e.weight,
+    }))
     if (allocations.length) {
       portfolios.push({ name: `Portfolio ${portfolios.length + 1}`, allocations })
     }
   }
 
-  const rebalRaw = params.get('rebal') as RebalanceFrequency | null
   const config: BacktestConfig = {
     ...DEFAULT_CONFIG,
     start: params.get('start') ?? undefined,
     end: params.get('end') ?? undefined,
-    initialAmount: positiveOr(params.get('amt'), DEFAULT_CONFIG.initialAmount),
-    monthlyContribution: numberOr(params.get('contrib'), 0),
-    rebalance: rebalRaw && REBALANCE_VALUES.includes(rebalRaw) ? rebalRaw : DEFAULT_CONFIG.rebalance,
+    initialAmount: numParam(params.get('amt'), DEFAULT_CONFIG.initialAmount, { positive: true }),
+    monthlyContribution: numParam(params.get('contrib'), 0),
+    rebalance: enumParam(params.get('rebal'), REBALANCE_VALUES, DEFAULT_CONFIG.rebalance),
     reinvestDividends: params.get('div') !== 'off',
   }
 
@@ -79,18 +73,4 @@ export function decodeSetup(params: URLSearchParams): BacktestSetup {
     config,
     benchmark: params.get('bench')?.toUpperCase() || null,
   }
-}
-
-function numberOr(raw: string | null, fallback: number): number {
-  const n = Number(raw)
-  return raw !== null && Number.isFinite(n) ? n : fallback
-}
-
-function positiveOr(raw: string | null, fallback: number): number {
-  const n = numberOr(raw, fallback)
-  return n > 0 ? n : fallback
-}
-
-function round2(n: number): number {
-  return Math.round(n * 100) / 100
 }

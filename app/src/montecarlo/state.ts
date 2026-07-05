@@ -1,4 +1,5 @@
 import { ASSET_CLASSES } from '@/data/assetClasses'
+import { decodeWeightList, encodeWeightList, enumParam, numParam } from '@/lib/urlCodec'
 import type { AllocationWeight } from './data'
 import type { WithdrawalStrategy } from './simulate'
 
@@ -39,19 +40,11 @@ export const DEFAULT_MC: MonteCarloConfig = {
   annualContribution: 0,
 }
 
-const num = (raw: string | null, fallback: number, min: number, max: number) => {
-  const n = Number(raw)
-  return raw !== null && Number.isFinite(n) && n >= min && n <= max ? n : fallback
-}
-
 export function encodeMonteCarlo(c: MonteCarloConfig): URLSearchParams {
   const p = new URLSearchParams()
-  // Keep zero-weight entries so a just-added asset (or one being edited to 0)
-  // survives the URL round-trip that drives this form's state.
-  const alloc = c.allocation
-    .filter((a) => a.weight >= 0)
-    .map((a) => `${a.assetId}:${Math.round(a.weight * 100) / 100}`)
-    .join(',')
+  // Zero-weight entries are kept so a just-added asset (or one being edited
+  // to 0) survives the URL round-trip that drives this form's state.
+  const alloc = encodeWeightList(c.allocation.map((a) => ({ key: a.assetId, weight: a.weight })))
   if (alloc) p.set('a', alloc)
   if (c.initialBalance !== DEFAULT_MC.initialBalance) p.set('bal', String(c.initialBalance))
   if (c.horizonYears !== DEFAULT_MC.horizonYears) p.set('yrs', String(c.horizonYears))
@@ -68,27 +61,22 @@ export function encodeMonteCarlo(c: MonteCarloConfig): URLSearchParams {
 export function decodeMonteCarlo(p: URLSearchParams): MonteCarloConfig {
   const rawA = p.get('a')
   const allocation = rawA
-    ? rawA
-        .split(',')
-        .map((part) => {
-          const [id, w] = part.split(':')
-          return { assetId: id ?? '', weight: Number(w) }
-        })
-        .filter((a) => VALID_IDS.has(a.assetId) && Number.isFinite(a.weight) && a.weight >= 0)
+    ? decodeWeightList(rawA, { isValidKey: (k) => VALID_IDS.has(k) }).map((e) => ({
+        assetId: e.key,
+        weight: e.weight,
+      }))
     : DEFAULT_MC.allocation
 
-  const strat = p.get('strat') as WithdrawalStrategy | null
-  const mode = p.get('mode')
   return {
     allocation: allocation.length ? allocation : DEFAULT_MC.allocation,
-    initialBalance: num(p.get('bal'), DEFAULT_MC.initialBalance, 1, 1e12),
-    horizonYears: num(p.get('yrs'), DEFAULT_MC.horizonYears, 1, 60),
-    withdrawalRate: num(p.get('wr'), DEFAULT_MC.withdrawalRate, 0, 100),
-    strategy: strat && STRATEGIES.includes(strat) ? strat : DEFAULT_MC.strategy,
-    feeRate: num(p.get('fee'), DEFAULT_MC.feeRate, 0, 10),
-    mode: mode === 'bootstrap' ? 'bootstrap' : 'historical',
-    trials: num(p.get('trials'), DEFAULT_MC.trials, 1000, 50_000),
-    accumulationYears: num(p.get('acc'), 0, 0, 50),
-    annualContribution: num(p.get('save'), 0, 0, 1e9),
+    initialBalance: numParam(p.get('bal'), DEFAULT_MC.initialBalance, { min: 1, max: 1e12 }),
+    horizonYears: numParam(p.get('yrs'), DEFAULT_MC.horizonYears, { min: 1, max: 60 }),
+    withdrawalRate: numParam(p.get('wr'), DEFAULT_MC.withdrawalRate, { min: 0, max: 100 }),
+    strategy: enumParam(p.get('strat'), STRATEGIES, DEFAULT_MC.strategy),
+    feeRate: numParam(p.get('fee'), DEFAULT_MC.feeRate, { min: 0, max: 10 }),
+    mode: p.get('mode') === 'bootstrap' ? 'bootstrap' : 'historical',
+    trials: numParam(p.get('trials'), DEFAULT_MC.trials, { min: 1000, max: 50_000 }),
+    accumulationYears: numParam(p.get('acc'), 0, { min: 0, max: 50 }),
+    annualContribution: numParam(p.get('save'), 0, { min: 0, max: 1e9 }),
   }
 }
