@@ -1,4 +1,10 @@
 export { runBacktest } from './backtest'
+export {
+  twoAssetFrontier,
+  minVarianceIndex,
+  maxSharpeIndex,
+  type FrontierPoint,
+} from './frontier'
 export { alignSeries, isNewMonth, isPeriodStart } from './align'
 export {
   annualIncome,

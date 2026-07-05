@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { ResultsSkeleton } from '@/components/LoadingSkeletons'
 import { AllocationBuilder } from '@/components/allocation/AllocationBuilder'
+import { FrontierCard } from '@/components/allocation/FrontierCard'
 import { ResultsPanel } from '@/components/backtest/ResultsPanel'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -109,8 +110,9 @@ export function Allocation() {
         {output.error ? (
           <p className="text-sm text-loss">{output.error}</p>
         ) : (
-          <div className={`transition-opacity duration-200 ${output.loading ? 'opacity-60' : ''}`}>
+          <div className={`space-y-6 transition-opacity duration-200 ${output.loading ? 'opacity-60' : ''}`}>
             <ResultsPanel runs={output.runs} showIncome={false} />
+            <FrontierCard setup={setup} start={output.effectiveStart} end={output.effectiveEnd} />
           </div>
         )}
       </main>
