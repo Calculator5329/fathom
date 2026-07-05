@@ -19,15 +19,26 @@ function stdev(xs: number[]): number {
 
 /** Compound the TWR index into calendar-month returns. */
 export function monthlyReturns(dates: string[], twrIndex: number[]): number[] {
-  const out: number[] = []
+  return monthlyReturnsLabeled(dates, twrIndex).map((m) => m.ret)
+}
+
+/** Calendar-month returns with their 'yyyy-mm' labels (for rf matching, regression). */
+export function monthlyReturnsLabeled(
+  dates: string[],
+  twrIndex: number[],
+): Array<{ month: string; ret: number }> {
+  const out: Array<{ month: string; ret: number }> = []
   let monthStartIdx = 0
   for (let t = 1; t < dates.length; t++) {
     if (dates[t].slice(0, 7) !== dates[t - 1].slice(0, 7)) {
-      out.push(twrIndex[t - 1] / twrIndex[monthStartIdx] - 1)
+      out.push({ month: dates[t - 1].slice(0, 7), ret: twrIndex[t - 1] / twrIndex[monthStartIdx] - 1 })
       monthStartIdx = t - 1
     }
   }
-  out.push(twrIndex[dates.length - 1] / twrIndex[monthStartIdx] - 1)
+  out.push({
+    month: dates[dates.length - 1].slice(0, 7),
+    ret: twrIndex[dates.length - 1] / twrIndex[monthStartIdx] - 1,
+  })
   return out
 }
 
@@ -183,14 +194,17 @@ export function computeMetrics(
   values: number[],
   flows: number[],
   riskFreeRate: number,
+  rfByMonth?: Record<string, number>,
 ): MetricSet {
   const totalReturn = twrIndex[twrIndex.length - 1] / twrIndex[0] - 1
   const horizon = yearsBetween(dates[0], dates[dates.length - 1])
   const cagr = horizon > 0 ? (1 + totalReturn) ** (1 / horizon) - 1 : 0
 
-  const monthly = monthlyReturns(dates, twrIndex)
-  const rfMonthly = (1 + riskFreeRate) ** (1 / 12) - 1
-  const excess = monthly.map((r) => r - rfMonthly)
+  const labeled = monthlyReturnsLabeled(dates, twrIndex)
+  const monthly = labeled.map((m) => m.ret)
+  const rfConst = (1 + riskFreeRate) ** (1 / 12) - 1
+  // Prefer the contemporaneous monthly T-bill return when supplied.
+  const excess = labeled.map((m) => m.ret - (rfByMonth?.[m.month] ?? rfConst))
   const monthlyStdev = stdev(monthly)
   const volatility = monthlyStdev * Math.sqrt(12)
   const sharpe = monthlyStdev > 0 ? (mean(excess) / monthlyStdev) * Math.sqrt(12) : 0

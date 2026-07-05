@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadManySeries } from '@/data/catalog'
+import { loadFactors, type FactorData } from '@/data/factors'
 import { runBacktest, type TickerSeries } from '@/engine'
 import type { BacktestSetup } from '@/lib/urlState'
 import type { NamedResult } from '@/components/charts/options'
@@ -38,6 +39,16 @@ export function useBacktests(setup: BacktestSetup): BacktestOutput {
   const [series, setSeries] = useState<Map<string, TickerSeries> | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [factors, setFactors] = useState<FactorData | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    // Best-effort: Sharpe/Sortino fall back to rf=0 if this never resolves.
+    loadFactors().then((f) => !cancelled && setFactors(f))
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (tickers.length === 0) {
@@ -90,7 +101,7 @@ export function useBacktests(setup: BacktestSetup): BacktestOutput {
     const limitingTicker = start === inception && !(userStart && userStart > inception) ? inceptionTicker : null
 
     try {
-      const config = { ...setup.config, start, end }
+      const config = { ...setup.config, start, end, rfByMonth: factors?.rfByMonth }
       const runs: NamedResult[] = validPortfolios.map((p, i) => ({
         label: p.name || `Portfolio ${i + 1}`,
         result: runBacktest(p.allocations.map((a) => series.get(a.ticker)!), p, config),
@@ -118,7 +129,7 @@ export function useBacktests(setup: BacktestSetup): BacktestOutput {
     } catch (err) {
       return { ...empty, error: err instanceof Error ? err.message : String(err) }
     }
-  }, [series, loading, error, JSON.stringify(setup)]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [series, loading, error, factors, JSON.stringify(setup)]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Stale-while-revalidate: while data loads or a portfolio is mid-edit
   // (weights not summing yet), keep showing the last good results instead of

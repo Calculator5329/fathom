@@ -42,6 +42,12 @@ export interface BacktestConfig {
   reinvestDividends: boolean
   /** Constant annual risk-free rate for Sharpe/Sortino, e.g. 0.03. Defaults to 0. */
   riskFreeRate?: number
+  /**
+   * Historical MONTHLY risk-free returns keyed by 'yyyy-mm' (e.g. from the
+   * Fama-French RF series). When provided, Sharpe/Sortino use the actual
+   * contemporaneous T-bill return each month instead of the constant.
+   */
+  rfByMonth?: Record<string, number>
 }
 
 /** Semantics of the simulation, documented once:

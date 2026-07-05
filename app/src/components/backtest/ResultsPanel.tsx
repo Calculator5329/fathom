@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Check, Download, Link as LinkIcon } from 'lucide-react'
 import { EChart } from '@/components/charts/EChart'
 import {
@@ -21,7 +21,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { monthlyReturns, rollingReturns } from '@/engine'
+import { monthlyReturns, monthlyReturnsLabeled, rollingReturns } from '@/engine'
+import { loadFactors, type FactorData } from '@/data/factors'
+import { fitFactors } from '@/factors/regression'
 import { buildResultsCsv, downloadCsv } from '@/lib/export'
 import { formatUsd, formatUsdCompact } from '@/lib/format'
 
@@ -175,6 +177,24 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
         : [],
     [runs, activeWindow],
   )
+
+  // Factor lens (Fama-French 3-factor) — best-effort data load.
+  const [factorData, setFactorData] = useState<FactorData | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    loadFactors().then((f) => !cancelled && setFactorData(f))
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  const factorFits = useMemo(() => {
+    if (!factorData) return null
+    const fits = runs.map((r) => ({
+      label: r.label,
+      fit: fitFactors(monthlyReturnsLabeled(r.result.dates, r.result.twrIndex), factorData),
+    }))
+    return fits.some((f) => f.fit) ? fits : null
+  }, [runs, factorData])
 
   const income = useMemo(() => incomeOption(runs), [runs])
   const incomeSummary = useMemo(
@@ -576,6 +596,59 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
                     ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          )}
+
+          {factorFits && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base font-medium">
+                  Factor lens
+                  <span className="ml-2 font-normal text-muted-foreground">
+                    Fama-French 3-factor regression, monthly
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead />
+                      <TableHead className="text-right">Market β</TableHead>
+                      <TableHead className="text-right">Size β</TableHead>
+                      <TableHead className="text-right">Value β</TableHead>
+                      <TableHead className="text-right">Alpha /yr</TableHead>
+                      <TableHead className="text-right">R²</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {factorFits.map(({ label, fit }) => (
+                      <TableRow key={label}>
+                        <TableCell className="text-muted-foreground">{label}</TableCell>
+                        {fit ? (
+                          <>
+                            <TableCell className="text-right font-mono tnum">{fit.betaMkt.toFixed(2)}</TableCell>
+                            <TableCell className="text-right font-mono tnum">{fit.betaSmb.toFixed(2)}</TableCell>
+                            <TableCell className="text-right font-mono tnum">{fit.betaHml.toFixed(2)}</TableCell>
+                            <TableCell className="text-right font-mono">
+                              <PctCell v={fit.alphaAnnual} />
+                            </TableCell>
+                            <TableCell className="text-right font-mono tnum">{fit.r2.toFixed(2)}</TableCell>
+                          </>
+                        ) : (
+                          <TableCell colSpan={5} className="text-right text-muted-foreground">
+                            under 24 months of factor overlap
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Positive Size β tilts small-cap; positive Value β tilts value. Alpha is the
+                  return unexplained by the three factors.
+                </p>
               </CardContent>
             </Card>
           )}

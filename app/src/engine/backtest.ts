@@ -87,7 +87,14 @@ export function runBacktest(
     twrIndex[t] = twrIndex[t - 1] * (value / (prevValue + flow))
   }
 
-  const metrics = computeMetrics(dates, twrIndex, values, flows, config.riskFreeRate ?? 0)
+  const metrics = computeMetrics(
+    dates,
+    twrIndex,
+    values,
+    flows,
+    config.riskFreeRate ?? 0,
+    config.rfByMonth,
+  )
 
   const finalValue = values[n - 1]
   const holdingBreakdowns = portfolio.allocations.map((a, i) => ({

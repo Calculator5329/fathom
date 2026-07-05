@@ -7,6 +7,7 @@ export {
   irr,
   maxDrawdown,
   monthlyReturns,
+  monthlyReturnsLabeled,
   rollingReturns,
 } from './metrics'
 export type * from './types'
