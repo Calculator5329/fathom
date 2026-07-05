@@ -77,14 +77,38 @@ describe('parseTrades', () => {
       '06-11-2026,YOU BOUGHT EX-DIV DATE 06/15/26RECORD DATE 06/15/26PAYABLE DTE 06/25/26 META PLATFORMS INC CLASS A COMMON STOCK (META) (Margin),META,META PLATFORMS INC CLASS A COMMON STOCK,Margin,559.74,0.15,"","","",-83.96,-4.06,06-12-2026',
       '"Brokerage services are provided by Fidelity Brokerage Services LLC (FBS), 900 Salem Street, Smithfield, RI 02917."',
     ].join('\n')
-    const { trades, skipped } = parseTrades(csv)
+    const { trades, skipped, dividends, cashFlows } = parseTrades(csv)
     expect(trades).toEqual([
       { date: '2026-06-11', ticker: 'META', side: 'buy', shares: 0.15, price: 559.74 },
       { date: '2026-07-02', ticker: 'SOFI', side: 'buy', shares: 4, price: 18.02 },
       { date: '2026-07-02', ticker: 'PYPL', side: 'sell', shares: 5, price: 45.16 },
     ])
-    // journal, dividend, SPAXX reinvestment, disclaimer all skipped
-    expect(skipped).toBe(4)
+    // Dividend row is CAPTURED now, not skipped; journal, SPAXX
+    // reinvestment, and the disclaimer line remain skipped.
+    expect(dividends).toEqual([{ date: '2026-07-01', ticker: 'NKE', amount: 7.59 }])
+    expect(cashFlows).toEqual([])
+    expect(skipped).toBe(3)
+  })
+
+  it('captures EFT deposits/withdrawals and foreign tax clawbacks', () => {
+    const csv = [
+      'Run Date,Action,Symbol,Description,Type,Price ($),Quantity,Commission ($),Fees ($),Accrued Interest ($),Amount ($),Cash Balance ($),Settlement Date',
+      '06-26-2026,Electronic Funds Transfer Received (Cash),,No Description,Cash,"",0,"","","",250,292.07,""',
+      '05-29-2026,Electronic Funds Transfer Paid (Cash),,No Description,Cash,"",0,"","","",-250,328.72,""',
+      '07-02-2026,DIRECT DEPOSIT ELAN CARDSVCRedemption (Cash),,No Description,Cash,"",0,"","","",9.89,770.41,""',
+      '05-05-2026,FOREIGN TAX PAID ASML HOLDING NV EUR0.09 NY REGISTRY ... (ASML) (Margin),ASML,ASML HOLDING NV,Margin,"",0,"","","",-0.76,66.64,""',
+      '05-05-2026,DIVIDEND RECEIVED ASML HOLDING NV EUR0.09 NY REGISTRY ... (ASML) (Margin),ASML,ASML HOLDING NV,Margin,"",0,"","","",5.07,67.4,""',
+      '07-02-2026,YOU BOUGHT SOFI TECHNOLOGIES INC COM (SOFI) (Margin),SOFI,SOFI TECHNOLOGIES INC COM,Margin,18.02,4,"","","",-72.1,657.16,07-06-2026',
+    ].join('\n')
+    const { trades, dividends, cashFlows } = parseTrades(csv)
+    expect(trades).toHaveLength(1)
+    expect(cashFlows).toEqual([
+      { date: '2026-05-29', amount: -250 },
+      { date: '2026-06-26', amount: 250 },
+      { date: '2026-07-02', amount: 9.89 },
+    ])
+    // Dividend + its tax clawback both land on ASML (net 4.31).
+    expect(dividends.reduce((s, d) => s + d.amount, 0)).toBeCloseTo(4.31, 6)
   })
 })
 

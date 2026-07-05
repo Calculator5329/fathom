@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowUpRight, ChevronRight, ScanSearch, Upload } from 'lucide-react'
+import { ArrowUpRight, ChevronRight, Download, ScanSearch, Upload } from 'lucide-react'
 import { EChart, baseOption, cssVar } from '@/components/charts/EChart'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,6 +24,8 @@ import {
   type PositionAnalysis,
   type ReconstructionResult,
 } from '@/xray/analyze'
+import { computeInsights, type PortfolioInsights } from '@/xray/insights'
+import { buildMasterFile, downloadMasterFile, type FathomPortfolioFile } from '@/xray/masterfile'
 import { parsePositions, parseTrades } from '@/xray/parse'
 
 /**
@@ -83,6 +85,8 @@ export function Xray() {
   const [posResult, setPosResult] = useState<PositionAnalysis | null>(null)
   const [histResult, setHistResult] = useState<ReconstructionResult | null>(null)
   const [histBlend, setHistBlend] = useState<PositionAnalysis | null>(null)
+  const [insights, setInsights] = useState<PortfolioInsights | null>(null)
+  const [master, setMaster] = useState<FathomPortfolioFile | null>(null)
   const [notes, setNotes] = useState<string[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -97,6 +101,8 @@ export function Xray() {
     setNotes([])
     setHistResult(null)
     setHistBlend(null)
+    setInsights(null)
+    setMaster(null)
     try {
       const { positions, errors } = parsePositions(posCsv)
       if (positions.length === 0) {
@@ -131,11 +137,13 @@ export function Xray() {
     setNotes([])
     setPosResult(null)
     try {
-      const { trades, errors, skipped } = parseTrades(tradesCsv)
+      const { trades, errors, skipped, dividends, cashFlows } = parseTrades(tradesCsv)
       if (trades.length === 0) {
         setNotes(errors.length ? errors : ['No trades recognized in that CSV.'])
         setHistResult(null)
         setHistBlend(null)
+        setInsights(null)
+        setMaster(null)
         return
       }
       localStorage.setItem(LS_TRADES, tradesCsv)
@@ -144,22 +152,26 @@ export function Xray() {
             (p): p is { ticker: string; shares: number } => p.shares != null && p.shares > 0,
           )
         : []
+      // SPY rides along for the same-flows benchmark replay.
       const { series, fundamentals } = await loadAll([
         ...trades.map((t) => t.ticker),
         ...sharePositions.map((p) => p.ticker),
+        'SPY',
       ])
 
       let allTrades = trades
+      let synthetic: typeof trades = []
       const mergeNotes: string[] = []
       if (sharePositions.length > 0) {
-        const { synthetic, warnings } = inferOpeningPositions(sharePositions, trades, series)
+        const opening = inferOpeningPositions(sharePositions, trades, series)
+        synthetic = opening.synthetic
         if (synthetic.length > 0) {
           allTrades = [...synthetic, ...trades]
           mergeNotes.push(
             `Merged with your positions file — opening holdings inferred for ${synthetic.length} tickers as of ${synthetic[0].date}.`,
           )
         }
-        mergeNotes.push(...warnings)
+        mergeNotes.push(...opening.warnings)
       }
 
       const result = reconstructHistory(allTrades, series)
@@ -174,12 +186,38 @@ export function Xray() {
         fundamentals,
       )
       setHistBlend(blend)
-      setNotes([
+      const spy = series.get('SPY')
+      const ins = computeInsights({
+        result,
+        allTrades,
+        realTrades: trades,
+        dividends,
+        cashFlows,
+        series,
+        benchmark: spy ? { ticker: 'SPY', series: spy } : null,
+      })
+      setInsights(ins)
+      const allNotes = [
         ...mergeNotes,
         ...errors,
-        ...(skipped > 0 ? [`${skipped} non-trade rows skipped (dividends, transfers…)`] : []),
+        ...(dividends.length > 0 ? [`${dividends.length} dividend payments captured`] : []),
+        ...(cashFlows.length > 0 ? [`${cashFlows.length} deposits/withdrawals captured`] : []),
+        ...(skipped > 0 ? [`${skipped} other non-trade rows skipped`] : []),
         ...result.warnings,
-      ])
+      ]
+      setNotes(allNotes)
+      setMaster(
+        buildMasterFile({
+          blend,
+          result,
+          insights: ins,
+          synthetic,
+          realTrades: trades,
+          dividends,
+          cashFlows,
+          notes: allNotes,
+        }),
+      )
       setInputSummary(
         sharePositions.length > 0
           ? `${sharePositions.length} holdings + ${trades.length} trades (merged)`
@@ -190,6 +228,8 @@ export function Xray() {
       setNotes([err instanceof Error ? err.message : String(err)])
       setHistResult(null)
       setHistBlend(null)
+      setInsights(null)
+      setMaster(null)
     } finally {
       setBusy(false)
     }
@@ -246,7 +286,7 @@ export function Xray() {
         },
       },
       tooltip: { ...(base.tooltip as object), valueFormatter: (v: unknown) => formatUsd(v as number) },
-      legend: { show: false },
+      legend: { show: !!insights?.benchmark },
       series: [
         {
           name: 'Portfolio value',
@@ -259,9 +299,68 @@ export function Xray() {
           areaStyle: { color: cssVar('--primary'), opacity: 0.06 },
           emphasis: { disabled: true },
         },
+        // Same money, same days, all SPY — the honest benchmark.
+        ...(insights?.benchmark
+          ? [
+              {
+                name: `${insights.benchmark.ticker} (same flows)`,
+                type: 'line' as const,
+                showSymbol: false,
+                sampling: 'lttb' as const,
+                data: insights.benchmark.values.map((v, i) => [
+                  histResult.dates[i],
+                  Math.round(v * 100) / 100,
+                ]),
+                lineStyle: { width: 1.25, color: cssVar('--chart-4') },
+                itemStyle: { color: cssVar('--chart-4') },
+                emphasis: { disabled: true },
+              },
+            ]
+          : []),
       ],
     }
-  }, [histResult])
+  }, [histResult, insights])
+
+  // Horizontal bars, biggest movers on top; gains emerald, losses red.
+  const attributionChart = useMemo(() => {
+    if (!insights || insights.attribution.length === 0) return null
+    const rows = [...insights.attribution]
+      .sort((a, b) => Math.abs(b.pnl) - Math.abs(a.pnl))
+      .slice(0, 12)
+      .reverse() // ECharts y-category renders bottom-up
+    const base = baseOption()
+    return {
+      ...base,
+      grid: { left: 64, right: 24, top: 8, bottom: 24 },
+      xAxis: {
+        ...(base.xAxis as object),
+        type: 'value' as const,
+        axisLabel: {
+          ...(base.xAxis as { axisLabel: object }).axisLabel,
+          formatter: (v: number) => formatUsdCompact(v),
+        },
+      },
+      yAxis: {
+        ...(base.yAxis as object),
+        type: 'category' as const,
+        data: rows.map((r) => r.ticker),
+        axisLabel: { ...(base.yAxis as { axisLabel: object }).axisLabel, fontFamily: 'monospace' },
+      },
+      tooltip: { ...(base.tooltip as object), valueFormatter: (v: unknown) => formatUsd(v as number) },
+      legend: { show: false },
+      series: [
+        {
+          type: 'bar' as const,
+          data: rows.map((r) => ({
+            value: Math.round(r.pnl * 100) / 100,
+            itemStyle: { color: cssVar(r.pnl >= 0 ? '--gain' : '--loss'), borderRadius: 2 },
+          })),
+          emphasis: { disabled: true },
+          barCategoryGap: '25%',
+        },
+      ],
+    }
+  }, [insights])
 
   const backtestMix = (analysis: PositionAnalysis) => {
     const top = analysis.holdings.slice(0, 10)
@@ -396,10 +495,132 @@ export function Xray() {
           </div>
           <Card>
             <CardHeader>
-              <CardTitle className="text-base font-medium">Portfolio value — reconstructed</CardTitle>
+              <CardTitle className="text-base font-medium">
+                Portfolio value — reconstructed
+                {insights?.benchmark && (
+                  <span className="ml-2 font-normal text-muted-foreground">
+                    vs {insights.benchmark.ticker} with your exact deposits
+                  </span>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent>{valueChart && <EChart option={valueChart} exportName="fathom-xray-history" className="h-72 w-full" />}</CardContent>
           </Card>
+
+          {insights && (
+            <>
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <Stat
+                  label="You added"
+                  value={formatUsdCompact(insights.deposits.total)}
+                  sub={`${formatUsdCompact(insights.deposits.perMonth)}/mo · ${insights.deposits.count} deposits`}
+                />
+                <Stat
+                  label="Market gains"
+                  value={formatUsdCompact(insights.marketGain)}
+                  sub="price change on what you held"
+                  loss={insights.marketGain < 0}
+                />
+                <Stat
+                  label="Dividends"
+                  value={formatUsdCompact(insights.dividends.total)}
+                  sub={`run-rate ${formatUsdCompact(insights.dividends.annualRunRate)}/yr${
+                    insights.dividends.byTicker[0]
+                      ? ` · top ${insights.dividends.byTicker[0].ticker}`
+                      : ''
+                  }`}
+                />
+                {insights.benchmark ? (
+                  <Stat
+                    label={`vs ${insights.benchmark.ticker}`}
+                    value={pctStr(
+                      histResult.twrIndex[histResult.twrIndex.length - 1] -
+                        1 -
+                        insights.benchmark.twr,
+                    )}
+                    sub={`${insights.benchmark.ticker} same flows: ${pctStr(insights.benchmark.twr)} total`}
+                    loss={
+                      histResult.twrIndex[histResult.twrIndex.length - 1] - 1 <
+                      insights.benchmark.twr
+                    }
+                  />
+                ) : (
+                  <Stat label="Trades" value={String(insights.behavior.trades)} sub={`${insights.behavior.perMonth.toFixed(0)}/mo`} />
+                )}
+              </div>
+
+              {attributionChart && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base font-medium">
+                      What drove it
+                      <span className="ml-2 font-normal text-muted-foreground">
+                        per-ticker profit this window, dividends included
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <EChart option={attributionChart} exportName="fathom-xray-attribution" className="h-72 w-full" />
+                  </CardContent>
+                </Card>
+              )}
+
+              {insights.sold.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base font-medium">
+                      Cost of selling
+                      <span className="ml-2 font-normal text-muted-foreground">
+                        what the shares you sold are worth today
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Ticker</TableHead>
+                          <TableHead className="text-right">Sale proceeds</TableHead>
+                          <TableHead className="text-right">Worth today</TableHead>
+                          <TableHead className="text-right">Selling cost you</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {insights.sold.map((s) => {
+                          const missed = s.worthNow - s.proceeds
+                          return (
+                            <TableRow key={s.ticker}>
+                              <TableCell className="font-mono">{s.ticker}</TableCell>
+                              <TableCell className="text-right font-mono tnum">{formatUsd(s.proceeds)}</TableCell>
+                              <TableCell className="text-right font-mono tnum">{formatUsd(s.worthNow)}</TableCell>
+                              <TableCell className={`text-right font-mono tnum ${missed > 0 ? 'text-loss' : 'text-gain'}`}>
+                                {missed > 0 ? formatUsd(missed) : `saved ${formatUsd(-missed)}`}
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground tnum">
+                  {insights.behavior.trades} trades over {insights.window.months.toFixed(1)} months
+                  ({insights.behavior.perMonth.toFixed(0)}/mo) · {insights.behavior.buys} buys ·{' '}
+                  {insights.behavior.sells} sells
+                  {insights.deposits.withdrawals > 0 &&
+                    ` · ${formatUsdCompact(insights.deposits.withdrawals)} withdrawn`}
+                </p>
+                {master && (
+                  <Button variant="outline" size="sm" onClick={() => downloadMasterFile(master)}>
+                    <Download /> Export master file
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
 

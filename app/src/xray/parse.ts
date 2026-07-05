@@ -19,6 +19,19 @@ export interface TradeInput {
   price?: number
 }
 
+/** A dividend credited to the account (negative = foreign tax clawback). */
+export interface DividendInput {
+  date: string
+  ticker: string
+  amount: number
+}
+
+/** External money moving in (+) or out (−) of the account. */
+export interface CashFlowInput {
+  date: string
+  amount: number
+}
+
 const TICKER_RE = /^[A-Za-z][A-Za-z0-9.\-]{0,11}$/
 
 /**
@@ -113,6 +126,7 @@ const H = {
   side: ['side', 'action', 'type', 'transaction type', 'transaction', 'activity', 'buy/sell', 'description'],
   shares: ['shares', 'quantity', 'qty', 'units', 'amount of shares'],
   price: ['price', 'share price', 'price per share', 'execution price', 'unit price'],
+  amount: ['amount ($)', 'amount', 'net amount', 'total amount'],
 }
 
 function findCol(headers: string[], aliases: string[]): number {
@@ -163,19 +177,39 @@ function splitCsv(line: string): string[] {
   return out.map((c) => c.trim())
 }
 
+export interface ParsedActivity {
+  trades: TradeInput[]
+  errors: string[]
+  /** Rows that are neither trades nor captured income/flows. */
+  skipped: number
+  /** Dividends credited (and foreign-tax clawbacks, negative). */
+  dividends: DividendInput[]
+  /** External deposits (+) / withdrawals (−): EFTs, direct deposits. */
+  cashFlows: CashFlowInput[]
+}
+
+const EMPTY_ACTIVITY = (errors: string[]): ParsedActivity => ({
+  trades: [],
+  errors,
+  skipped: 0,
+  dividends: [],
+  cashFlows: [],
+})
+
 /**
- * Trade-history CSV → normalized trades. Requires date/ticker/side/shares
- * columns (any common naming); price optional. Skips non-trade rows
- * (dividends, transfers) rather than failing.
+ * Trade-history CSV → normalized trades PLUS the income/flow rows brokers
+ * mix in. Requires date/ticker/side/shares columns (any common naming);
+ * price optional. Dividends and external transfers are captured when an
+ * amount column exists; everything else non-trade is skipped, not fatal.
  */
-export function parseTrades(text: string): { trades: TradeInput[]; errors: string[]; skipped: number } {
+export function parseTrades(text: string): ParsedActivity {
   const errors: string[] = []
   const lines = text.split(/\r?\n/).filter((l) => l.trim())
-  if (lines.length < 2) return { trades: [], errors: ['Need a header row plus at least one trade.'], skipped: 0 }
+  if (lines.length < 2) return EMPTY_ACTIVITY(['Need a header row plus at least one trade.'])
 
   // Find the header row (some exports have preamble lines).
   let headerIdx = -1
-  let cols = { date: -1, ticker: -1, side: -1, shares: -1, price: -1 }
+  let cols = { date: -1, ticker: -1, side: -1, shares: -1, price: -1, amount: -1 }
   for (let i = 0; i < Math.min(lines.length, 10); i++) {
     const headers = splitCsv(lines[i]).map((h) => h.toLowerCase().trim())
     const c = {
@@ -184,6 +218,7 @@ export function parseTrades(text: string): { trades: TradeInput[]; errors: strin
       side: findCol(headers, H.side),
       shares: findCol(headers, H.shares),
       price: findCol(headers, H.price),
+      amount: findCol(headers, H.amount),
     }
     if (c.date >= 0 && c.ticker >= 0 && c.shares >= 0) {
       headerIdx = i
@@ -192,14 +227,14 @@ export function parseTrades(text: string): { trades: TradeInput[]; errors: strin
     }
   }
   if (headerIdx < 0) {
-    return {
-      trades: [],
-      errors: ['Could not find columns for date, ticker/symbol, and shares/quantity in the header.'],
-      skipped: 0,
-    }
+    return EMPTY_ACTIVITY([
+      'Could not find columns for date, ticker/symbol, and shares/quantity in the header.',
+    ])
   }
 
   const trades: TradeInput[] = []
+  const dividends: DividendInput[] = []
+  const cashFlows: CashFlowInput[] = []
   let skipped = 0
   for (const line of lines.slice(headerIdx + 1)) {
     // Cash-sweep noise (e.g. SPAXX reinvestments) matches /reinvest/ below
@@ -210,10 +245,29 @@ export function parseTrades(text: string): { trades: TradeInput[]; errors: strin
     }
     const cells = splitCsv(line)
     const date = normalizeDate(cells[cols.date] ?? '')
+    const amount =
+      cols.amount >= 0 ? Number((cells[cols.amount] ?? '').replace(/[,$"]/g, '')) : NaN
+    const action = cols.side >= 0 ? (cells[cols.side] ?? '') : ''
     const tickerRaw = (cells[cols.ticker] ?? '').toUpperCase().trim()
+
+    // Income / external-flow rows (captured, not skipped) — checked before
+    // trade parsing since they have qty 0 and would otherwise fall through.
+    if (date && Number.isFinite(amount) && amount !== 0) {
+      if (/dividend received/i.test(action) && TICKER_RE.test(tickerRaw)) {
+        dividends.push({ date, ticker: tickerRaw, amount })
+        continue
+      }
+      if (/foreign tax paid/i.test(action) && TICKER_RE.test(tickerRaw)) {
+        dividends.push({ date, ticker: tickerRaw, amount }) // negative clawback
+        continue
+      }
+      if (/electronic funds transfer|direct deposit|ach |wire /i.test(action)) {
+        cashFlows.push({ date, amount })
+        continue
+      }
+    }
     const shares = Math.abs(Number((cells[cols.shares] ?? '').replace(/[,$"]/g, '')))
-    const sideRaw = cols.side >= 0 ? (cells[cols.side] ?? '') : ''
-    let side = normalizeSide(sideRaw)
+    let side = normalizeSide(action)
     // Some exports encode sells as negative quantities with no side column.
     if (!side && cols.side < 0) {
       side = Number((cells[cols.shares] ?? '').replace(/[,$"]/g, '')) < 0 ? 'sell' : 'buy'
@@ -232,5 +286,7 @@ export function parseTrades(text: string): { trades: TradeInput[]; errors: strin
     })
   }
   trades.sort((a, b) => a.date.localeCompare(b.date))
-  return { trades, errors, skipped }
+  dividends.sort((a, b) => a.date.localeCompare(b.date))
+  cashFlows.sort((a, b) => a.date.localeCompare(b.date))
+  return { trades, errors, skipped, dividends, cashFlows }
 }
