@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowUpRight, ScanSearch, Upload } from 'lucide-react'
 import { EChart, baseOption, cssVar } from '@/components/charts/EChart'
@@ -19,6 +19,7 @@ import { loadFundamentals, type Fundamentals } from '@/fundamentals/load'
 import { formatUsd, formatUsdCompact } from '@/lib/format'
 import {
   analyzePositions,
+  inferOpeningPositions,
   reconstructHistory,
   type PositionAnalysis,
   type ReconstructionResult,
@@ -70,8 +71,10 @@ async function loadAll(tickers: string[]) {
 
 export function Xray() {
   const navigate = useNavigate()
-  const [positionsText, setPositionsText] = useState('')
-  const [tradesText, setTradesText] = useState('')
+  // Lazy initializers (not an effect) so the Tabs default below can see the
+  // restored text on first render.
+  const [positionsText, setPositionsText] = useState(() => localStorage.getItem(LS_POSITIONS) ?? '')
+  const [tradesText, setTradesText] = useState(() => localStorage.getItem(LS_TRADES) ?? '')
   const [busy, setBusy] = useState(false)
   const [posResult, setPosResult] = useState<PositionAnalysis | null>(null)
   const [histResult, setHistResult] = useState<ReconstructionResult | null>(null)
@@ -79,24 +82,19 @@ export function Xray() {
   const [notes, setNotes] = useState<string[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    setPositionsText(localStorage.getItem(LS_POSITIONS) ?? '')
-    setTradesText(localStorage.getItem(LS_TRADES) ?? '')
-  }, [])
-
-  const runPositions = async () => {
+  const runPositions = async (posCsv = positionsText) => {
     setBusy(true)
     setNotes([])
     setHistResult(null)
     setHistBlend(null)
     try {
-      const { positions, errors } = parsePositions(positionsText)
+      const { positions, errors } = parsePositions(posCsv)
       if (positions.length === 0) {
         setNotes(errors.length ? errors : ['Nothing to analyze — add lines like "AAPL 10" or "VTI 40%".'])
         setPosResult(null)
         return
       }
-      localStorage.setItem(LS_POSITIONS, positionsText)
+      localStorage.setItem(LS_POSITIONS, posCsv)
       const { series, fundamentals, missing } = await loadAll(positions.map((p) => p.ticker))
       const analysis = analyzePositions(positions, series, fundamentals)
       setPosResult(analysis)
@@ -109,30 +107,63 @@ export function Xray() {
     }
   }
 
-  const runTrades = async () => {
+  /**
+   * Reconstruct from the activity CSV. When a positions snapshot is also
+   * present (pasted or imported), the two merge: opening holdings are
+   * inferred (current − net trades, split-aware) so the history covers the
+   * WHOLE portfolio, and blended stats come from the actual current
+   * positions rather than only the traded slice.
+   */
+  const runTrades = async (tradesCsv = tradesText, posCsv = positionsText) => {
     setBusy(true)
     setNotes([])
     setPosResult(null)
     try {
-      const { trades, errors, skipped } = parseTrades(tradesText)
+      const { trades, errors, skipped } = parseTrades(tradesCsv)
       if (trades.length === 0) {
         setNotes(errors.length ? errors : ['No trades recognized in that CSV.'])
         setHistResult(null)
         setHistBlend(null)
         return
       }
-      localStorage.setItem(LS_TRADES, tradesText)
-      const { series, fundamentals } = await loadAll(trades.map((t) => t.ticker))
-      const result = reconstructHistory(trades, series)
+      localStorage.setItem(LS_TRADES, tradesCsv)
+      const sharePositions = posCsv.trim()
+        ? parsePositions(posCsv).positions.filter(
+            (p): p is { ticker: string; shares: number } => p.shares != null && p.shares > 0,
+          )
+        : []
+      const { series, fundamentals } = await loadAll([
+        ...trades.map((t) => t.ticker),
+        ...sharePositions.map((p) => p.ticker),
+      ])
+
+      let allTrades = trades
+      const mergeNotes: string[] = []
+      if (sharePositions.length > 0) {
+        const { synthetic, warnings } = inferOpeningPositions(sharePositions, trades, series)
+        if (synthetic.length > 0) {
+          allTrades = [...synthetic, ...trades]
+          mergeNotes.push(
+            `Merged with your positions file — opening holdings inferred for ${synthetic.length} tickers as of ${synthetic[0].date}.`,
+          )
+        }
+        mergeNotes.push(...warnings)
+      }
+
+      const result = reconstructHistory(allTrades, series)
       setHistResult(result)
-      // Blend analysis of the CURRENT reconstructed positions.
+      // Blend the ACTUAL current positions when we have them (authoritative);
+      // otherwise the positions implied by the trade log.
       const blend = analyzePositions(
-        result.endPositions.map((p) => ({ ticker: p.ticker, shares: p.shares })),
+        sharePositions.length > 0
+          ? sharePositions
+          : result.endPositions.map((p) => ({ ticker: p.ticker, shares: p.shares })),
         series,
         fundamentals,
       )
       setHistBlend(blend)
       setNotes([
+        ...mergeNotes,
         ...errors,
         ...(skipped > 0 ? [`${skipped} non-trade rows skipped (dividends, transfers…)`] : []),
         ...result.warnings,
@@ -144,6 +175,41 @@ export function Xray() {
     } finally {
       setBusy(false)
     }
+  }
+
+  /**
+   * One-shot broker import: accepts one or both Fidelity CSVs in any order,
+   * classifies each (activity first — its header has a date column;
+   * positions files don't), fills the editors, and runs the best available
+   * analysis automatically.
+   */
+  const importFiles = async (files: File[]) => {
+    let pos = positionsText
+    let trd = tradesText
+    const noteLines: string[] = []
+    for (const f of files) {
+      const text = await f.text()
+      const asTrades = parseTrades(text)
+      if (asTrades.trades.length > 0) {
+        trd = text
+        setTradesText(text)
+        localStorage.setItem(LS_TRADES, text)
+        noteLines.push(`${f.name}: activity history (${asTrades.trades.length} trades)`)
+        continue
+      }
+      const asPositions = parsePositions(text)
+      if (asPositions.positions.length > 0) {
+        pos = text
+        setPositionsText(text)
+        localStorage.setItem(LS_POSITIONS, text)
+        noteLines.push(`${f.name}: positions (${asPositions.positions.length} holdings)`)
+        continue
+      }
+      noteLines.push(`${f.name}: not recognized as a positions or activity CSV`)
+    }
+    if (trd.trim()) await runTrades(trd, pos)
+    else if (pos.trim()) await runPositions(pos)
+    setNotes((prev) => [...noteLines, ...prev])
   }
 
   const valueChart = useMemo(() => {
@@ -215,9 +281,14 @@ export function Xray() {
                 placeholder={'One per line — shares or weight:\nAAPL 12\nVTI 40%\nBRK-B 5'}
                 className="min-h-28 w-full resize-y rounded-md border bg-transparent px-3 py-2 font-mono text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               />
-              <Button onClick={runPositions} disabled={busy || !positionsText.trim()}>
-                {busy ? 'Analyzing…' : 'Analyze positions'}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button onClick={() => runPositions()} disabled={busy || !positionsText.trim()}>
+                  {busy ? 'Analyzing…' : 'Analyze positions'}
+                </Button>
+                <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
+                  <Upload /> Import CSVs
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -232,29 +303,32 @@ export function Xray() {
                 className="min-h-28 w-full resize-y rounded-md border bg-transparent px-3 py-2 font-mono text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               />
               <div className="flex items-center gap-2">
-                <Button onClick={runTrades} disabled={busy || !tradesText.trim()}>
+                <Button onClick={() => runTrades()} disabled={busy || !tradesText.trim()}>
                   {busy ? 'Reconstructing…' : 'Reconstruct history'}
                 </Button>
-                <Button variant="outline" onClick={() => fileRef.current?.click()}>
-                  <Upload /> CSV file
+                <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
+                  <Upload /> Import CSVs
                 </Button>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".csv,text/csv"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0]
-                    if (!f) return
-                    f.text().then(setTradesText)
-                    e.target.value = ''
-                  }}
-                />
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Shared across both tabs: drop one or both Fidelity exports here
+          (positions + activity) and everything merges automatically. */}
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".csv,text/csv"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          const files = e.target.files ? Array.from(e.target.files) : []
+          e.target.value = ''
+          if (files.length) void importFiles(files)
+        }}
+      />
 
       {notes.length > 0 && (
         <ul className="mt-3 space-y-0.5 text-sm text-muted-foreground">

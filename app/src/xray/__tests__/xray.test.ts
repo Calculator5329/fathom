@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { TickerSeries } from '@/engine'
-import { reconstructHistory } from '../analyze'
+import { inferOpeningPositions, reconstructHistory } from '../analyze'
 import { parsePositions, parseTrades } from '../parse'
 
 // ---------- parsers ----------------------------------------------------------
@@ -99,6 +99,81 @@ const mk = (ticker: string, rows: Array<[string, number, number?]>): TickerSerie
     divCash: 0,
     splitFactor: splitFactor ?? 1,
   })),
+})
+
+describe('inferOpeningPositions (positions + activity merge)', () => {
+  const flat = (t: string) =>
+    mk(t, [
+      ['2026-01-02', 100],
+      ['2026-03-02', 100],
+      ['2026-06-01', 100],
+    ])
+
+  it('opening = current − net trades; exited tickers get their sold shares back', () => {
+    const series = new Map([
+      ['AAA', flat('AAA')],
+      ['BBB', flat('BBB')],
+      ['CCC', flat('CCC')],
+    ])
+    const trades = [
+      { date: '2026-01-02', ticker: 'AAA', side: 'buy' as const, shares: 4 },
+      { date: '2026-03-02', ticker: 'CCC', side: 'sell' as const, shares: 3 },
+    ]
+    const { synthetic, warnings } = inferOpeningPositions(
+      [
+        { ticker: 'AAA', shares: 10 }, // 10 now, bought 4 → opened with 6
+        { ticker: 'BBB', shares: 7 }, //  never traded → opened with 7
+        // CCC absent from positions: sold 3, ended 0 → opened with 3
+      ],
+      trades,
+      series,
+    )
+    expect(warnings).toEqual([])
+    const byTicker = new Map(synthetic.map((s) => [s.ticker, s]))
+    expect(byTicker.get('AAA')).toMatchObject({ date: '2026-01-02', side: 'buy', shares: 6 })
+    expect(byTicker.get('BBB')).toMatchObject({ shares: 7 })
+    expect(byTicker.get('CCC')).toMatchObject({ shares: 3 })
+  })
+
+  it('split mid-window: current shares are end-basis, opening converts to trade-date basis', () => {
+    // Buy 2 pre-split (old basis); 2:1 split later; snapshot shows 12 in the
+    // end basis. Opened with (12 − 2×2)/2 = 4 old-basis shares.
+    const s = mk('SPL', [
+      ['2026-01-02', 200],
+      ['2026-03-02', 100, 2],
+      ['2026-06-01', 100],
+    ])
+    const { synthetic } = inferOpeningPositions(
+      [{ ticker: 'SPL', shares: 12 }],
+      [{ date: '2026-01-02', ticker: 'SPL', side: 'buy', shares: 2 }],
+      new Map([['SPL', s]]),
+    )
+    expect(synthetic).toHaveLength(1)
+    expect(synthetic[0]).toMatchObject({ date: '2026-01-02', shares: 4 })
+  })
+
+  it('clamps and warns when trades sell more than the snapshot explains', () => {
+    const { synthetic, warnings } = inferOpeningPositions(
+      [{ ticker: 'AAA', shares: 1 }],
+      [{ date: '2026-01-02', ticker: 'AAA', side: 'buy', shares: 5 }],
+      new Map([['AAA', flat('AAA')]]),
+    )
+    // current 1 − bought 5 → opening −4 → clamped, warned, no synthetic buy
+    expect(synthetic).toEqual([])
+    expect(warnings).toHaveLength(1)
+  })
+
+  it('merged reconstruction values the whole portfolio from day one', () => {
+    const series = new Map([['AAA', flat('AAA')]])
+    const trades = [{ date: '2026-03-02', ticker: 'AAA', side: 'buy' as const, shares: 2, price: 100 }]
+    const { synthetic } = inferOpeningPositions([{ ticker: 'AAA', shares: 10 }], trades, series)
+    const r = reconstructHistory([...synthetic, ...trades], series)
+    // Opening 8 shares are capital at the first trade date, not a gain.
+    expect(r.values[0]).toBe(8 * 100 + 2 * 100)
+    expect(r.totalInvested).toBe(1000)
+    expect(r.endPositions).toEqual([{ ticker: 'AAA', shares: 10 }])
+    expect(r.twrIndex[r.twrIndex.length - 1]).toBeCloseTo(1, 10)
+  })
 })
 
 describe('reconstructHistory', () => {

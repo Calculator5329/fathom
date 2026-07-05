@@ -132,6 +132,63 @@ export interface ReconstructionResult {
 }
 
 /**
+ * Infer opening holdings from a current-positions snapshot plus the trade
+ * window: opening (end basis) = current shares − net traded shares, with
+ * each trade converted to the end basis via the splits after its date.
+ * Returned as synthetic buys dated at the first trade date (in THAT date's
+ * share basis) so reconstructHistory treats them as day-one capital — this
+ * is what lets a Fidelity positions file + activity file merge into a
+ * whole-portfolio history instead of just the traded slice.
+ */
+export function inferOpeningPositions(
+  positions: Array<{ ticker: string; shares: number }>,
+  trades: TradeInput[],
+  series: Map<string, TickerSeries>,
+): { synthetic: TradeInput[]; warnings: string[] } {
+  const warnings: string[] = []
+  const synthetic: TradeInput[] = []
+  if (trades.length === 0) return { synthetic, warnings }
+  const startDate = trades.reduce((m, t) => (t.date < m ? t.date : m), trades[0].date)
+
+  const posByTicker = new Map(positions.map((p) => [p.ticker, p.shares]))
+  const tickers = new Set([...posByTicker.keys(), ...trades.map((t) => t.ticker)])
+
+  for (const ticker of tickers) {
+    const s = series.get(ticker)
+    if (!s) {
+      if (posByTicker.has(ticker)) {
+        warnings.push(`${ticker}: no price data — excluded from opening holdings`)
+      }
+      continue
+    }
+    const splitAfter = (date: string) => {
+      let f = 1
+      for (const r of s.records) {
+        if (r.date > date && r.splitFactor && r.splitFactor !== 1) f *= r.splitFactor
+      }
+      return f
+    }
+    let netEnd = 0
+    for (const t of trades) {
+      if (t.ticker !== ticker) continue
+      netEnd += (t.side === 'buy' ? t.shares : -t.shares) * splitAfter(t.date)
+    }
+    let openingEnd = (posByTicker.get(ticker) ?? 0) - netEnd
+    if (openingEnd < -1e-6) {
+      warnings.push(
+        `${ticker}: trades sell more than the positions file explains — opening clamped to 0`,
+      )
+    }
+    openingEnd = Math.max(0, openingEnd)
+    const openingStart = openingEnd / splitAfter(startDate)
+    if (openingStart > 1e-9) {
+      synthetic.push({ date: startDate, ticker, side: 'buy', shares: openingStart })
+    }
+  }
+  return { synthetic, warnings }
+}
+
+/**
  * Rebuild the actual portfolio history from a trade log.
  *
  * Split handling: a trade's share count is in the share basis OF ITS DATE.
