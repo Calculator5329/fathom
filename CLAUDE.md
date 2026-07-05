@@ -8,6 +8,25 @@ Fathom never stores personal account balances; finance-master never re-implement
 Read [docs/VISION.md](docs/VISION.md) for the roadmap, [docs/PLAN.md](docs/PLAN.md) for the original
 product spec, [docs/data-notes.md](docs/data-notes.md) before touching data.
 
+## Docs map (handoff suite, 2026-07-05)
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system overview, stack, directory map, pipelines,
+  exact run/test/deploy commands. Start here if you're new.
+- [docs/HANDOFF_ROADMAP.md](docs/HANDOFF_ROADMAP.md) — Now/Next/Later task list with acceptance
+  criteria. (Named to avoid case-colliding with `docs/roadmap.md`, which is Ethan's untracked
+  pre-project draft — don't touch that one.) [docs/VISION.md](docs/VISION.md) holds decision history.
+- [docs/IDEAS.md](docs/IDEAS.md) — ranked expansion backlog with first steps.
+
+## Definition of done (every change)
+
+1. `npx vitest run` AND `npx tsc -b` green from `app/` — no exceptions.
+2. Engine/sim/projection math changes: hand-computed fixtures added AND the real-data golden
+   regressions stay green (see invariant 1).
+3. UI changes verified in the running preview via DOM assertions (screenshots time out).
+4. Stage only files you created/edited (never `git add -A`), commit with a focused message, push.
+5. If a decision was made or a roadmap item finished, note it in docs/VISION.md or
+   docs/HANDOFF_ROADMAP.md.
+
 ## Commands
 
 - Dev server: use the preview tooling with `.claude/launch.json` ("app"); port 5173 is taken by
@@ -96,7 +115,9 @@ Near-black green-cast canvas, 4-step surface ladder, hairline borders, ONE emera
 ## Working style (Ethan's rules)
 
 - Commit each self-contained change; stage only files you created/edited; NEVER `git add -A`.
-  No remote configured yet — commit locally.
+  Remote: `origin = https://github.com/Calculator5329/fathom.git` — a PUBLIC repo (AGPL). Push
+  after committing. Because it's public: never commit tokens, personal financial figures, or
+  Ethan's untracked files (they are untracked on purpose).
 - Verify UI changes in the running preview before committing (drive the DOM via eval; the
   screenshot tool times out — use DOM assertions).
 - Delegate mechanical work to Codex subagents (see AGENTS.md for their guardrails):
