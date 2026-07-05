@@ -26,6 +26,11 @@ const TICKER_RE = /^[A-Za-z][A-Za-z0-9.\-]{0,11}$/
  * A number with % (or ≤100 when the whole list is weight-like) = weight.
  */
 export function parsePositions(text: string): { positions: PositionInput[]; errors: string[] } {
+  // Broker positions exports (e.g. Fidelity "Portfolio_Positions_*.csv") are
+  // CSVs with Symbol/Quantity columns — detect those before line parsing.
+  const csv = parsePositionsCsv(text)
+  if (csv) return csv
+
   const positions: PositionInput[] = []
   const errors: string[] = []
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
@@ -52,7 +57,14 @@ export function parsePositions(text: string): { positions: PositionInput[]; erro
     positions.push(isPct ? { ticker, weight: value } : { ticker, shares: value })
   }
 
-  // Dedupe: same ticker listed twice sums.
+  return dedupePositions(positions, errors)
+}
+
+/** Dedupe: same ticker listed twice sums. */
+function dedupePositions(
+  positions: PositionInput[],
+  errors: string[],
+): { positions: PositionInput[]; errors: string[] } {
   const merged = new Map<string, PositionInput>()
   for (const p of positions) {
     const prev = merged.get(p.ticker)
@@ -62,6 +74,36 @@ export function parsePositions(text: string): { positions: PositionInput[]; erro
     else errors.push(`${p.ticker} — mixed shares and % entries; using the first`)
   }
   return { positions: [...merged.values()], errors }
+}
+
+/**
+ * Positions from a broker CSV: any header row (within the first 10 lines)
+ * that has symbol + quantity columns. Returns null when the text doesn't
+ * look like such a CSV so the caller falls back to line parsing.
+ */
+function parsePositionsCsv(text: string): { positions: PositionInput[]; errors: string[] } | null {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim())
+  for (let i = 0; i < Math.min(lines.length, 10); i++) {
+    const headers = splitCsv(lines[i]).map((h) => h.toLowerCase().trim())
+    if (headers.length < 3) continue
+    const sym = findCol(headers, H.ticker)
+    const qty = findCol(headers, H.shares)
+    if (sym < 0 || qty < 0) continue
+
+    const positions: PositionInput[] = []
+    for (const line of lines.slice(i + 1)) {
+      const cells = splitCsv(line)
+      // Footer disclaimers collapse to one cell; cash rows aren't positions.
+      if (cells.length < 3 || isCashRow(line)) continue
+      // Fidelity marks core/money-market symbols with trailing asterisks.
+      const ticker = (cells[sym] ?? '').trim().toUpperCase().replace(/\*+$/, '')
+      const shares = Number((cells[qty] ?? '').replace(/[,$"]/g, ''))
+      if (!TICKER_RE.test(ticker) || !Number.isFinite(shares) || shares <= 0) continue
+      positions.push({ ticker, shares })
+    }
+    return positions.length > 0 ? dedupePositions(positions, []) : null
+  }
+  return null
 }
 
 // Header aliases seen across broker exports.
@@ -83,9 +125,19 @@ function normalizeDate(raw: string): string | null {
   const s = raw.trim().replace(/"/g, '')
   let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)
   if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`
-  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  // US-broker orderings: MM/DD/YYYY and Fidelity's MM-DD-YYYY.
+  m = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/)
   if (m) return `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`
   return null
+}
+
+/**
+ * Rows that describe cash sweep / money-market activity (e.g. Fidelity SPAXX
+ * dividends + reinvestments, "Pending activity"). They're cash, not
+ * positions, and would otherwise pollute the analysis.
+ */
+function isCashRow(line: string): boolean {
+  return /money market|pending activity/i.test(line)
 }
 
 function normalizeSide(raw: string): 'buy' | 'sell' | null {
@@ -150,6 +202,12 @@ export function parseTrades(text: string): { trades: TradeInput[]; errors: strin
   const trades: TradeInput[] = []
   let skipped = 0
   for (const line of lines.slice(headerIdx + 1)) {
+    // Cash-sweep noise (e.g. SPAXX reinvestments) matches /reinvest/ below
+    // and would register as bogus buys — drop it before side detection.
+    if (isCashRow(line)) {
+      skipped++
+      continue
+    }
     const cells = splitCsv(line)
     const date = normalizeDate(cells[cols.date] ?? '')
     const tickerRaw = (cells[cols.ticker] ?? '').toUpperCase().trim()

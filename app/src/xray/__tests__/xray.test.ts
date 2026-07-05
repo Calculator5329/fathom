@@ -21,6 +21,25 @@ describe('parsePositions', () => {
     expect(positions).toHaveLength(1)
     expect(errors).toHaveLength(1)
   })
+
+  it('parses a Fidelity Portfolio_Positions CSV (real export shape)', () => {
+    const csv = [
+      "Account Number,Account Name,Symbol,Description,Quantity,Last Price,Last Price Change,Current Value,Today's Gain/Loss Dollar,Today's Gain/Loss Percent,Total Gain/Loss Dollar,Total Gain/Loss Percent,Percent Of Account,Cost Basis Total,Average Cost Basis,Type",
+      'Z00000000,Growth Portfolio,META,META PLATFORMS INC CLASS A COMMON STOCK,28.12,$582.90,-$30.01,$16391.14,-$842.48,-4.89%,+$9521.31,+138.59%,21.98%,$6869.83,$244.30,Margin,',
+      'Z00000000,Growth Portfolio,AMZN,AMAZON.COM INC,61.575,$242.67,+$0.97,$14942.40,+$59.01,+0.39%,+$3178.97,+27.02%,20.04%,$11763.43,$191.04,Margin,',
+      'Z00000000,Growth Portfolio,SPAXX**,HELD IN MONEY MARKET,,,,$770.41,,,,,1.03%,,,Cash,',
+      'Z00000000,Growth Portfolio,Pending activity,,,,,$136.75,,,,,,,,,',
+      '',
+      '"The data and information in this spreadsheet is provided to you solely for your use, and is not for distribution."',
+      '"Date downloaded Jul-05-2026 1:45 a.m ET"',
+    ].join('\n')
+    const { positions, errors } = parsePositions(csv)
+    expect(errors).toEqual([])
+    expect(positions).toEqual([
+      { ticker: 'META', shares: 28.12 },
+      { ticker: 'AMZN', shares: 61.575 },
+    ])
+  })
 })
 
 describe('parseTrades', () => {
@@ -44,6 +63,28 @@ describe('parseTrades', () => {
     const { trades } = parseTrades(csv)
     expect(trades[0].side).toBe('buy')
     expect(trades[1]).toMatchObject({ side: 'sell', shares: 3 })
+  })
+
+  it('parses a Fidelity History_for_Account CSV (real export shape)', () => {
+    const csv = [
+      'Run Date,Action,Symbol,Description,Type,Price ($),Quantity,Commission ($),Fees ($),Accrued Interest ($),Amount ($),Cash Balance ($),Settlement Date',
+      '',
+      '07-06-2026,JOURNALED JNL VS A/C TYPES (Cash),,No Description,Cash,"",0,"","","",-113.25,Processing,""',
+      '07-02-2026,YOU BOUGHT SOFI TECHNOLOGIES INC COM (SOFI) (Margin),SOFI,SOFI TECHNOLOGIES INC COM,Margin,18.02,4,"","","",-72.1,657.16,07-06-2026',
+      '07-02-2026,YOU SOLD PAYPAL HLDGS INC COM (PYPL) (Margin),PYPL,PAYPAL HLDGS INC COM,Margin,45.16,-5,"","","",225.8,729.26,07-06-2026',
+      '07-01-2026,DIVIDEND RECEIVED NIKE INC CLASS B COM NPV (NKE) (Margin),NKE,NIKE INC CLASS B COM NPV,Margin,"",0,"","","",7.59,760.52,""',
+      '06-30-2026,REINVESTMENT FIDELITY GOVERNMENT MONEY MARKET (SPAXX) (Cash),SPAXX,FIDELITY GOVERNMENT MONEY MARKET,Cash,1,0.51,"","","",-0.51,749.93,""',
+      '06-11-2026,YOU BOUGHT EX-DIV DATE 06/15/26RECORD DATE 06/15/26PAYABLE DTE 06/25/26 META PLATFORMS INC CLASS A COMMON STOCK (META) (Margin),META,META PLATFORMS INC CLASS A COMMON STOCK,Margin,559.74,0.15,"","","",-83.96,-4.06,06-12-2026',
+      '"Brokerage services are provided by Fidelity Brokerage Services LLC (FBS), 900 Salem Street, Smithfield, RI 02917."',
+    ].join('\n')
+    const { trades, skipped } = parseTrades(csv)
+    expect(trades).toEqual([
+      { date: '2026-06-11', ticker: 'META', side: 'buy', shares: 0.15, price: 559.74 },
+      { date: '2026-07-02', ticker: 'SOFI', side: 'buy', shares: 4, price: 18.02 },
+      { date: '2026-07-02', ticker: 'PYPL', side: 'sell', shares: 5, price: 45.16 },
+    ])
+    // journal, dividend, SPAXX reinvestment, disclaimer all skipped
+    expect(skipped).toBe(4)
   })
 })
 
