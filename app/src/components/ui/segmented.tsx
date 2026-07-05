@@ -15,13 +15,14 @@ export function Segmented<T extends string>({
   onChange: (v: T) => void
 }) {
   return (
-    <div className="flex gap-1">
+    <div role="group" className="flex gap-1">
       {options.map((o) => (
         <Button
           key={o.v}
           variant={o.v === value ? 'secondary' : 'ghost'}
           size="xs"
           className="font-mono"
+          aria-pressed={o.v === value}
           onClick={() => onChange(o.v)}
         >
           {o.label}

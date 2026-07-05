@@ -101,6 +101,9 @@ export function Xray() {
       const analysis = analyzePositions(positions, series, fundamentals)
       setPosResult(analysis)
       setNotes([...errors, ...missing.map((t) => `${t}: no price data available`)])
+    } catch (err) {
+      setNotes([err instanceof Error ? err.message : String(err)])
+      setPosResult(null)
     } finally {
       setBusy(false)
     }
@@ -115,6 +118,7 @@ export function Xray() {
       if (trades.length === 0) {
         setNotes(errors.length ? errors : ['No trades recognized in that CSV.'])
         setHistResult(null)
+        setHistBlend(null)
         return
       }
       localStorage.setItem(LS_TRADES, tradesText)
@@ -136,6 +140,7 @@ export function Xray() {
     } catch (err) {
       setNotes([err instanceof Error ? err.message : String(err)])
       setHistResult(null)
+      setHistBlend(null)
     } finally {
       setBusy(false)
     }

@@ -90,7 +90,7 @@ export function Styleguide() {
 
       {/* Colors */}
       <SectionTitle>Color tokens</SectionTitle>
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         {swatches.map((s) => (
           <div key={s.name} className="space-y-2">
             <div className={`h-16 rounded-lg border ${s.cls}`} />
@@ -122,7 +122,7 @@ export function Styleguide() {
 
       {/* Metric cards */}
       <SectionTitle>Metric cards</SectionTitle>
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {metrics.map((m) => (
           <Card key={m.label} className="gap-1">
             <CardHeader>
@@ -201,7 +201,7 @@ export function Styleguide() {
       {/* Form controls */}
       <SectionTitle>Form controls</SectionTitle>
       <Card>
-        <CardContent className="grid grid-cols-3 gap-6">
+        <CardContent className="grid gap-6 sm:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="ticker">Add ticker</Label>
             <Input id="ticker" placeholder="e.g. VTI, AAPL, VTSAX" />
@@ -233,7 +233,7 @@ export function Styleguide() {
       </Card>
 
       {/* Badges */}
-      <div className="mt-6 flex gap-2">
+      <div className="mt-6 flex flex-wrap gap-2">
         <Badge>Stock</Badge>
         <Badge variant="secondary">ETF</Badge>
         <Badge variant="outline">Mutual fund</Badge>
@@ -246,7 +246,7 @@ export function Styleguide() {
       {/* Tabs + table */}
       <SectionTitle>Results depth tabs</SectionTitle>
       <Tabs defaultValue="annual">
-        <TabsList>
+        <TabsList className="max-w-full overflow-x-auto">
           <TabsTrigger value="annual">Annual returns</TabsTrigger>
           <TabsTrigger value="rolling">Rolling returns</TabsTrigger>
           <TabsTrigger value="risk">Risk</TabsTrigger>
@@ -254,7 +254,7 @@ export function Styleguide() {
         </TabsList>
         <TabsContent value="annual" className="animate-enter">
           <Card>
-            <CardContent>
+            <CardContent className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

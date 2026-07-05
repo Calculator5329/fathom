@@ -47,8 +47,12 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
       mode === 'bootstrap'
         ? runBootstrap(series, params, { trials: e.data.trials, rng: mulberry32(e.data.seed) })
         : runHistoricalSequence(series, params)
-    // Max safe withdrawal is always evaluated historically (the honest floor).
-    const maxSwr = maxSafeWithdrawal(series, params, 0.95)
+    // Max safe withdrawal is evaluated historically (the honest floor) — but
+    // only for rate-driven strategies. VPW and fixed-percent adapt spending to
+    // the balance and can't deplete early, so "max safe rate" is meaningless
+    // there (the solver would just return its search ceiling).
+    const rateDriven = params.strategy === 'fixedReal' || params.strategy === 'guardrails'
+    const maxSwr = rateDriven ? maxSafeWithdrawal(series, params, 0.95) : NaN
     postMessage({ result, maxSwr } satisfies WorkerResponse)
   } catch (err) {
     postMessage({

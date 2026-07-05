@@ -8,7 +8,8 @@
  *
  * Convention (matches the Trinity study / FiCalc): withdraw once at the START
  * of each year, then compound 12 months of returns. A trial "fails" if the
- * balance is exhausted before the horizon ends.
+ * balance is exhausted before the horizon ends — except VPW's final-year
+ * spend-to-zero, which is the plan working, not a failure.
  */
 
 export type WithdrawalStrategy = 'fixedReal' | 'fixedPercent' | 'vpw' | 'guardrails'
@@ -99,6 +100,12 @@ function runTrial(
   path: number[]
   ending: number
   depletedYear: number | null
+  /**
+   * True only when the money ran out unplanned. VPW amortizes the balance to
+   * zero by design, so hitting $0 in the FINAL year is the plan succeeding,
+   * not a failure.
+   */
+  failed: boolean
   firstYearW: number
   worstYearW: number
 } {
@@ -182,7 +189,9 @@ function runTrial(
     path[y + 1] = balance
   }
   if (!Number.isFinite(worstYearW)) worstYearW = 0
-  return { path, ending: balance, depletedYear, firstYearW, worstYearW }
+  const failed =
+    depletedYear !== null && !(params.strategy === 'vpw' && depletedYear === totalYears)
+  return { path, ending: balance, depletedYear, failed, firstYearW, worstYearW }
 }
 
 // ---- percentile helper ------------------------------------------------------
@@ -197,6 +206,7 @@ function percentile(sorted: number[], p: number): number {
 
 interface TrialOut {
   path: number[]
+  failed: boolean
   firstYearW: number
   worstYearW: number
 }
@@ -211,7 +221,7 @@ function summarize(
   const totalYears = accumulationYears + params.horizonYears
   const trials = trialsOut.length
   const endings = trialsOut.map((t) => t.path[totalYears])
-  const successes = endings.filter((e) => e > 0).length
+  const successes = trialsOut.filter((t) => !t.failed).length
 
   // Per-year percentiles.
   const pByYear = { p5: [], p25: [], p50: [], p75: [], p95: [] } as SimResult['percentiles']
@@ -233,8 +243,7 @@ function summarize(
         .map((t, i) => ({
           label: labels[i],
           endingBalance: t.path[totalYears],
-          depletedYear:
-            t.path[totalYears] > 0 ? null : t.path.findIndex((b, y) => y > 0 && b === 0),
+          depletedYear: t.failed ? t.path.findIndex((b, y) => y > 0 && b === 0) : null,
         }))
         .sort((a, b) => a.endingBalance - b.endingBalance)
         .slice(0, 10)

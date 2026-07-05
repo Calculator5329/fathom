@@ -92,6 +92,27 @@ describe('fidelity pack', () => {
   })
 })
 
+describe('VPW planned spend-down', () => {
+  it('depleting AT the horizon is the plan, not a failure', () => {
+    // VPW amortizes to zero by design — its final year withdraws the whole
+    // balance. With flat-zero returns the balance hits 0 in year 10 exactly
+    // as planned, so success must be 100% and nothing reads as "depleted".
+    const s = constantSeries(0, 10 * 12)
+    const r = runHistoricalSequence(s, { ...base, strategy: 'vpw', horizonYears: 10 })
+    expect(r.successRate).toBe(1)
+    expect(r.medianEnding).toBeLessThan(base.initialBalance * 0.05)
+    expect(r.worstStarts.every((w) => w.depletedYear === null)).toBe(true)
+  })
+
+  it('first-year VPW income amortizes the balance over the horizon', () => {
+    // 2.5% assumed real return over 10 years → payout rate ≈ 11.4%/yr on 1M.
+    const s = constantSeries(0, 10 * 12)
+    const r = runHistoricalSequence(s, { ...base, strategy: 'vpw', horizonYears: 10 })
+    expect(r.income.firstYearMedian).toBeGreaterThan(100_000)
+    expect(r.income.firstYearMedian).toBeLessThan(130_000)
+  })
+})
+
 describe('bootstrap', () => {
   it('is deterministic with a seeded RNG and matches trial count', () => {
     const s = constantSeries(0.004, 30 * 12)

@@ -327,8 +327,17 @@ function Results({
             <CardTitle className="text-sm font-normal text-muted-foreground">Max safe rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold tracking-tight tnum text-gain">{pctStr(maxSwr, 2)}</p>
-            <p className="mt-0.5 text-sm text-muted-foreground">95% historical</p>
+            {Number.isFinite(maxSwr) ? (
+              <>
+                <p className="text-3xl font-semibold tracking-tight tnum text-gain">{pctStr(maxSwr, 2)}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">95% historical</p>
+              </>
+            ) : (
+              <>
+                <p className="text-3xl font-semibold tracking-tight tnum text-muted-foreground">&mdash;</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">spending adapts to balance</p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card className="gap-1">
