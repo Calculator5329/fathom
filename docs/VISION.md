@@ -171,8 +171,12 @@ APPROVED, in-flight this pass:
    tree-shaking, catalog preload at boot.
 7. UI batch: Segmented → ui/, sonner toasts, skeleton loading states, landing mini-chart,
    PWA manifest + logo pass, "/" focuses ticker search.
-8. Data: fundamentals fetched on ticker admission + weekly refresh job; Shiller extended by
-   parsing ie_data.xls with relaxed completeness filter; schema "v" field in bucket JSONs.
+8. Data: fundamentals fetched on ticker admission + weekly refresh job; schema "v" field in
+   bucket JSONs. Shiller extension: INVESTIGATED AGAIN 2026-07-04 — Yale's ie_data.xls is
+   itself abandoned (last-modified 2023-10-17; dividend column blank after 2023-06), so no
+   filter relaxation can extend it (`scripts/build-shiller.mjs` documents the formulas and
+   guards). Only path: splice 2023-07→present from SPY total return + FRED CPI/GS10 using the
+   same formulas — a provenance change, deferred to roadmap.
 
 ROADMAP (approved, later): FRED macro dashboard (low priority) · efficient-frontier explorer ·
 ⌘K command palette · OG share-image service · saved-scenarios library (secondary to
