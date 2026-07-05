@@ -16,10 +16,12 @@ export interface MonteCarloConfig {
   feeRate: number // percent
   mode: 'historical' | 'bootstrap'
   trials: number
+  accumulationYears: number
+  annualContribution: number // real $/yr during accumulation
 }
 
 const VALID_IDS = new Set(ASSET_CLASSES.map((a) => a.id))
-const STRATEGIES: WithdrawalStrategy[] = ['fixedReal', 'fixedPercent', 'vpw']
+const STRATEGIES: WithdrawalStrategy[] = ['fixedReal', 'fixedPercent', 'vpw', 'guardrails']
 
 export const DEFAULT_MC: MonteCarloConfig = {
   allocation: [
@@ -33,6 +35,8 @@ export const DEFAULT_MC: MonteCarloConfig = {
   feeRate: 0.02,
   mode: 'historical',
   trials: 10_000,
+  accumulationYears: 0,
+  annualContribution: 0,
 }
 
 const num = (raw: string | null, fallback: number, min: number, max: number) => {
@@ -56,6 +60,8 @@ export function encodeMonteCarlo(c: MonteCarloConfig): URLSearchParams {
   if (c.feeRate !== DEFAULT_MC.feeRate) p.set('fee', String(c.feeRate))
   if (c.mode !== DEFAULT_MC.mode) p.set('mode', c.mode)
   if (c.trials !== DEFAULT_MC.trials) p.set('trials', String(c.trials))
+  if (c.accumulationYears !== 0) p.set('acc', String(c.accumulationYears))
+  if (c.annualContribution !== 0) p.set('save', String(c.annualContribution))
   return p
 }
 
@@ -82,5 +88,7 @@ export function decodeMonteCarlo(p: URLSearchParams): MonteCarloConfig {
     feeRate: num(p.get('fee'), DEFAULT_MC.feeRate, 0, 10),
     mode: mode === 'bootstrap' ? 'bootstrap' : 'historical',
     trials: num(p.get('trials'), DEFAULT_MC.trials, 1000, 50_000),
+    accumulationYears: num(p.get('acc'), 0, 0, 50),
+    annualContribution: num(p.get('save'), 0, 0, 1e9),
   }
 }

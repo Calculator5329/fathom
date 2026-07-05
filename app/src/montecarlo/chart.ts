@@ -10,7 +10,8 @@ import type { SimResult } from './simulate'
 export function fanChartOption(result: SimResult): EChartsCoreOption {
   const base = baseOption()
   const accent = cssVar('--primary')
-  const years = Array.from({ length: result.horizonYears + 1 }, (_, i) => String(i))
+  const totalYears = result.accumulationYears + result.horizonYears
+  const years = Array.from({ length: totalYears + 1 }, (_, i) => String(i))
   const { p5, p25, p50, p75, p95 } = result.percentiles
 
   // Stacked-area trick for bands: base (invisible) + delta (filled).
@@ -65,6 +66,24 @@ export function fanChartOption(result: SimResult): EChartsCoreOption {
         itemStyle: { color: accent },
         showSymbol: false,
         emphasis: { disabled: true },
+        // Shade the saving years and mark retirement.
+        ...(result.accumulationYears > 0
+          ? {
+              markArea: {
+                silent: true,
+                itemStyle: { color: cssVar('--chart-2'), opacity: 0.05 },
+                label: { color: cssVar('--muted-foreground'), fontSize: 12, position: 'insideTop' },
+                data: [[{ name: 'saving', xAxis: '0' }, { xAxis: String(result.accumulationYears) }]],
+              },
+              markLine: {
+                silent: true,
+                symbol: 'none',
+                lineStyle: { color: cssVar('--muted-foreground'), type: 'dashed', width: 1 },
+                label: { color: cssVar('--muted-foreground'), fontSize: 12, formatter: 'retire' },
+                data: [{ xAxis: String(result.accumulationYears) }],
+              },
+            }
+          : {}),
       },
     ],
   }

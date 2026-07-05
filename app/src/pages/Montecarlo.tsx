@@ -40,6 +40,7 @@ const STRATEGY_LABELS: Record<WithdrawalStrategy, string> = {
   fixedReal: 'Fixed real dollar',
   fixedPercent: 'Fixed % of balance',
   vpw: 'Variable % (VPW)',
+  guardrails: 'Guardrails (Guyton-Klinger)',
 }
 
 const pctStr = (v: number, dp = 1) => `${(v * 100).toFixed(dp)}%`
@@ -62,6 +63,8 @@ export function Montecarlo() {
       strategy: config.strategy,
       horizonYears: config.horizonYears,
       feeRate: config.feeRate / 100,
+      accumulationYears: config.accumulationYears,
+      annualContribution: config.annualContribution,
     },
     mode: config.mode,
     trials: config.trials,
@@ -148,6 +151,39 @@ export function Montecarlo() {
                 step={50000}
                 value={config.initialBalance}
                 onChange={(e) => update({ ...config, initialBalance: Math.max(1, Number(e.target.value)) })}
+                className="pl-7 font-mono tnum"
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="acc">Years to retire</Label>
+            <div className="relative">
+              <Input
+                id="acc"
+                type="number"
+                min={0}
+                max={50}
+                value={config.accumulationYears}
+                onChange={(e) =>
+                  update({ ...config, accumulationYears: Math.max(0, Math.min(50, Math.round(Number(e.target.value)))) })
+                }
+                className="pr-7 font-mono tnum"
+              />
+              <span className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-sm text-muted-foreground">y</span>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="save">Saving / yr</Label>
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">$</span>
+              <Input
+                id="save"
+                type="number"
+                step={1000}
+                min={0}
+                value={config.annualContribution}
+                disabled={config.accumulationYears === 0}
+                onChange={(e) => update({ ...config, annualContribution: Math.max(0, Number(e.target.value)) })}
                 className="pl-7 font-mono tnum"
               />
             </div>
@@ -305,6 +341,39 @@ function Results({
           </CardContent>
         </Card>
       </div>
+
+      {/* Income variability — the real story for variable strategies. */}
+      {config.strategy !== 'fixedReal' && (
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="gap-1">
+            <CardHeader>
+              <CardTitle className="text-sm font-normal text-muted-foreground">First-year income</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-semibold tracking-tight tnum">{formatUsdCompact(result.income.firstYearMedian)}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">median, today's $</p>
+            </CardContent>
+          </Card>
+          <Card className="gap-1">
+            <CardHeader>
+              <CardTitle className="text-sm font-normal text-muted-foreground">Worst year (median)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-semibold tracking-tight tnum">{formatUsdCompact(result.income.worstYearMedian)}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">typical deepest pay cut</p>
+            </CardContent>
+          </Card>
+          <Card className="gap-1">
+            <CardHeader>
+              <CardTitle className="text-sm font-normal text-muted-foreground">Worst year (5th pct)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-semibold tracking-tight tnum text-loss">{formatUsdCompact(result.income.worstYearP5)}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">bad-luck floor</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <Card>
         <CardHeader>

@@ -5,6 +5,7 @@ import {
   mulberry32,
   runBootstrap,
   runHistoricalSequence,
+  trialMonths,
   type SimParams,
   type SimResult,
 } from './simulate'
@@ -33,7 +34,7 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
       cpi: new Map(e.data.cpi),
     }
     const series = buildRealReturns(e.data.allocation, data)
-    if (series.returns.length < e.data.params.horizonYears * 12) {
+    if (series.returns.length < trialMonths(e.data.params)) {
       postMessage({
         result: null,
         maxSwr: 0,

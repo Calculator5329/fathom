@@ -9,6 +9,7 @@ import {
   type RealReturnSeries,
   type SimParams,
 } from '../simulate'
+// (RealReturnSeries used by the fidelity-pack crash fixture)
 
 // ---- unit tests on synthetic series ----------------------------------------
 /** Constant real monthly return series of the given length. */
@@ -47,6 +48,47 @@ describe('runTrial semantics (via historical with 1 start)', () => {
     const r = runHistoricalSequence(s, base)
     expect(r.successRate).toBe(1)
     expect(r.medianEnding).toBeGreaterThan(base.initialBalance)
+  })
+})
+
+describe('fidelity pack', () => {
+  it('accumulation phase: contributions compound into the retirement balance', () => {
+    // 0% return, save 12k/yr for 10y on 100k start -> exactly 220k at retirement.
+    const s = constantSeries(0, 40 * 12)
+    const r = runHistoricalSequence(s, {
+      ...base,
+      initialBalance: 100_000,
+      accumulationYears: 10,
+      annualContribution: 12_000,
+      horizonYears: 10,
+      withdrawalRate: 0.04,
+    })
+    expect(r.accumulationYears).toBe(10)
+    expect(r.percentiles.p50[10]).toBeCloseTo(220_000, 4)
+    // fixedReal anchors to the retirement balance: 4% of 220k = 8.8k/yr.
+    expect(r.income.firstYearMedian).toBeCloseTo(8_800, 4)
+  })
+
+  it('guardrails cuts income after a crash and never depletes as fast as fixedReal', () => {
+    // Crash 40% in year one, flat after: guardrails should cut 10%.
+    const months = 30 * 12
+    const returns = Array.from({ length: months }, (_, i) => (i < 12 ? -0.0417 : 0))
+    const s: RealReturnSeries = { dates: constantSeries(0, months).dates, returns }
+    const fixed = runHistoricalSequence(s, { ...base, horizonYears: 30 })
+    const guard = runHistoricalSequence(s, { ...base, horizonYears: 30, strategy: 'guardrails' })
+    // At least one 10% cut fired (repeatedly, in this pathological flat fixture).
+    expect(guard.income.worstYearMedian).toBeLessThanOrEqual(guard.income.firstYearMedian * 0.9)
+    expect(guard.income.worstYearMedian).toBeGreaterThan(0)
+    // Cutting withdrawals must not end worse than never cutting.
+    expect(guard.medianEnding).toBeGreaterThanOrEqual(fixed.medianEnding)
+    expect(guard.successRate).toBeGreaterThanOrEqual(fixed.successRate)
+  })
+
+  it('income stats: fixedReal worst year equals first year when nothing depletes', () => {
+    const s = constantSeries(0.004, 30 * 12)
+    const r = runHistoricalSequence(s, base)
+    expect(r.income.worstYearMedian).toBeCloseTo(r.income.firstYearMedian, 6)
+    expect(r.income.firstYearMedian).toBeCloseTo(base.initialBalance * base.withdrawalRate, 6)
   })
 })
 

@@ -11,18 +11,27 @@
  * balance is exhausted before the horizon ends.
  */
 
-export type WithdrawalStrategy = 'fixedReal' | 'fixedPercent' | 'vpw'
+export type WithdrawalStrategy = 'fixedReal' | 'fixedPercent' | 'vpw' | 'guardrails'
 
 export interface SimParams {
   initialBalance: number
-  /** Annual withdrawal rate (fraction). fixedReal: ×initial; fixedPercent: ×current. */
+  /**
+   * Annual withdrawal rate (fraction). fixedReal/guardrails: × the balance at
+   * RETIREMENT (start of the withdrawal phase); fixedPercent: × current
+   * balance each year.
+   */
   withdrawalRate: number
   strategy: WithdrawalStrategy
+  /** Years of withdrawals (the retirement horizon). */
   horizonYears: number
   /** Annual expense ratio / advisory fee (fraction), applied monthly. */
   feeRate: number
   /** VPW assumed real return (fraction); ignored by other strategies. */
   vpwReturn?: number
+  /** Years of saving BEFORE withdrawals begin (0 = retire immediately). */
+  accumulationYears?: number
+  /** Real dollars contributed per year during accumulation (monthly 1/12). */
+  annualContribution?: number
 }
 
 export interface RealReturnSeries {
@@ -37,13 +46,20 @@ export interface SimResult {
   trials: number
   successRate: number
   horizonYears: number
-  /** Per-year (0..horizon) balance percentiles across trials, today's dollars. */
+  accumulationYears: number
+  /** Per-year (0..acc+horizon) balance percentiles across trials, today's dollars. */
   percentiles: { p5: number[]; p25: number[]; p50: number[]; p75: number[]; p95: number[] }
   /** Sorted ending balances for the distribution view. */
   endingBalances: number[]
   medianEnding: number
   /** Historical mode only: the worst starting years by outcome. */
   worstStarts: Array<{ label: string; endingBalance: number; depletedYear: number | null }>
+  /**
+   * Income variability across trials (real dollars): each trial's worst
+   * withdrawal year, summarized. For fixedReal this equals the fixed amount
+   * in successful trials; for variable strategies it shows the pay cut risk.
+   */
+  income: { firstYearMedian: number; worstYearMedian: number; worstYearP5: number }
 }
 
 // ---- seedable RNG (deterministic tests; Math.random in the worker) ----------
@@ -58,58 +74,115 @@ export function mulberry32(seed: number): () => number {
   }
 }
 
-// ---- withdrawal amount for a given year ------------------------------------
-function withdrawalForYear(
-  params: SimParams,
-  balance: number,
-  yearsElapsed: number,
-): number {
-  const { strategy, withdrawalRate, initialBalance, horizonYears } = params
-  if (strategy === 'fixedReal') return initialBalance * withdrawalRate
-  if (strategy === 'fixedPercent') return balance * withdrawalRate
-  // VPW: amortize the balance over the remaining years at an assumed real return.
-  const n = horizonYears - yearsElapsed
-  const r = params.vpwReturn ?? 0.025
-  const rate = r === 0 ? 1 / n : r / (1 - (1 + r) ** -n)
-  return balance * rate
+/** Total months a trial spans (accumulation + withdrawal phases). */
+export function trialMonths(params: SimParams): number {
+  return ((params.accumulationYears ?? 0) + params.horizonYears) * 12
 }
 
 /**
- * Run one trial over a sequence of `horizon×12` monthly real returns.
- * Returns ending balance (0 if depleted), the yearly balance path
- * (length horizon+1, index 0 = start), and the year it depleted (or null).
+ * Run one trial. Phases:
+ *  1) Accumulation (optional): contribute annualContribution/12 at each
+ *     month start, compound.
+ *  2) Withdrawals: withdraw 1/12 of the year's amount at each month start
+ *     (FiCalc convention — kinder than a full year up front), compound.
+ * Strategy semantics: fixedReal/guardrails anchor to the balance at
+ * retirement; guardrails then cuts the real withdrawal 10% when its current
+ * rate drifts 20% above the initial rate, and raises it 10% when 20% below
+ * (simplified Guyton-Klinger, decision applied at each year start).
+ * Everything is in real terms; a fee drags returns monthly.
  */
 function runTrial(
   params: SimParams,
   monthly: number[],
   offset: number,
-): { path: number[]; ending: number; depletedYear: number | null } {
+): {
+  path: number[]
+  ending: number
+  depletedYear: number | null
+  firstYearW: number
+  worstYearW: number
+} {
   const { initialBalance, horizonYears, feeRate } = params
+  const accYears = params.accumulationYears ?? 0
+  const contribMonthly = (params.annualContribution ?? 0) / 12
   const monthlyFeeFactor = (1 - feeRate) ** (1 / 12)
+  const totalYears = accYears + horizonYears
+
   let balance = initialBalance
-  const path = new Array<number>(horizonYears + 1)
+  const path = new Array<number>(totalYears + 1)
   path[0] = balance
   let depletedYear: number | null = null
+  let m = offset
 
-  for (let y = 0; y < horizonYears; y++) {
+  // Guardrails / fixed-real state, set at retirement.
+  let anchorW = 0
+  let initialRate = 0
+  let firstYearW = 0
+  let worstYearW = Infinity
+
+  for (let y = 0; y < totalYears; y++) {
     if (depletedYear !== null) {
       path[y + 1] = 0
+      m += 12
       continue
     }
-    const w = withdrawalForYear(params, balance, y)
-    balance -= w
-    if (balance <= 0) {
-      balance = 0
-      depletedYear = y + 1
-      path[y + 1] = 0
-      continue
+    const inAccumulation = y < accYears
+    let wMonthly = 0
+
+    if (!inAccumulation) {
+      const yearsRetired = y - accYears
+      if (yearsRetired === 0) {
+        anchorW = balance * params.withdrawalRate
+        initialRate = params.withdrawalRate
+      }
+      let w: number
+      switch (params.strategy) {
+        case 'fixedReal':
+          w = anchorW
+          break
+        case 'fixedPercent':
+          w = balance * params.withdrawalRate
+          break
+        case 'guardrails': {
+          if (yearsRetired > 0 && balance > 0) {
+            const currentRate = anchorW / balance
+            if (currentRate > initialRate * 1.2) anchorW *= 0.9
+            else if (currentRate < initialRate * 0.8) anchorW *= 1.1
+          }
+          w = anchorW
+          break
+        }
+        default: {
+          // VPW: amortize over remaining years at an assumed real return.
+          const n = horizonYears - yearsRetired
+          const r = params.vpwReturn ?? 0.025
+          const rate = r === 0 ? 1 / n : r / (1 - (1 + r) ** -n)
+          w = balance * rate
+        }
+      }
+      if (yearsRetired === 0) firstYearW = w
+      if (w < worstYearW) worstYearW = w
+      wMonthly = w / 12
     }
-    for (let m = 0; m < 12; m++) {
-      balance *= (1 + monthly[offset + y * 12 + m]) * monthlyFeeFactor
+
+    for (let k = 0; k < 12; k++) {
+      if (inAccumulation) {
+        balance += contribMonthly
+      } else {
+        balance -= wMonthly
+        if (balance <= 0) {
+          balance = 0
+          depletedYear = y + 1
+          break
+        }
+      }
+      balance *= (1 + monthly[m + k]) * monthlyFeeFactor
     }
+    m += 12
     path[y + 1] = balance
   }
-  return { path, ending: balance, depletedYear }
+  if (!Number.isFinite(worstYearW)) worstYearW = 0
+  return { path, ending: balance, depletedYear, firstYearW, worstYearW }
 }
 
 // ---- percentile helper ------------------------------------------------------
@@ -122,20 +195,28 @@ function percentile(sorted: number[], p: number): number {
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo)
 }
 
+interface TrialOut {
+  path: number[]
+  firstYearW: number
+  worstYearW: number
+}
+
 function summarize(
   mode: SimResult['mode'],
-  paths: number[][],
+  trialsOut: TrialOut[],
   labels: string[],
-  horizonYears: number,
+  params: SimParams,
 ): SimResult {
-  const trials = paths.length
-  const endings = paths.map((p) => p[horizonYears])
+  const accumulationYears = params.accumulationYears ?? 0
+  const totalYears = accumulationYears + params.horizonYears
+  const trials = trialsOut.length
+  const endings = trialsOut.map((t) => t.path[totalYears])
   const successes = endings.filter((e) => e > 0).length
 
   // Per-year percentiles.
   const pByYear = { p5: [], p25: [], p50: [], p75: [], p95: [] } as SimResult['percentiles']
-  for (let y = 0; y <= horizonYears; y++) {
-    const col = paths.map((p) => p[y]).sort((a, b) => a - b)
+  for (let y = 0; y <= totalYears; y++) {
+    const col = trialsOut.map((t) => t.path[y]).sort((a, b) => a - b)
     pByYear.p5.push(percentile(col, 5))
     pByYear.p25.push(percentile(col, 25))
     pByYear.p50.push(percentile(col, 50))
@@ -144,14 +225,16 @@ function summarize(
   }
 
   const sortedEndings = [...endings].sort((a, b) => a - b)
+  const firstW = trialsOut.map((t) => t.firstYearW).sort((a, b) => a - b)
+  const worstW = trialsOut.map((t) => t.worstYearW).sort((a, b) => a - b)
 
-  // Worst starts (historical): lowest ending balances first.
   const worstStarts = labels.length
-    ? paths
-        .map((p, i) => ({
+    ? trialsOut
+        .map((t, i) => ({
           label: labels[i],
-          endingBalance: p[horizonYears],
-          depletedYear: p[horizonYears] > 0 ? null : p.findIndex((b, y) => y > 0 && b === 0),
+          endingBalance: t.path[totalYears],
+          depletedYear:
+            t.path[totalYears] > 0 ? null : t.path.findIndex((b, y) => y > 0 && b === 0),
         }))
         .sort((a, b) => a.endingBalance - b.endingBalance)
         .slice(0, 10)
@@ -161,25 +244,30 @@ function summarize(
     mode,
     trials,
     successRate: trials ? successes / trials : 0,
-    horizonYears,
+    horizonYears: params.horizonYears,
+    accumulationYears,
     percentiles: pByYear,
     endingBalances: sortedEndings,
     medianEnding: percentile(sortedEndings, 50),
     worstStarts,
+    income: {
+      firstYearMedian: percentile(firstW, 50),
+      worstYearMedian: percentile(worstW, 50),
+      worstYearP5: percentile(worstW, 5),
+    },
   }
 }
 
 // ---- historical sequence ----------------------------------------------------
 export function runHistoricalSequence(series: RealReturnSeries, params: SimParams): SimResult {
-  const months = params.horizonYears * 12
-  const paths: number[][] = []
+  const months = trialMonths(params)
+  const out: TrialOut[] = []
   const labels: string[] = []
   for (let start = 0; start + months <= series.returns.length; start++) {
-    const { path } = runTrial(params, series.returns, start)
-    paths.push(path)
+    out.push(runTrial(params, series.returns, start))
     labels.push(series.dates[start])
   }
-  return summarize('historical', paths, labels, params.horizonYears)
+  return summarize('historical', out, labels, params)
 }
 
 // ---- block bootstrap --------------------------------------------------------
@@ -192,12 +280,12 @@ export function runBootstrap(
   params: SimParams,
   opts: { trials: number; blockMonths?: number; rng?: () => number } = { trials: 10000 },
 ): SimResult {
-  const months = params.horizonYears * 12
+  const months = trialMonths(params)
   const block = opts.blockMonths ?? 24
   const rng = opts.rng ?? Math.random
   const src = series.returns
   const maxStart = src.length - block
-  const paths: number[][] = []
+  const out: TrialOut[] = []
 
   for (let t = 0; t < opts.trials; t++) {
     const seq = new Array<number>(months)
@@ -208,9 +296,9 @@ export function runBootstrap(
       for (let i = 0; i < len; i++) seq[filled + i] = src[start + i]
       filled += len
     }
-    paths.push(runTrial(params, seq, 0).path)
+    out.push(runTrial(params, seq, 0))
   }
-  return summarize('bootstrap', paths, [], params.horizonYears)
+  return summarize('bootstrap', out, [], params)
 }
 
 /** Solve the max withdrawal rate meeting a target success rate (historical). */

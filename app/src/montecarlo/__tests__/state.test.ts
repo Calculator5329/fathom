@@ -15,6 +15,8 @@ describe('monte carlo url state', () => {
       feeRate: 0.25,
       mode: 'bootstrap',
       trials: 20_000,
+      accumulationYears: 15,
+      annualContribution: 24_000,
     }
     expect(decodeMonteCarlo(encodeMonteCarlo(c))).toEqual(c)
   })
