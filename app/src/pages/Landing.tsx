@@ -61,30 +61,22 @@ function HeroSparkline() {
       .then((s) => {
         if (cancelled) return
         const adj = splitAdjustedCloses(s.records)
-        // ~20 years of SPY on a LOG scale: log turns two decades of
-        // compounding into a clean, steady climb (linear front-flattens;
-        // a daily line squished into this wide band reads as noise). Weekly
-        // samples + a light moving average smooth out the jitter so it looks
-        // like a premium area chart, not a jagged squiggle — while still
-        // showing the 2008, 2020 and 2022 dips.
+        // ~20 years of DAILY SPY on a LINEAR scale — the real shape, daily
+        // texture and all: near-flat through the mid-2000s, then the long
+        // climb with the 2008 / 2020 / 2022 dips clearly cut in. Sampled to
+        // roughly one point per horizontal pixel so every visible wiggle is
+        // a real day, not a smoothed average.
         const windowed = adj.slice(-Math.min(adj.length, 20 * 252))
-        const step = Math.max(1, Math.floor(windowed.length / 320)) // ~weekly
-        const sampled: number[] = []
-        for (let i = 0; i < windowed.length; i += step) sampled.push(Math.log(windowed[i]))
-        const smooth = sampled.map((_, i) => {
-          const lo = Math.max(0, i - 2)
-          const hi = Math.min(sampled.length - 1, i + 2)
-          let sum = 0
-          for (let j = lo; j <= hi; j++) sum += sampled[j]
-          return sum / (hi - lo + 1)
-        })
-        const min = Math.min(...smooth)
-        const max = Math.max(...smooth)
-        const d = smooth
+        const step = Math.max(1, Math.floor(windowed.length / 1150))
+        const pts: number[] = []
+        for (let i = 0; i < windowed.length; i += step) pts.push(windowed[i])
+        const min = Math.min(...pts)
+        const max = Math.max(...pts)
+        const d = pts
           .map((v, i) => {
-            const x = (i / (smooth.length - 1)) * 1000
-            const y = 90 - ((v - min) / (max - min || 1)) * 80
-            return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+            const x = (i / (pts.length - 1)) * 1000
+            const y = 92 - ((v - min) / (max - min || 1)) * 84
+            return `${i === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`
           })
           .join('')
         setPath(d)
