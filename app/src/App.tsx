@@ -13,6 +13,10 @@ const Links = lazy(() => import('./pages/Links').then((m) => ({ default: m.Links
 const Xray = lazy(() => import('./pages/Xray').then((m) => ({ default: m.Xray })))
 const Styleguide = lazy(() => import('./pages/Styleguide').then((m) => ({ default: m.Styleguide })))
 
+// Warm the ticker catalog at boot so the first picker interaction is instant.
+import { loadCatalog } from './data/catalog'
+loadCatalog()
+
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `text-sm transition-colors ${
     isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'

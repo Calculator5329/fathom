@@ -1,6 +1,28 @@
 import { useEffect, useRef } from 'react'
 import { Download } from 'lucide-react'
-import * as echarts from 'echarts'
+// Tree-shaken ECharts: register only what Fathom actually renders. Importing
+// the full 'echarts' bundle costs ~700KB extra minified — don't regress this.
+import * as echarts from 'echarts/core'
+import { BarChart, LineChart } from 'echarts/charts'
+import {
+  GridComponent,
+  LegendComponent,
+  MarkAreaComponent,
+  MarkLineComponent,
+  TooltipComponent,
+} from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+echarts.use([
+  BarChart,
+  LineChart,
+  GridComponent,
+  LegendComponent,
+  MarkAreaComponent,
+  MarkLineComponent,
+  TooltipComponent,
+  CanvasRenderer,
+])
 
 /** Resolve a CSS custom property from :root (e.g. chart token colors). */
 export function cssVar(name: string): string {
@@ -64,7 +86,7 @@ interface EChartProps {
 
 export function EChart({ option, group, className, exportName }: EChartProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const chartRef = useRef<echarts.ECharts | null>(null)
+  const chartRef = useRef<echarts.EChartsType | null>(null)
 
   const exportPng = () => {
     const chart = chartRef.current
