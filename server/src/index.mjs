@@ -17,13 +17,14 @@
  */
 import http from 'node:http'
 import { Storage } from '@google-cloud/storage'
+import { fetchFundamentals } from './edgar.mjs'
 import { TiingoError, fetchTickerFull, searchTiingo } from './tiingo.mjs'
 
 const PORT = Number(process.env.PORT) || 8080
 const BUCKET = process.env.BUCKET || 'ethan-488900-fathom-data'
 const CATALOG_PATH = 'tickers/catalog.json'
 const CATALOG_TTL_MS = 5 * 60 * 1000
-const CACHE_CONTROL = 'public, max-age=3600'
+const CACHE_CONTROL = 'public,max-age=3600'
 
 const storage = new Storage()
 const bucket = storage.bucket(BUCKET)
@@ -31,6 +32,7 @@ const bucket = storage.bucket(BUCKET)
 // ---- catalog cache -------------------------------------------------------
 let catalog = []
 let catalogLoadedAt = 0
+let catalogGeneration = null
 
 function upstreamMessage(err) {
   if (err instanceof TiingoError && err.status === 429) {
@@ -58,26 +60,93 @@ function upstreamMessage(err) {
 
 async function loadCatalog(force = false) {
   if (!force && Date.now() - catalogLoadedAt < CATALOG_TTL_MS) return catalog
-  const [buf] = await bucket.file(CATALOG_PATH).download()
+  const file = bucket.file(CATALOG_PATH)
+  let buf = null
+  let generation = null
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const [metadata] = await file.getMetadata()
+    generation = metadata.generation ?? null
+    const source = generation ? bucket.file(CATALOG_PATH, { generation }) : file
+    try {
+      const downloaded = await source.download()
+      buf = downloaded[0]
+      break
+    } catch (err) {
+      if (Number(err?.code ?? err?.statusCode) !== 404 || attempt === 2) throw err
+    }
+  }
   catalog = JSON.parse(buf.toString())
   catalogLoadedAt = Date.now()
+  catalogGeneration = generation
   return catalog
 }
 
-async function saveCatalog(next) {
-  catalog = next.sort((a, b) => a.ticker.localeCompare(b.ticker))
-  catalogLoadedAt = Date.now()
-  await bucket.file(CATALOG_PATH).save(JSON.stringify(catalog), {
+function isPreconditionFailed(err) {
+  return Number(err?.code ?? err?.statusCode) === 412
+}
+
+async function updateCatalog(mutator) {
+  let lastError = null
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const fresh = await loadCatalog(true)
+    const next = await mutator([...fresh])
+    if (next === null) return { changed: false, catalog: fresh }
+
+    const sorted = next.toSorted((a, b) => a.ticker.localeCompare(b.ticker))
+    const saveOptions = {
+      contentType: 'application/json',
+      metadata: { cacheControl: 'public, max-age=300' },
+    }
+    if (catalogGeneration !== null) {
+      saveOptions.preconditionOpts = { ifGenerationMatch: catalogGeneration }
+    }
+    try {
+      await bucket.file(CATALOG_PATH).save(JSON.stringify(sorted), saveOptions)
+      catalog = sorted
+      catalogLoadedAt = Date.now()
+      const [metadata] = await bucket.file(CATALOG_PATH).getMetadata()
+      catalogGeneration = metadata.generation ?? null
+      return { changed: true, catalog }
+    } catch (err) {
+      if (!isPreconditionFailed(err)) throw err
+      lastError = err
+    }
+  }
+  throw lastError ?? new Error('catalog update failed')
+}
+
+async function saveJson(path, data, cacheControl = CACHE_CONTROL) {
+  await bucket.file(path).save(JSON.stringify(data), {
     contentType: 'application/json',
-    metadata: { cacheControl: 'public, max-age=300' },
+    metadata: { cacheControl },
   })
 }
 
+async function saveVersionedJson(path, data, cacheControl = CACHE_CONTROL) {
+  const payload = { ...data, v: 1 }
+  await saveJson(path, payload, cacheControl)
+  return payload
+}
+
+async function saveReport(path, report) {
+  return saveVersionedJson(path, report, CACHE_CONTROL)
+}
+
+async function saveFundamentals(data) {
+  return saveVersionedJson(`fundamentals/${data.ticker}.json`, data, CACHE_CONTROL)
+}
+
+async function cacheFundamentals(ticker) {
+  const data = await fetchFundamentals(ticker)
+  if (!data) {
+    console.warn(`${ticker}: no EDGAR fundamentals to cache`)
+    return null
+  }
+  return saveFundamentals(data)
+}
+
 async function saveSeries(data) {
-  await bucket.file(`tickers/${data.ticker}.json`).save(JSON.stringify(data), {
-    contentType: 'application/json',
-    metadata: { cacheControl: CACHE_CONTROL },
-  })
+  return saveVersionedJson(`tickers/${data.ticker}.json`, data, CACHE_CONTROL)
 }
 
 // ---- handlers ------------------------------------------------------------
@@ -128,22 +197,30 @@ function admitTicker(symbol) {
     p = (async () => {
       const data = await fetchTickerFull(key)
       if (!data) return null
-      await saveSeries(data)
-      const cat = await loadCatalog(true)
-      if (!cat.some((e) => e.ticker === data.ticker)) {
-        let type = 'Stock'
-        try {
-          const [match] = await searchTiingo(data.ticker, 1)
-          if (match?.ticker === data.ticker) type = match.type
-        } catch {
-          /* default Stock */
-        }
-        await saveCatalog([
-          ...cat,
-          { ticker: data.ticker, name: data.name, type, startDate: data.startDate },
-        ])
+      const savedData = await saveSeries(data)
+      let type = 'Stock'
+      try {
+        const [match] = await searchTiingo(data.ticker, 1)
+        if (match?.ticker === data.ticker) type = match.type
+      } catch {
+        /* default Stock */
       }
-      return data
+
+      let catalogType = type
+      await updateCatalog((cat) => {
+        const existing = cat.find((e) => e.ticker === data.ticker)
+        if (existing) {
+          catalogType = existing.type
+          return null
+        }
+        return [...cat, { ticker: data.ticker, name: data.name, type, startDate: data.startDate }]
+      })
+
+      if (catalogType === 'Stock') {
+        cacheFundamentals(data.ticker).catch(console.warn)
+      }
+
+      return savedData
     })().finally(() => inflight.delete(key))
     inflight.set(key, p)
   }
@@ -151,6 +228,7 @@ function admitTicker(symbol) {
 }
 
 async function handleRefresh() {
+  const startedAt = Date.now()
   const cat = await loadCatalog(true)
   const results = { refreshed: 0, failed: [] }
   const updated = []
@@ -167,8 +245,43 @@ async function handleRefresh() {
     }
     await new Promise((r) => setTimeout(r, 1200)) // stay polite to Tiingo
   }
-  await saveCatalog(updated)
-  return results
+  const updatedByTicker = new Map(updated.map((entry) => [entry.ticker, entry]))
+  await updateCatalog((fresh) => fresh.map((entry) => updatedByTicker.get(entry.ticker) ?? entry))
+  const report = {
+    ranAt: new Date().toISOString(),
+    durationMs: Date.now() - startedAt,
+    refreshed: results.refreshed,
+    failed: results.failed,
+    catalogSize: cat.length,
+  }
+  return saveReport('refresh-report.json', report)
+}
+
+async function handleRefreshFundamentals() {
+  const startedAt = Date.now()
+  const cat = await loadCatalog(true)
+  const stocks = cat.filter((entry) => entry.type === 'Stock')
+  const results = { refreshed: 0, failed: [] }
+
+  for (const entry of stocks) {
+    try {
+      const data = await fetchFundamentals(entry.ticker)
+      if (!data) throw new Error('no fundamentals')
+      await saveFundamentals(data)
+      results.refreshed++
+    } catch (err) {
+      results.failed.push(`${entry.ticker}: ${err.message}`)
+    }
+  }
+
+  const report = {
+    ranAt: new Date().toISOString(),
+    durationMs: Date.now() - startedAt,
+    refreshed: results.refreshed,
+    failed: results.failed,
+    catalogSize: cat.length,
+  }
+  return saveReport('fundamentals-report.json', report)
 }
 
 // ---- http ----------------------------------------------------------------
@@ -222,6 +335,18 @@ const server = http.createServer(async (req, res) => {
       }
       const results = await handleRefresh()
       console.log('refresh complete:', JSON.stringify(results))
+      return send(res, 200, results)
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/refresh-fundamentals') {
+      if (
+        !process.env.REFRESH_TOKEN ||
+        req.headers['x-refresh-token'] !== process.env.REFRESH_TOKEN
+      ) {
+        return send(res, 401, { error: 'unauthorized' })
+      }
+      const results = await handleRefreshFundamentals()
+      console.log('fundamentals refresh complete:', JSON.stringify(results))
       return send(res, 200, results)
     }
 
