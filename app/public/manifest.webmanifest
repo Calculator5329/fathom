@@ -1,0 +1,17 @@
+{
+  "name": "Fathom",
+  "short_name": "Fathom",
+  "description": "Backtesting, asset allocation, retirement simulation, and stock research on decades of real market data.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0f0e",
+  "theme_color": "#0c0f0e",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

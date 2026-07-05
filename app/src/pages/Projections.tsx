@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { LineChart, LogIn, Plus } from 'lucide-react'
 import { TickerPicker } from '@/components/backtest/TickerPicker'
 import { Button } from '@/components/ui/button'
@@ -134,8 +135,10 @@ function ProjectionsInner() {
       await saveProjection(user.uid, toSave)
       setBaseline(JSON.stringify(toSave))
       setDraft(toSave)
+      toast.success(`${toSave.ticker} projection saved`)
     } catch (err) {
       console.error(err)
+      toast.error(`Save failed: ${err instanceof Error ? err.message : 'unknown error'}`)
     } finally {
       setSaving(false)
     }
@@ -143,8 +146,14 @@ function ProjectionsInner() {
 
   const onDelete = async () => {
     if (!user || !draft) return
-    await deleteProjection(user.uid, draft.ticker)
-    setDraft(null)
+    const ticker = draft.ticker
+    try {
+      await deleteProjection(user.uid, ticker)
+      setDraft(null)
+      toast.success(`${ticker} projection deleted`)
+    } catch (err) {
+      toast.error(`Delete failed: ${err instanceof Error ? err.message : 'unknown error'}`)
+    }
   }
 
   const doSignIn = async () => {

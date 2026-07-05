@@ -1,5 +1,6 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
+import { Toaster } from '@/components/ui/sonner'
 import { Landing } from './pages/Landing'
 
 // Route-level code splitting: ECharts (~400KB) and the engine load only when
@@ -23,6 +24,24 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   }`
 
 function Shell({ children }: { children: React.ReactNode }) {
+  // "/" focuses the nearest ticker/asset search input (Linear-style).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return
+      const input = document.querySelector<HTMLInputElement>(
+        'input[placeholder*="ticker" i], input[placeholder*="Search" i], input[placeholder*="asset" i]',
+      )
+      if (input) {
+        e.preventDefault()
+        input.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
@@ -76,6 +95,7 @@ export default function App() {
             <Route path="/styleguide" element={<Styleguide />} />
           </Routes>
         </Suspense>
+        <Toaster position="bottom-right" />
       </Shell>
     </BrowserRouter>
   )

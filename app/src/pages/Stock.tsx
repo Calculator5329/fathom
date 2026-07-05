@@ -5,6 +5,8 @@ import { EChart } from '@/components/charts/EChart'
 import { TickerPicker } from '@/components/backtest/TickerPicker'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Segmented } from '@/components/ui/segmented'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { loadSeries, lookup } from '@/data/catalog'
 import type { TickerSeries } from '@/engine'
@@ -48,31 +50,6 @@ const PERIOD_OPTS: Array<{ v: Period; label: string }> = [
   { v: '1yq', label: '1Y·Q' },
 ]
 
-function Segmented<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: Array<{ v: T; label: string }>
-  value: T
-  onChange: (v: T) => void
-}) {
-  return (
-    <div className="flex gap-1">
-      {options.map((o) => (
-        <Button
-          key={o.v}
-          variant={o.v === value ? 'secondary' : 'ghost'}
-          size="xs"
-          className="font-mono"
-          onClick={() => onChange(o.v)}
-        >
-          {o.label}
-        </Button>
-      ))}
-    </div>
-  )
-}
 
 function sliceRange(years: FiscalYear[], range: Range): FiscalYear[] {
   if (range === 'all') return years
@@ -277,7 +254,16 @@ export function Stock() {
       </div>
 
       {error && <p className="mt-6 text-sm text-loss">{error}</p>}
-      {loading && !series && <p className="mt-6 text-sm text-muted-foreground">Loading {ticker}…</p>}
+      {loading && !series && (
+        <div className="mt-6 animate-pulse">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[0, 1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-24 rounded-xl" />
+            ))}
+          </div>
+          <Skeleton className="mt-6 h-96 rounded-xl" />
+        </div>
+      )}
 
       {stats && (
         <>
