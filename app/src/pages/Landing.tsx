@@ -61,12 +61,13 @@ function HeroSparkline() {
       .then((s) => {
         if (cancelled) return
         const adj = splitAdjustedCloses(s.records)
-        // ~20 years of DAILY SPY on a LINEAR scale — the real shape, daily
-        // texture and all: near-flat through the mid-2000s, then the long
-        // climb with the 2008 / 2020 / 2022 dips clearly cut in. Sampled to
-        // roughly one point per horizontal pixel so every visible wiggle is
-        // a real day, not a smoothed average.
-        const windowed = adj.slice(-Math.min(adj.length, 20 * 252))
+        // ~25 years of DAILY SPY on a LINEAR scale — the real shape, daily
+        // texture and all: the dot-com peak and 2000s, then the long climb
+        // with the 2008 / 2020 / 2022 dips cut in. (Full history over-
+        // flattens on a linear axis; 25y keeps the growth spread across the
+        // width.) Sampled to ~1 point per horizontal pixel so every visible
+        // wiggle is a real day, not a smoothed average.
+        const windowed = adj.slice(-Math.min(adj.length, 25 * 252))
         const step = Math.max(1, Math.floor(windowed.length / 1150))
         const pts: number[] = []
         for (let i = 0; i < windowed.length; i += step) pts.push(windowed[i])
