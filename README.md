@@ -92,3 +92,8 @@ node scripts/build-fundamentals.mjs          # SEC EDGAR fundamentals
 node scripts/extend-asset-classes.mjs        # Shiller/FRED splice to present
 node scripts/build-ff-factors.mjs            # Fama-French 3-factor data
 ```
+
+## License
+
+[AGPL-3.0](LICENSE) — read it, learn from it, build on it, but derivatives
+(including hosted services) must stay open source under the same terms.
