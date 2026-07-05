@@ -151,6 +151,35 @@ Hosting deploy → Shiller refresh + polish debt → Tool 3 (auth foundation, sm
 Tool 4 Monte Carlo (no new data needed, huge value) → Tool 5 fundamentals (new data program) →
 Tool 6 x-ray (depends on 5 for full value) → backlog items opportunistically.
 
+## 2026-07-04 review — Ethan's decisions (binding priorities)
+
+**Name ratified: Fathom.**
+
+APPROVED, in-flight this pass:
+1. Cross-tool integration: EDGAR→Projections prefill (fields stay editable as the manual
+   override), TTM P/E on Research (from quarters), base-case projection chip on ticker pages.
+2. Tool 6 Portfolio X-ray with **activity-history import as the priority** (split-aware trade
+   reconstruction → TWR + IRR); positions paste/CSV, blended TTM fundamentals, vs 52-wk,
+   local-first persistence, backtest handoff.
+3. Monte Carlo fidelity pack: Guyton-Klinger, monthly withdrawals, accumulation phase,
+   income-variability metric (implementer's discretion on details).
+4. Factor lens (FF 3-factor regression on backtests) + Sharpe risk-free fix (FF RF series /
+   cash series instead of rf=0).
+5. Architecture: unify the three URL codecs + shared round-trip tests; useUrlSyncedState hook;
+   GCS generation-precondition on catalog writes; refresh-report.json observability.
+6. Perf (implementer judged worthwhile): gzip bucket JSONs (content-encoding), ECharts
+   tree-shaking, catalog preload at boot.
+7. UI batch: Segmented → ui/, sonner toasts, skeleton loading states, landing mini-chart,
+   PWA manifest + logo pass, "/" focuses ticker search.
+8. Data: fundamentals fetched on ticker admission + weekly refresh job; Shiller extended by
+   parsing ie_data.xls with relaxed completeness filter; schema "v" field in bucket JSONs.
+
+ROADMAP (approved, later): FRED macro dashboard (low priority) · efficient-frontier explorer ·
+⌘K command palette · OG share-image service · saved-scenarios library (secondary to
+activity import).
+
+REJECTED: Backtest→Monte Carlo handoff button (don't build).
+
 ## Guardrails for future work (bind on Opus AND Codex)
 
 - Everything in CLAUDE.md "Non-negotiable invariants" — especially: engine changes require
