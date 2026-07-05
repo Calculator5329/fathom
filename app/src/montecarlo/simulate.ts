@@ -60,7 +60,21 @@ export interface SimResult {
    * withdrawal year, summarized. For fixedReal this equals the fixed amount
    * in successful trials; for variable strategies it shows the pay cut risk.
    */
-  income: { firstYearMedian: number; worstYearMedian: number; worstYearP5: number }
+  income: {
+    firstYearMedian: number
+    worstYearMedian: number
+    worstYearP5: number
+    /** Fraction of trials where income ever fell below the first year's. */
+    cutProbability: number
+    /** Median count of retirement years spent below the starting income. */
+    yearsBelowStartMedian: number
+  }
+  /**
+   * Per-retirement-year income percentiles across trials (real dollars,
+   * actual amounts withdrawn — a depleted trial contributes $0). Arrays are
+   * indexed by retirement year 1..horizonYears.
+   */
+  incomeByYear: { p5: number[]; p25: number[]; p50: number[]; p75: number[]; p95: number[] }
 }
 
 // ---- seedable RNG (deterministic tests; Math.random in the worker) ----------
@@ -108,6 +122,8 @@ function runTrial(
   failed: boolean
   firstYearW: number
   worstYearW: number
+  /** Actual real dollars withdrawn per retirement year (0 once depleted). */
+  withdrawals: number[]
 } {
   const { initialBalance, horizonYears, feeRate } = params
   const accYears = params.accumulationYears ?? 0
@@ -118,6 +134,7 @@ function runTrial(
   let balance = initialBalance
   const path = new Array<number>(totalYears + 1)
   path[0] = balance
+  const withdrawals = new Array<number>(horizonYears).fill(0)
   let depletedYear: number | null = null
   let m = offset
 
@@ -172,10 +189,12 @@ function runTrial(
       wMonthly = w / 12
     }
 
+    let drawn = 0
     for (let k = 0; k < 12; k++) {
       if (inAccumulation) {
         balance += contribMonthly
       } else {
+        drawn += Math.min(wMonthly, balance)
         balance -= wMonthly
         if (balance <= 0) {
           balance = 0
@@ -185,13 +204,14 @@ function runTrial(
       }
       balance *= (1 + monthly[m + k]) * monthlyFeeFactor
     }
+    if (!inAccumulation) withdrawals[y - accYears] = drawn
     m += 12
     path[y + 1] = balance
   }
   if (!Number.isFinite(worstYearW)) worstYearW = 0
   const failed =
     depletedYear !== null && !(params.strategy === 'vpw' && depletedYear === totalYears)
-  return { path, ending: balance, depletedYear, failed, firstYearW, worstYearW }
+  return { path, ending: balance, depletedYear, failed, firstYearW, worstYearW, withdrawals }
 }
 
 // ---- percentile helper ------------------------------------------------------
@@ -209,6 +229,7 @@ interface TrialOut {
   failed: boolean
   firstYearW: number
   worstYearW: number
+  withdrawals: number[]
 }
 
 function summarize(
@@ -238,6 +259,28 @@ function summarize(
   const firstW = trialsOut.map((t) => t.firstYearW).sort((a, b) => a - b)
   const worstW = trialsOut.map((t) => t.worstYearW).sort((a, b) => a - b)
 
+  // Per-retirement-year income distribution + pay-cut stats. "Below start"
+  // uses a 0.5% tolerance so float noise doesn't register as a cut; a
+  // depleted trial's $0 years count, which is the honest reading.
+  const incomeByYear = { p5: [], p25: [], p50: [], p75: [], p95: [] } as SimResult['incomeByYear']
+  for (let y = 0; y < params.horizonYears; y++) {
+    const col = trialsOut.map((t) => t.withdrawals[y]).sort((a, b) => a - b)
+    incomeByYear.p5.push(percentile(col, 5))
+    incomeByYear.p25.push(percentile(col, 25))
+    incomeByYear.p50.push(percentile(col, 50))
+    incomeByYear.p75.push(percentile(col, 75))
+    incomeByYear.p95.push(percentile(col, 95))
+  }
+  let cutTrials = 0
+  const yearsBelow: number[] = []
+  for (const t of trialsOut) {
+    const floor = t.firstYearW * 0.995
+    const below = t.withdrawals.filter((w) => w < floor).length
+    if (below > 0) cutTrials++
+    yearsBelow.push(below)
+  }
+  yearsBelow.sort((a, b) => a - b)
+
   const worstStarts = labels.length
     ? trialsOut
         .map((t, i) => ({
@@ -263,7 +306,10 @@ function summarize(
       firstYearMedian: percentile(firstW, 50),
       worstYearMedian: percentile(worstW, 50),
       worstYearP5: percentile(worstW, 5),
+      cutProbability: trials ? cutTrials / trials : 0,
+      yearsBelowStartMedian: percentile(yearsBelow, 50),
     },
+    incomeByYear,
   }
 }
 

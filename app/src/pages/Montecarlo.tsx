@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/table'
 import { ASSET_CLASSES, assetClass } from '@/data/assetClasses'
 import { formatUsd, formatUsdCompact } from '@/lib/format'
-import { endingHistogramOption, fanChartOption } from '@/montecarlo/chart'
+import { endingHistogramOption, fanChartOption, incomeFanOption } from '@/montecarlo/chart'
 import type { WithdrawalStrategy } from '@/montecarlo/simulate'
 import { decodeMonteCarlo, encodeMonteCarlo, type MonteCarloConfig } from '@/montecarlo/state'
 import { useSimulation } from '@/montecarlo/useSimulation'
@@ -301,6 +301,10 @@ function Results({
   config: MonteCarloConfig
 }) {
   const fan = useMemo(() => fanChartOption(result), [result])
+  const incomeFan = useMemo(
+    () => (config.strategy !== 'fixedReal' ? incomeFanOption(result) : null),
+    [result, config.strategy],
+  )
   const hist = useMemo(() => endingHistogramOption(result), [result])
   const success = result.successRate
   const successColor = success >= 0.9 ? 'text-gain' : success >= 0.75 ? 'text-chart-3' : 'text-loss'
@@ -358,7 +362,7 @@ function Results({
 
       {/* Income variability — the real story for variable strategies. */}
       {config.strategy !== 'fixedReal' && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Card className="gap-1">
             <CardHeader>
               <CardTitle className="text-sm font-normal text-muted-foreground">First-year income</CardTitle>
@@ -386,7 +390,35 @@ function Results({
               <p className="mt-0.5 text-sm text-muted-foreground">bad-luck floor</p>
             </CardContent>
           </Card>
+          <Card className="gap-1">
+            <CardHeader>
+              <CardTitle className="text-sm font-normal text-muted-foreground">Pay cut odds</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-semibold tracking-tight tnum">{pctStr(result.income.cutProbability)}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                median {Math.round(result.income.yearsBelowStartMedian)} yrs below start
+              </p>
+            </CardContent>
+          </Card>
         </div>
+      )}
+
+      {/* Income over time — how deep and how long the cuts run. */}
+      {config.strategy !== 'fixedReal' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-medium">
+              Income over time
+              <span className="ml-2 font-normal text-muted-foreground">
+                annual withdrawals, today's dollars &middot; median with 25&ndash;75 and 5&ndash;95 bands
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EChart option={incomeFan!} exportName="fathom-montecarlo-income" className="h-72 w-full" />
+          </CardContent>
+        </Card>
       )}
 
       <Card>

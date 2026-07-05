@@ -92,6 +92,42 @@ describe('fidelity pack', () => {
   })
 })
 
+describe('income distribution (incomeByYear + pay-cut stats)', () => {
+  it('fixedReal, healthy market: income is flat, no cuts', () => {
+    const s = constantSeries(0.004, 30 * 12)
+    const r = runHistoricalSequence(s, base)
+    expect(r.incomeByYear.p50).toHaveLength(30)
+    for (let y = 0; y < 30; y++) {
+      expect(r.incomeByYear.p50[y]).toBeCloseTo(40_000, 6)
+      expect(r.incomeByYear.p5[y]).toBeCloseTo(r.incomeByYear.p95[y], 6)
+    }
+    expect(r.income.cutProbability).toBe(0)
+    expect(r.income.yearsBelowStartMedian).toBe(0)
+  })
+
+  it('guardrails after a crash: median income steps down and cut stats fire', () => {
+    const months = 30 * 12
+    const returns = Array.from({ length: months }, (_, i) => (i < 12 ? -0.0417 : 0))
+    const s: RealReturnSeries = { dates: constantSeries(0, months).dates, returns }
+    const r = runHistoricalSequence(s, { ...base, horizonYears: 30, strategy: 'guardrails' })
+    // Year 1 is the anchor; the crash forces at least one 10% cut later.
+    expect(r.incomeByYear.p50[0]).toBeCloseTo(40_000, 6)
+    const later = Math.min(...r.incomeByYear.p50.slice(1))
+    expect(later).toBeLessThanOrEqual(40_000 * 0.9 + 1)
+    expect(later).toBeGreaterThan(0)
+    expect(r.income.cutProbability).toBe(1)
+    expect(r.income.yearsBelowStartMedian).toBeGreaterThan(0)
+  })
+
+  it('fixedReal that depletes: income goes to zero after depletion (counted as cut)', () => {
+    const s = constantSeries(0, 30 * 12) // depletes in year 25
+    const r = runHistoricalSequence(s, { ...base, horizonYears: 30 })
+    expect(r.incomeByYear.p50[0]).toBeCloseTo(40_000, 6)
+    expect(r.incomeByYear.p50[29]).toBe(0)
+    expect(r.income.cutProbability).toBe(1)
+  })
+})
+
 describe('VPW planned spend-down', () => {
   it('depleting AT the horizon is the plan, not a failure', () => {
     // VPW amortizes to zero by design — its final year withdraws the whole

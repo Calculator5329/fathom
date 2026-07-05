@@ -89,6 +89,93 @@ export function fanChartOption(result: SimResult): EChartsCoreOption {
   }
 }
 
+/**
+ * Percentile fan of annual retirement income (real dollars withdrawn per
+ * year). The story for variable strategies: how deep and how long the pay
+ * cuts run. Same band construction as the balance fan; x-axis is years
+ * INTO RETIREMENT (accumulation years withdraw nothing).
+ */
+export function incomeFanOption(result: SimResult): EChartsCoreOption {
+  const base = baseOption()
+  const accent = cssVar('--chart-2')
+  const years = Array.from({ length: result.horizonYears }, (_, i) => String(i + 1))
+  const { p5, p25, p50, p75, p95 } = result.incomeByYear
+
+  const bandSeries = (lower: number[], upper: number[], opacity: number, name: string) => [
+    {
+      name: `${name}-base`,
+      type: 'line' as const,
+      data: lower,
+      stack: name,
+      lineStyle: { opacity: 0 },
+      showSymbol: false,
+      silent: true,
+      emphasis: { disabled: true },
+    },
+    {
+      name,
+      type: 'line' as const,
+      data: upper.map((u, i) => u - lower[i]),
+      stack: name,
+      lineStyle: { opacity: 0 },
+      areaStyle: { color: accent, opacity },
+      showSymbol: false,
+      silent: true,
+      emphasis: { disabled: true },
+    },
+  ]
+
+  return {
+    ...base,
+    xAxis: {
+      ...(base.xAxis as object),
+      type: 'category',
+      data: years,
+      boundaryGap: false,
+      name: 'Retirement year',
+    },
+    yAxis: {
+      ...(base.yAxis as object),
+      type: 'value',
+      axisLabel: {
+        ...(base.yAxis as { axisLabel: object }).axisLabel,
+        formatter: (v: number) => formatUsdCompact(v),
+      },
+    },
+    tooltip: {
+      ...(base.tooltip as object),
+      valueFormatter: (v: unknown) => formatUsdCompact(v as number),
+    },
+    legend: { show: false },
+    series: [
+      ...bandSeries(p5, p95, 0.08, '5–95'),
+      ...bandSeries(p25, p75, 0.16, '25–75'),
+      {
+        name: 'Median income',
+        type: 'line',
+        data: p50,
+        lineStyle: { width: 2.5, color: accent },
+        itemStyle: { color: accent },
+        showSymbol: false,
+        emphasis: { disabled: true },
+        // Dashed reference at the starting income — cuts read instantly.
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          lineStyle: { color: cssVar('--muted-foreground'), type: 'dashed', width: 1 },
+          label: {
+            color: cssVar('--muted-foreground'),
+            fontSize: 12,
+            formatter: 'start',
+            position: 'insideEndTop',
+          },
+          data: [{ yAxis: result.income.firstYearMedian }],
+        },
+      },
+    ],
+  }
+}
+
 /** Histogram of ending balances (today's dollars). */
 export function endingHistogramOption(result: SimResult): EChartsCoreOption {
   const base = baseOption()
