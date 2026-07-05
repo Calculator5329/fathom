@@ -61,18 +61,19 @@ function HeroSparkline() {
       .then((s) => {
         if (cancelled) return
         const adj = splitAdjustedCloses(s.records)
-        // ~monthly samples across the full history, on a LOG scale — linear
-        // renders decades of compounding as a flat line with a spike at the
-        // end, which looked broken rather than impressive.
-        const step = Math.max(1, Math.floor(adj.length / 160))
+        // Last ~4 years of daily closes: full history is a featureless
+        // diagonal at this size (linear OR log); a recent window has real
+        // texture — drawdowns, recoveries — and reads as a live market.
+        const windowed = adj.slice(-Math.min(adj.length, 4 * 252))
+        const step = Math.max(1, Math.floor(windowed.length / 240))
         const pts: number[] = []
-        for (let i = 0; i < adj.length; i += step) pts.push(Math.log(adj[i]))
+        for (let i = 0; i < windowed.length; i += step) pts.push(windowed[i])
         const min = Math.min(...pts)
         const max = Math.max(...pts)
         const d = pts
           .map((v, i) => {
             const x = (i / (pts.length - 1)) * 1000
-            const y = 96 - ((v - min) / (max - min || 1)) * 92
+            const y = 92 - ((v - min) / (max - min || 1)) * 84
             return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
           })
           .join('')
@@ -88,11 +89,24 @@ function HeroSparkline() {
     <svg
       viewBox="0 0 1000 100"
       preserveAspectRatio="none"
-      className="animate-enter mt-8 h-16 w-full"
+      className="animate-enter mt-8 h-20 w-full"
       aria-hidden
     >
-      <path d={`${path}L1000,100L0,100Z`} fill="var(--primary)" opacity="0.06" />
-      <path d={path} fill="none" stroke="var(--primary)" strokeWidth="1.5" opacity="0.5" />
+      <defs>
+        <linearGradient id="hero-spark-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${path}L1000,100L0,100Z`} fill="url(#hero-spark-fill)" />
+      <path
+        d={path}
+        fill="none"
+        stroke="var(--primary)"
+        strokeWidth="1.75"
+        opacity="0.8"
+        vectorEffect="non-scaling-stroke"
+      />
     </svg>
   )
 }
