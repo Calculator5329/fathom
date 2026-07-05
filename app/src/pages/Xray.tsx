@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowUpRight, ScanSearch, Upload } from 'lucide-react'
+import { ArrowUpRight, ChevronRight, ScanSearch, Upload } from 'lucide-react'
 import { EChart, baseOption, cssVar } from '@/components/charts/EChart'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -76,6 +76,10 @@ export function Xray() {
   const [positionsText, setPositionsText] = useState(() => localStorage.getItem(LS_POSITIONS) ?? '')
   const [tradesText, setTradesText] = useState(() => localStorage.getItem(LS_TRADES) ?? '')
   const [busy, setBusy] = useState(false)
+  // Inputs collapse out of the way once an analysis lands (still one click
+  // to reopen) — after that point the results ARE the page.
+  const [inputsOpen, setInputsOpen] = useState(true)
+  const [inputSummary, setInputSummary] = useState('')
   const [posResult, setPosResult] = useState<PositionAnalysis | null>(null)
   const [histResult, setHistResult] = useState<ReconstructionResult | null>(null)
   const [histBlend, setHistBlend] = useState<PositionAnalysis | null>(null)
@@ -83,6 +87,12 @@ export function Xray() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const runPositions = async (posCsv = positionsText) => {
+    // Both inputs present → always the richer merged analysis, whichever
+    // button was pressed.
+    if (tradesText.trim()) {
+      localStorage.setItem(LS_POSITIONS, posCsv)
+      return runTrades(tradesText, posCsv)
+    }
     setBusy(true)
     setNotes([])
     setHistResult(null)
@@ -99,6 +109,8 @@ export function Xray() {
       const analysis = analyzePositions(positions, series, fundamentals)
       setPosResult(analysis)
       setNotes([...errors, ...missing.map((t) => `${t}: no price data available`)])
+      setInputSummary(`${positions.length} holdings`)
+      setInputsOpen(false)
     } catch (err) {
       setNotes([err instanceof Error ? err.message : String(err)])
       setPosResult(null)
@@ -168,6 +180,12 @@ export function Xray() {
         ...(skipped > 0 ? [`${skipped} non-trade rows skipped (dividends, transfers…)`] : []),
         ...result.warnings,
       ])
+      setInputSummary(
+        sharePositions.length > 0
+          ? `${sharePositions.length} holdings + ${trades.length} trades (merged)`
+          : `${trades.length} trades`,
+      )
+      setInputsOpen(false)
     } catch (err) {
       setNotes([err instanceof Error ? err.message : String(err)])
       setHistResult(null)
@@ -266,6 +284,19 @@ export function Xray() {
         your browser and saved only on this device.
       </p>
 
+      {!inputsOpen && (
+        <button
+          type="button"
+          onClick={() => setInputsOpen(true)}
+          className="flex items-center gap-2 rounded-md border bg-surface-1 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+        >
+          <ChevronRight className="size-4" />
+          <span className="font-mono">Inputs</span>
+          <span className="tnum">&middot; {inputSummary}</span>
+        </button>
+      )}
+
+      {inputsOpen && (
       <Tabs defaultValue={tradesText ? 'activity' : 'positions'}>
         <TabsList>
           <TabsTrigger value="positions">Positions</TabsTrigger>
@@ -314,6 +345,7 @@ export function Xray() {
           </Card>
         </TabsContent>
       </Tabs>
+      )}
 
       {/* Shared across both tabs: drop one or both Fidelity exports here
           (positions + activity) and everything merges automatically. */}

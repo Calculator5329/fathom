@@ -61,10 +61,12 @@ function HeroSparkline() {
       .then((s) => {
         if (cancelled) return
         const adj = splitAdjustedCloses(s.records)
-        // ~monthly samples across the full history.
+        // ~monthly samples across the full history, on a LOG scale — linear
+        // renders decades of compounding as a flat line with a spike at the
+        // end, which looked broken rather than impressive.
         const step = Math.max(1, Math.floor(adj.length / 160))
         const pts: number[] = []
-        for (let i = 0; i < adj.length; i += step) pts.push(adj[i])
+        for (let i = 0; i < adj.length; i += step) pts.push(Math.log(adj[i]))
         const min = Math.min(...pts)
         const max = Math.max(...pts)
         const d = pts
@@ -109,9 +111,11 @@ export function Landing() {
       </p>
       <HeroSparkline />
 
-      <div className={`mt-8 grid gap-4 sm:grid-cols-2 ${tools.length > 4 ? 'xl:grid-cols-3' : ''}`}>
+      <div
+        className={`mt-8 grid auto-rows-fr gap-4 sm:grid-cols-2 ${tools.length > 4 ? 'xl:grid-cols-3' : ''}`}
+      >
         {tools.map((t) => (
-          <Link key={t.to} to={t.to} className="group">
+          <Link key={t.to} to={t.to} className="group h-full">
             <Card className="h-full transition-colors group-hover:bg-surface-2">
               <CardContent>
                 <div className="flex items-center justify-between">
