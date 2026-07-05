@@ -96,7 +96,7 @@ export function Montecarlo() {
   return (
     <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-7xl flex-col px-6 lg:flex-row">
       {/* Builder rail — stacks above results on narrow screens */}
-      <aside className="border-b py-6 lg:w-80 lg:shrink-0 lg:border-r lg:border-b-0 lg:py-8 lg:pr-6">
+      <aside className="border-b py-6 lg:w-80 lg:shrink-0 lg:border-r lg:border-b-0 lg:py-8 lg:pr-8">
         {/* Allocation */}
         <div className="space-y-2">
           <Label>Portfolio</Label>
@@ -141,7 +141,7 @@ export function Montecarlo() {
         </div>
 
         {/* Plan inputs */}
-        <div className="mt-6 grid grid-cols-2 gap-3">
+        <div className="mt-7 grid grid-cols-2 gap-x-3 gap-y-4">
           <div className="col-span-2 space-y-1.5">
             <Label htmlFor="bal">Starting balance</Label>
             <div className="relative">

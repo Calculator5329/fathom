@@ -43,6 +43,11 @@ export function baseOption(): echarts.EChartsCoreOption {
   const border = 'rgba(255,255,255,0.07)'
   return {
     backgroundColor: 'transparent',
+    // Snap to new data instead of morphing. Editing a portfolio swaps the
+    // series for a different-length dataset; the default update animation
+    // interpolates old→new point-by-point on the time axis and briefly
+    // renders wild spikes. Keep the first-render appear animation only.
+    animationDurationUpdate: 0,
     textStyle: { fontFamily: 'Inter Variable, sans-serif', fontSize: 14 },
     grid: { left: 8, right: 16, top: 32, bottom: 8, containLabel: true },
     xAxis: {

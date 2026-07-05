@@ -61,19 +61,29 @@ function HeroSparkline() {
       .then((s) => {
         if (cancelled) return
         const adj = splitAdjustedCloses(s.records)
-        // Last ~4 years of daily closes: full history is a featureless
-        // diagonal at this size (linear OR log); a recent window has real
-        // texture — drawdowns, recoveries — and reads as a live market.
-        const windowed = adj.slice(-Math.min(adj.length, 4 * 252))
-        const step = Math.max(1, Math.floor(windowed.length / 240))
-        const pts: number[] = []
-        for (let i = 0; i < windowed.length; i += step) pts.push(windowed[i])
-        const min = Math.min(...pts)
-        const max = Math.max(...pts)
-        const d = pts
+        // ~20 years of SPY on a LOG scale: log turns two decades of
+        // compounding into a clean, steady climb (linear front-flattens;
+        // a daily line squished into this wide band reads as noise). Weekly
+        // samples + a light moving average smooth out the jitter so it looks
+        // like a premium area chart, not a jagged squiggle — while still
+        // showing the 2008, 2020 and 2022 dips.
+        const windowed = adj.slice(-Math.min(adj.length, 20 * 252))
+        const step = Math.max(1, Math.floor(windowed.length / 320)) // ~weekly
+        const sampled: number[] = []
+        for (let i = 0; i < windowed.length; i += step) sampled.push(Math.log(windowed[i]))
+        const smooth = sampled.map((_, i) => {
+          const lo = Math.max(0, i - 2)
+          const hi = Math.min(sampled.length - 1, i + 2)
+          let sum = 0
+          for (let j = lo; j <= hi; j++) sum += sampled[j]
+          return sum / (hi - lo + 1)
+        })
+        const min = Math.min(...smooth)
+        const max = Math.max(...smooth)
+        const d = smooth
           .map((v, i) => {
-            const x = (i / (pts.length - 1)) * 1000
-            const y = 92 - ((v - min) / (max - min || 1)) * 84
+            const x = (i / (smooth.length - 1)) * 1000
+            const y = 90 - ((v - min) / (max - min || 1)) * 80
             return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
           })
           .join('')
@@ -89,7 +99,7 @@ function HeroSparkline() {
     <svg
       viewBox="0 0 1000 100"
       preserveAspectRatio="none"
-      className="animate-enter mt-8 h-20 w-full"
+      className="animate-enter mt-8 h-28 w-full"
       aria-hidden
     >
       <defs>
@@ -120,8 +130,8 @@ export function Landing() {
         Understand any market decision with decades of real data.
       </h1>
       <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-        Backtesting, allocation, retirement simulation, and stock projections —
-        computed instantly, shareable by link, no account for the core tools.
+        Backtesting, allocation, retirement simulation, and stock overviews.
+        Computed instantly, shareable by link, no account for the core tools.
       </p>
       <HeroSparkline />
 
