@@ -149,10 +149,119 @@ export const VALUATION_LABELS: Record<ValuationMetric, string> = {
   pb: 'Price / Book',
 }
 
+/** Per-year price context: split-adjusted year-end close (current share
+ * basis) and the cumulative split factor from that year end to today. */
+function yearEndStats(records: DailyRecord[]): Map<number, { adjClose: number; splitSince: number }> {
+  const byYear = new Map<number, { adjClose: number; splitSince: number }>()
+  let futureSplit = 1
+  for (let i = records.length - 1; i >= 0; i--) {
+    const y = Number(records[i].date.slice(0, 4))
+    // Walking backward, the first record seen per year is that year's last.
+    if (!byYear.has(y)) byYear.set(y, { adjClose: records[i].close / futureSplit, splitSince: futureSplit })
+    const sf = records[i].splitFactor
+    if (sf && sf !== 1) futureSplit *= sf
+  }
+  return byYear
+}
+
 /**
- * A valuation ratio over time. Uses each fiscal year's contemporaneous
- * year-end price and as-reported figures, so the ratio is split-neutral
- * (both numerator and denominator are in that era's share basis).
+ * Resolve each fiscal year's diluted share count to the CURRENT share basis.
+ *
+ * EDGAR companyfacts mixes bases: a year's count may be as-reported (that
+ * era's basis) or restated split-adjusted when it came from a later filing's
+ * comparatives (e.g. AMZN FY2021 shows ~10.3B post-20:1 shares while its
+ * year-end price was pre-split — a naive price × shares is 20× too high).
+ * Share counts drift slowly (buybacks/dilution, <~10%/yr) while splits jump
+ * ≥2×, so walking from the latest year backward we pick whichever candidate
+ * (reported × splits-since-then, or reported as-is) is log-closest to the
+ * following year's resolved count.
+ */
+export function resolveShares(records: DailyRecord[], years: FiscalYear[]): Map<number, number> {
+  const stats = yearEndStats(records)
+  const out = new Map<number, number>()
+  const desc = [...years].sort((a, b) => b.year - a.year)
+  let anchor: number | null = null
+  for (const fy of desc) {
+    // Some facts arrive with no share count but a usable EPS — imply the
+    // count (in whatever basis that EPS was stated, handled below).
+    let s =
+      fy.sharesDiluted ??
+      (fy.netIncome && fy.epsDiluted ? Math.abs(fy.netIncome / fy.epsDiluted) : null)
+    if (!s) continue
+
+    // Magnitude repair: some filings state the raw fact in thousands or
+    // millions (e.g. MCD "752"). net income / EPS from the same fact set
+    // implies the true order of magnitude.
+    if (fy.sharesDiluted && fy.netIncome && fy.epsDiluted) {
+      const implied = Math.abs(fy.netIncome / fy.epsDiluted)
+      while (s < implied / 30) s *= 1000
+      while (s > implied * 30) s /= 1000
+    }
+
+    // Candidate bases: the count may be as-reported (era basis) or restated
+    // by any LATER filing — including intermediate bases between two splits
+    // (NVDA FY2020 comparatives were restated for the 2021 4:1 but predate
+    // the 2024 10:1). One candidate per later calendar year's basis.
+    const multipliers = new Set<number>([1])
+    for (const other of desc) {
+      if (other.year < fy.year) continue
+      const since = stats.get(other.year)?.splitSince
+      if (since) multipliers.add(since)
+    }
+    const sinceOwn = stats.get(fy.year)?.splitSince ?? 1
+    let pick = s * sinceOwn // default: as-reported in its own era
+    if (anchor != null) {
+      const a = anchor
+      for (const m of multipliers) {
+        if (Math.abs(Math.log((s * m) / a)) < Math.abs(Math.log(pick / a))) pick = s * m
+      }
+    }
+    out.set(fy.year, pick)
+    anchor = pick
+  }
+  return out
+}
+
+/** The plotted [year, ratio] pairs — exported for unit tests. */
+export function valuationSeries(
+  records: DailyRecord[],
+  years: FiscalYear[],
+  metric: ValuationMetric,
+): Array<[string, number | null]> {
+  const stats = yearEndStats(records)
+  const shares = resolveShares(records, years)
+
+  // Everything is computed in the CURRENT share basis: split-adjusted
+  // year-end price × basis-resolved shares (see resolveShares). P/E uses
+  // mktCap / net income for the same reason — reported EPS has the same
+  // mixed-basis problem as reported share counts.
+  const ratio = (fy: FiscalYear): number | null => {
+    const st = stats.get(fy.year)
+    if (!st) return null
+    const sh = shares.get(fy.year)
+    if (metric === 'pe') {
+      if (sh && fy.netIncome) return (st.adjClose * sh) / fy.netIncome
+      // No share count to normalize with: raw close over reported EPS
+      // (consistent when both are as-reported, which is the common case).
+      return fy.epsDiluted ? st.adjClose * st.splitSince / fy.epsDiluted : null
+    }
+    if (!sh) return null
+    const mktCap = st.adjClose * sh
+    if (metric === 'ps') return fy.revenue ? mktCap / fy.revenue : null
+    if (metric === 'pfcf') return fy.fcf && fy.fcf > 0 ? mktCap / fy.fcf : null
+    if (metric === 'pocf') return fy.operatingCashFlow && fy.operatingCashFlow > 0 ? mktCap / fy.operatingCashFlow : null
+    return fy.stockholdersEquity && fy.stockholdersEquity > 0 ? mktCap / fy.stockholdersEquity : null
+  }
+
+  return years.map((fy) => {
+    const v = ratio(fy)
+    return [String(fy.year), v == null ? null : Math.round(v * 10) / 10]
+  })
+}
+
+/**
+ * A valuation ratio over time, in the current share basis throughout so
+ * split restatements in EDGAR data can't distort it.
  */
 export function valuationOption(
   records: DailyRecord[],
@@ -160,26 +269,7 @@ export function valuationOption(
   metric: ValuationMetric,
 ): EChartsCoreOption {
   const base = baseOption()
-  // Last close of each calendar year, as the fiscal-year-end price proxy.
-  const yearEndClose = new Map<number, number>()
-  for (const r of records) yearEndClose.set(Number(r.date.slice(0, 4)), r.close)
-
-  const ratio = (fy: FiscalYear): number | null => {
-    const price = yearEndClose.get(fy.year)
-    if (price == null) return null
-    if (metric === 'pe') return fy.epsDiluted ? price / fy.epsDiluted : null
-    if (!fy.sharesDiluted) return null
-    const mktCap = price * fy.sharesDiluted
-    if (metric === 'ps') return fy.revenue ? mktCap / fy.revenue : null
-    if (metric === 'pfcf') return fy.fcf && fy.fcf > 0 ? mktCap / fy.fcf : null
-    if (metric === 'pocf') return fy.operatingCashFlow && fy.operatingCashFlow > 0 ? mktCap / fy.operatingCashFlow : null
-    return fy.stockholdersEquity && fy.stockholdersEquity > 0 ? mktCap / fy.stockholdersEquity : null
-  }
-
-  const data = years.map((fy) => {
-    const v = ratio(fy)
-    return [String(fy.year), v == null ? null : Math.round(v * 10) / 10]
-  })
+  const data = valuationSeries(records, years, metric)
   const vals = data.map((d) => d[1]).filter((v): v is number => v != null)
   const avg = vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0
 
