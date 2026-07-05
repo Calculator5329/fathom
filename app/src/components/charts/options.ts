@@ -1,9 +1,9 @@
 import type { EChartsCoreOption } from 'echarts'
 import { annualIncome, rollingReturns, type BacktestResult } from '@/engine'
-import { formatUsd, formatUsdCompact } from '@/lib/format'
+import { formatPct, formatUsd, formatUsdCompact } from '@/lib/format'
 import { baseOption, chartPalette, cssVar } from './EChart'
 
-const fmtPct = (v: number) => `${(v * 100).toFixed(1)}%`
+const fmtPct = (v: number) => formatPct(v)
 
 export interface NamedResult {
   label: string

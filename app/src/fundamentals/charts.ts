@@ -1,7 +1,7 @@
 import type { EChartsCoreOption } from 'echarts'
 import type { DailyRecord } from '@/engine'
 import { baseOption, chartPalette, cssVar } from '@/components/charts/EChart'
-import { formatUsd, formatUsdCompact } from '@/lib/format'
+import { formatPct, formatUsd, formatUsdCompact } from '@/lib/format'
 import type { FiscalYear, Quarter } from './load'
 
 const quarterLabel = (q: Quarter) => `Q${q.fiscalQuarter} '${String(q.fiscalYear).slice(2)}`
@@ -14,7 +14,7 @@ const ERAS: Array<[string, string, string]> = [
   ['2022-01-01', '2022-10-01', '2022'],
 ]
 
-const fmtPct = (v: number) => `${(v * 100).toFixed(0)}%`
+const fmtPct = (v: number) => formatPct(v, { dp: 0 })
 
 /**
  * Long-run split-adjusted price with shaded market-crash eras. Takes the

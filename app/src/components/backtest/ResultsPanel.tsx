@@ -25,9 +25,9 @@ import { monthlyReturns, monthlyReturnsLabeled, rollingReturns } from '@/engine'
 import { loadFactors, type FactorData } from '@/data/factors'
 import { fitFactors } from '@/factors/regression'
 import { buildResultsCsv, downloadCsv } from '@/lib/export'
-import { formatUsd, formatUsdCompact } from '@/lib/format'
+import { formatPct, formatUsd, formatUsdCompact } from '@/lib/format'
 
-const pct = (v: number, dp = 1) => `${v >= 0 ? '' : '−'}${Math.abs(v * 100).toFixed(dp)}%`
+const pct = (v: number, dp = 1) => formatPct(v, { dp })
 const num = (v: number) => v.toFixed(2)
 
 function PctCell({ v, dp = 1 }: { v: number; dp?: number }) {

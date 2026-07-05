@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { loadSeries } from '@/data/catalog'
 import type { TickerSeries } from '@/engine'
 import { loadFundamentals, type Fundamentals } from '@/fundamentals/load'
-import { formatUsd, formatUsdCompact } from '@/lib/format'
+import { formatPct, formatUsd, formatUsdCompact } from '@/lib/format'
 import {
   analyzePositions,
   inferOpeningPositions,
@@ -36,7 +36,7 @@ import { parsePositions, parseTrades } from '@/xray/parse'
  * (localStorage); nothing is uploaded anywhere.
  */
 
-const pctStr = (v: number, dp = 1) => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(dp)}%`
+const pctStr = (v: number, dp = 1) => formatPct(v, { dp, signed: true })
 const LS_POSITIONS = 'fathom.xray.positions.v1'
 const LS_TRADES = 'fathom.xray.trades.v1'
 
@@ -455,6 +455,7 @@ export function Xray() {
           <Card>
             <CardContent className="space-y-3">
               <textarea
+                aria-label="Positions — one ticker per line"
                 value={positionsText}
                 onChange={(e) => setPositionsText(e.target.value)}
                 placeholder={'One per line — shares or weight:\nAAPL 12\nVTI 40%\nBRK-B 5'}
@@ -476,6 +477,7 @@ export function Xray() {
           <Card>
             <CardContent className="space-y-3">
               <textarea
+                aria-label="Activity history — broker trade CSV"
                 value={tradesText}
                 onChange={(e) => setTradesText(e.target.value)}
                 placeholder={'Paste a trade-history CSV (date, symbol, action, quantity, price)\nor use the file button below.'}

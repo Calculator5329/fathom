@@ -24,7 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ASSET_CLASSES, assetClass } from '@/data/assetClasses'
-import { formatUsd, formatUsdCompact } from '@/lib/format'
+import { formatPct, formatUsd, formatUsdCompact } from '@/lib/format'
 import { endingHistogramOption, fanChartOption, incomeFanOption } from '@/montecarlo/chart'
 import type { WithdrawalStrategy } from '@/montecarlo/simulate'
 import { decodeMonteCarlo, encodeMonteCarlo, type MonteCarloConfig } from '@/montecarlo/state'
@@ -44,7 +44,7 @@ const STRATEGY_LABELS: Record<WithdrawalStrategy, string> = {
   guardrails: 'Guardrails (Guyton-Klinger)',
 }
 
-const pctStr = (v: number, dp = 1) => `${(v * 100).toFixed(dp)}%`
+const pctStr = (v: number, dp = 1) => formatPct(v, { dp })
 
 function weightSum(alloc: MonteCarloConfig['allocation']) {
   return Math.round(alloc.reduce((s, a) => s + a.weight, 0) * 100) / 100

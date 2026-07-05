@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatUsd, formatUsdCompact } from '../format'
+import { formatPct, formatUsd, formatUsdCompact } from '../format'
 
 describe('formatUsdCompact', () => {
   it('keeps small dollar amounts uncompressed', () => {
@@ -12,13 +12,28 @@ describe('formatUsdCompact', () => {
     expect(formatUsdCompact(6_473_743_200)).toBe('$6.47B')
   })
 
-  it('preserves the sign for negative compact values', () => {
-    expect(formatUsdCompact(-1_250_000)).toBe('-$1.25M')
+  it('uses a real minus (U+2212) for negative compact values', () => {
+    expect(formatUsdCompact(-1_250_000)).toBe('−$1.25M')
+    expect(formatUsdCompact(-50)).toBe('−$50')
   })
 })
 
 describe('formatUsd', () => {
   it('keeps full whole-dollar formatting for detailed values', () => {
     expect(formatUsd(6_473_743_200)).toBe('$6,473,743,200')
+  })
+})
+
+describe('formatPct', () => {
+  it('unsigned: real minus for negatives, no plus for positives', () => {
+    expect(formatPct(0.084)).toBe('8.4%')
+    expect(formatPct(-0.032)).toBe('−3.2%')
+    expect(formatPct(0.965, { dp: 0 })).toBe('97%')
+  })
+
+  it('signed: explicit + and real minus', () => {
+    expect(formatPct(0.084, { signed: true })).toBe('+8.4%')
+    expect(formatPct(-0.032, { signed: true })).toBe('−3.2%')
+    expect(formatPct(0, { signed: true })).toBe('+0.0%')
   })
 })

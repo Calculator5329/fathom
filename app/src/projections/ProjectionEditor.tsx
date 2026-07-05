@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { formatUsd } from '@/lib/format'
+import { formatPct, formatUsd } from '@/lib/format'
 import { projectionChartOption } from './chart'
 import {
   currentImpliedMargin,
@@ -18,7 +18,7 @@ import {
   type ScenarioKey,
 } from './model'
 
-const pct = (v: number, dp = 1) => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(dp)}%`
+const pct = (v: number, dp = 1) => formatPct(v, { dp, signed: true })
 
 const scenarioAccent: Record<ScenarioKey, string> = {
   bear: 'var(--loss)',

@@ -21,10 +21,23 @@ export function formatUsd(value: number) {
 
 export function formatUsdCompact(value: number) {
   const abs = Math.abs(value)
-  const sign = value < 0 ? '-' : ''
+  const sign = value < 0 ? '−' : ''
   const scale = COMPACT_SUFFIXES.find((item) => abs >= item.value)
 
-  if (!scale) return USD_FULL.format(value)
+  if (!scale) return sign ? `−${USD_FULL.format(abs)}` : USD_FULL.format(value)
 
   return `${sign}$${trimDecimals(abs / scale.value)}${scale.suffix}`
+}
+
+/**
+ * Percent formatter shared across every tool so signs render consistently:
+ * a real minus (U+2212, not a hyphen) for negatives, and an explicit "+"
+ * only when `signed` is set (returns/changes where direction matters).
+ * `value` is a fraction (0.084 → "8.4%").
+ */
+export function formatPct(value: number, opts?: { dp?: number; signed?: boolean }) {
+  const dp = opts?.dp ?? 1
+  const mag = Math.abs(value * 100).toFixed(dp)
+  const prefix = value < 0 ? '−' : opts?.signed ? '+' : ''
+  return `${prefix}${mag}%`
 }

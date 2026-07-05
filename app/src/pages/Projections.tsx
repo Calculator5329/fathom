@@ -7,7 +7,7 @@ import { TickerPicker } from '@/components/backtest/TickerPicker'
 import { Button } from '@/components/ui/button'
 import { AuthProvider, useAuth } from '@/auth/AuthContext'
 import { loadSeries } from '@/data/catalog'
-import { formatUsd } from '@/lib/format'
+import { formatPct, formatUsd } from '@/lib/format'
 import { baseCagr } from '@/projections/chart'
 import { projectScenario, type Projection } from '@/projections/model'
 import { prefillProjection } from '@/projections/prefill'
@@ -26,7 +26,7 @@ import { usePrice } from '@/projections/usePrice'
  * Tools 1–2 stay public; this one requires sign-in to persist work.
  */
 
-const pct = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(1)}%`
+const pct = (v: number) => formatPct(v, { signed: true })
 
 // A pre-filled projection so signed-out visitors see the tool working.
 const DEMO: Projection = {

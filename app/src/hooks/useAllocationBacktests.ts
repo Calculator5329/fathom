@@ -24,7 +24,7 @@ export function useAllocationBacktests(setup: AllocationSetup): AllocationOutput
     let cancelled = false
     loadAssetClassData()
       .then((d) => !cancelled && setData(d))
-      .catch((err) => !cancelled && setError(err.message))
+      .catch((err) => !cancelled && setError(err instanceof Error ? err.message : String(err)))
     return () => {
       cancelled = true
     }

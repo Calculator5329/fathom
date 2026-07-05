@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { loadSeries, lookup } from '@/data/catalog'
 import type { TickerSeries } from '@/engine'
-import { formatUsd, formatUsdCompact } from '@/lib/format'
+import { formatPct, formatUsd, formatUsdCompact } from '@/lib/format'
 import { splitAdjustedCloses } from '@/lib/prices'
 import {
   VALUATION_LABELS,
@@ -31,7 +31,7 @@ import { loadFundamentals, type FiscalYear, type Fundamentals } from '@/fundamen
  * filings, valuation over time, and one-click handoffs to backtest/projection.
  * Public, no login. Story: "Show me everything about this company and act on it."
  */
-const pctStr = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(1)}%`
+const pctStr = (v: number) => formatPct(v, { signed: true })
 
 type Range = 'all' | '10y' | '5y'
 const RANGE_OPTS: Array<{ v: Range; label: string }> = [

@@ -63,7 +63,7 @@ export function useBacktests(setup: BacktestSetup): BacktestOutput {
         if (cancelled) return
         setSeries(new Map(list.map((s) => [s.ticker.toUpperCase(), s])))
       })
-      .catch((err) => !cancelled && setError(err.message))
+      .catch((err) => !cancelled && setError(err instanceof Error ? err.message : String(err)))
       .finally(() => !cancelled && setLoading(false))
     return () => {
       cancelled = true
