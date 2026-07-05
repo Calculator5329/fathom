@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
+import { PageSkeleton } from '@/components/LoadingSkeletons'
 import { Landing } from './pages/Landing'
 
 // Route-level code splitting: ECharts (~400KB) and the engine load only when
@@ -95,7 +96,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Shell>
-        <Suspense fallback={<div className="px-6 py-16 text-sm text-muted-foreground">Loading…</div>}>
+        <Suspense fallback={<PageSkeleton />}>
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/backtest" element={<Backtest />} />

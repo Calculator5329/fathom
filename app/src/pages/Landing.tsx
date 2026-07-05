@@ -81,7 +81,7 @@ function HeroSparkline() {
     <svg
       viewBox="0 0 1000 100"
       preserveAspectRatio="none"
-      className="animate-enter mt-10 h-20 w-full"
+      className="animate-enter mt-8 h-16 w-full"
       aria-hidden
     >
       <path d={`${path}L1000,100L0,100Z`} fill="var(--primary)" opacity="0.06" />
@@ -92,7 +92,7 @@ function HeroSparkline() {
 
 export function Landing() {
   return (
-    <div className="mx-auto max-w-4xl px-6 py-24">
+    <div className="mx-auto max-w-4xl px-6 py-10 xl:max-w-6xl">
       <h1 className="text-5xl font-semibold tracking-tight">
         Understand any market decision with decades of real data.
       </h1>
@@ -102,7 +102,7 @@ export function Landing() {
       </p>
       <HeroSparkline />
 
-      <div className="mt-12 grid gap-4 sm:grid-cols-2">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {TOOLS.map((t) => (
           <Link key={t.to} to={t.to} className="group">
             <Card className="h-full transition-colors group-hover:bg-surface-2">

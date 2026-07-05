@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { AssetClassPicker } from '@/components/AssetClassPicker'
+import { ResultsSkeleton } from '@/components/LoadingSkeletons'
 import { EChart } from '@/components/charts/EChart'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -277,7 +278,11 @@ export function Montecarlo() {
         {sim.error ? (
           <p className="text-sm text-loss">{sim.error}</p>
         ) : !sim.result ? (
-          <p className="text-sm text-muted-foreground">{sim.running ? 'Running simulation…' : 'Set an allocation to run.'}</p>
+          sim.running ? (
+            <ResultsSkeleton />
+          ) : (
+            <p className="text-sm text-muted-foreground">Set an allocation to run.</p>
+          )
         ) : (
           <Results result={sim.result} maxSwr={sim.maxSwr} config={config} />
         )}

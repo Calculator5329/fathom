@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { LineChart, LogIn, Plus } from 'lucide-react'
+import { PageSkeleton } from '@/components/LoadingSkeletons'
 import { TickerPicker } from '@/components/backtest/TickerPicker'
 import { Button } from '@/components/ui/button'
 import { AuthProvider, useAuth } from '@/auth/AuthContext'
@@ -166,7 +167,7 @@ function ProjectionsInner() {
   }
 
   if (authLoading) {
-    return <div className="px-6 py-16 text-sm text-muted-foreground">Loading…</div>
+    return <PageSkeleton />
   }
 
   // ---- Signed-out: interactive demo + sign-in CTA ----

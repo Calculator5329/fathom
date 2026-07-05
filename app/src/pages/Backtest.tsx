@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { ResultsSkeleton } from '@/components/LoadingSkeletons'
 import { BuilderPanel } from '@/components/backtest/BuilderPanel'
 import { ResultsPanel } from '@/components/backtest/ResultsPanel'
 import { Button } from '@/components/ui/button'
@@ -85,7 +86,7 @@ export function Backtest() {
           <CardContent>{builder}</CardContent>
         </Card>
         {output.error && <p className="mt-4 text-sm text-loss">{output.error}</p>}
-        {output.loading && <p className="mt-4 text-sm text-muted-foreground">Loading data&hellip;</p>}
+        {output.loading && <ResultsSkeleton cards={2} />}
       </div>
     )
   }
