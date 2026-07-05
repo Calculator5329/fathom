@@ -33,6 +33,11 @@ const TOOLS = [
     title: 'Stock projections',
     body: 'Model bear / base / bull cases for any stock and track the implied return versus today’s real price.',
   },
+  {
+    to: '/xray',
+    title: 'Portfolio X-ray',
+    body: 'Paste positions or your trade history — blended valuation, concentration, and your real TWR and IRR. Stays in your browser.',
+  },
 ]
 
 export function Landing() {
