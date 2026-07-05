@@ -158,17 +158,47 @@ export function Stock() {
     let baseIdx = recs.findIndex((r) => r.date.slice(0, 4) === curYear) - 1
     if (baseIdx < 0) baseIdx = 0
     const fy = fundamentals?.fiscalYears.at(-1)
+    // TTM EPS: prefer summed quarterly EPS; reconstructed Q4s lack EPS, so
+    // fall back to trailing-4-quarter net income over latest diluted shares.
+    const quarters = fundamentals?.quarters ?? []
+    const last4 = quarters.slice(-4)
+    let ttmEps: number | null = null
+    if (last4.length === 4) {
+      if (last4.every((q) => q.epsDiluted != null)) {
+        ttmEps = last4.reduce((s, q) => s + (q.epsDiluted ?? 0), 0)
+      } else if (last4.every((q) => q.netIncome != null) && fy?.sharesDiluted) {
+        ttmEps = last4.reduce((s, q) => s + (q.netIncome ?? 0), 0) / fy.sharesDiluted
+      }
+    }
+    const epsForPe = ttmEps ?? fy?.epsDiluted ?? null
     return {
       price: last.close,
       asOf: last.date,
       ytd: lastAdj / adjCloses[baseIdx] - 1,
       fromHigh: lastAdj / ath - 1,
-      pe: fy?.epsDiluted ? last.close / fy.epsDiluted : null,
+      pe: epsForPe && epsForPe > 0 ? last.close / epsForPe : null,
+      peBasis: ttmEps != null ? ('ttm' as const) : ('fy' as const),
       marketCap: fy?.sharesDiluted ? last.close * fy.sharesDiluted : null,
       netMargin: fy?.netMargin ?? null,
       revenue: fy?.revenue ?? null,
     }
   }, [series, adjCloses, fundamentals])
+
+  // Your saved base case for this ticker (signed-in users only; lazy firebase).
+  const [basePeek, setBasePeek] = useState<import('@/projections/peek').BaseCasePeek | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    setBasePeek(null)
+    if (!ticker) return
+    import('@/projections/peek')
+      .then((m) => m.peekBaseCase(ticker, stats?.price ?? null))
+      .then((p) => !cancelled && setBasePeek(p))
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticker, stats?.price])
 
   const meta = lookup(ticker)
   const allYears = fundamentals?.fiscalYears.filter((y) => y.revenue != null) ?? []
@@ -221,6 +251,20 @@ export function Stock() {
             </button>
           )}
           <p className="mt-1 truncate text-muted-foreground">{fundamentals?.name ?? meta?.name ?? ''}</p>
+          {basePeek && (
+            <button
+              type="button"
+              onClick={() => navigate(`/projections?ticker=${ticker}`)}
+              className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-chart-2/40 px-2 py-0.5 text-sm text-chart-2 transition-colors hover:bg-surface-2"
+              title="Open your projection"
+            >
+              <LineChart className="size-3.5" />
+              Your base case:{' '}
+              <span className="font-mono tnum">{pctStr(basePeek.totalCagr)}/yr</span> to{' '}
+              <span className="font-mono tnum">{formatUsd(basePeek.targetPrice)}</span>
+              <span className="text-muted-foreground">({basePeek.horizonYears}y)</span>
+            </button>
+          )}
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => navigate(`/backtest?p1=${ticker}:100`)}>
@@ -241,7 +285,11 @@ export function Stock() {
             <Stat label="Price" value={formatUsd(stats.price)} sub={`as of ${stats.asOf}`} />
             <Stat label="Year to date" value={pctStr(stats.ytd)} sub={`${pctStr(stats.fromHigh)} from high`} />
             {stats.pe != null ? (
-              <Stat label="P/E" value={`${stats.pe.toFixed(1)}×`} sub="trailing, last FY" />
+              <Stat
+                label="P/E"
+                value={`${stats.pe.toFixed(1)}×`}
+                sub={stats.peBasis === 'ttm' ? 'trailing 12 months' : 'trailing, last FY'}
+              />
             ) : (
               stats.netMargin != null && (
                 <Stat label="Net margin" value={`${(stats.netMargin * 100).toFixed(1)}%`} sub="last FY" />

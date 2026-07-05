@@ -4,9 +4,11 @@ import { LineChart, LogIn, Plus } from 'lucide-react'
 import { TickerPicker } from '@/components/backtest/TickerPicker'
 import { Button } from '@/components/ui/button'
 import { AuthProvider, useAuth } from '@/auth/AuthContext'
+import { loadSeries } from '@/data/catalog'
 import { formatUsd } from '@/lib/format'
 import { baseCagr } from '@/projections/chart'
-import { defaultScenarios, projectScenario, type Projection } from '@/projections/model'
+import { projectScenario, type Projection } from '@/projections/model'
+import { prefillProjection } from '@/projections/prefill'
 import { ProjectionEditor } from '@/projections/ProjectionEditor'
 import {
   deleteProjection,
@@ -23,18 +25,6 @@ import { usePrice } from '@/projections/usePrice'
  */
 
 const pct = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(1)}%`
-
-function freshProjection(ticker: string, currentPrice: number): Projection {
-  const now = Date.now()
-  return {
-    ticker: ticker.toUpperCase(),
-    inputs: { baseRevenue: 1000, netIncome: 150, sharesOut: 100, currentPrice, horizonYears: 5 },
-    scenarios: defaultScenarios(),
-    notes: '',
-    createdAt: now,
-    updatedAt: now,
-  }
-}
 
 // A pre-filled projection so signed-out visitors see the tool working.
 const DEMO: Projection = {
@@ -96,19 +86,35 @@ function ProjectionsInner() {
   }, [user])
 
   const dirty = draft ? JSON.stringify(draft) !== baseline : false
+  const [prefilledYear, setPrefilledYear] = useState<number | null>(null)
 
-  const openDraft = (p: Projection) => {
+  const openDraft = (p: Projection, fromYear: number | null = null) => {
+    setPrefilledYear(fromYear)
     setDraft(p)
     setBaseline(JSON.stringify(p))
     setPickingNew(false)
   }
 
+  /** New draft for a ticker: fetch its price, prefill from SEC filings. */
+  const startNewDraft = async (ticker: string) => {
+    let price = 0
+    try {
+      const s = await loadSeries(ticker)
+      price = s.records[s.records.length - 1]?.close ?? 0
+    } catch {
+      /* unknown ticker — prefill falls back to generic defaults */
+    }
+    const { projection, prefilledFromYear } = await prefillProjection(ticker, price)
+    openDraft(projection, prefilledFromYear)
+  }
+
   // Deep-link from Research ("Project" on a ticker): open the existing
-  // projection or create a fresh draft, once saved projections have loaded.
+  // projection or create a prefilled draft, once saved projections load.
   useEffect(() => {
     if (!user || !requestedTicker || !savedLoaded || draft) return
     const existing = saved.find((p) => p.ticker === requestedTicker)
-    openDraft(existing ?? freshProjection(requestedTicker, info?.price ?? 0))
+    if (existing) openDraft(existing)
+    else void startNewDraft(requestedTicker)
     setSearchParams({}, { replace: true }) // consume the param
   }, [user, requestedTicker, savedLoaded]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -204,7 +210,8 @@ function ProjectionsInner() {
               autoFocus
               onPick={(entry) => {
                 const existing = saved.find((p) => p.ticker === entry.ticker)
-                openDraft(existing ?? freshProjection(entry.ticker, 0))
+                if (existing) openDraft(existing)
+                else void startNewDraft(entry.ticker)
               }}
             />
           </div>
@@ -260,6 +267,7 @@ function ProjectionsInner() {
             onDelete={saved.some((p) => p.ticker === draft.ticker) ? onDelete : null}
             saving={saving}
             dirty={dirty}
+            prefilledFromYear={prefilledYear}
           />
         ) : (
           <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">

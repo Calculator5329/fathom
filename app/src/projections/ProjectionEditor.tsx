@@ -44,6 +44,8 @@ interface ProjectionEditorProps {
   onDelete: (() => void) | null
   saving: boolean
   dirty: boolean
+  /** Fiscal year the inputs were prefilled from (SEC filings), if any. */
+  prefilledFromYear?: number | null
 }
 
 function NumField({
@@ -92,6 +94,7 @@ export function ProjectionEditor({
   onDelete,
   saving,
   dirty,
+  prefilledFromYear = null,
 }: ProjectionEditorProps) {
   const [showNotes, setShowNotes] = useState(!!draft.notes)
   const hasLivePrice = currentPrice != null && Number.isFinite(currentPrice) && currentPrice > 0
@@ -172,7 +175,11 @@ export function ProjectionEditor({
           <div>
             <CardTitle className="text-base font-medium">
               Company inputs
-              <span className="ml-2 font-normal text-muted-foreground">most recent annual figures</span>
+              <span className="ml-2 font-normal text-muted-foreground">
+                {prefilledFromYear
+                  ? `prefilled from SEC filings (FY${prefilledFromYear}) — edit anything`
+                  : 'most recent annual figures'}
+              </span>
             </CardTitle>
             {!hasLivePrice && (
               <p className="mt-1 text-sm text-muted-foreground">
