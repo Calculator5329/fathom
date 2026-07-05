@@ -6,6 +6,13 @@ const PROJECT_ROOT = path.resolve(SCRIPT_DIR, '..');
 
 const INPUTS = {
   shiller: path.join(PROJECT_ROOT, 'context', 'reference-data', 'shiller', 'shiller.csv'),
+  shillerSpliceMeta: path.join(
+    PROJECT_ROOT,
+    'context',
+    'reference-data',
+    'shiller',
+    'splice-meta.json',
+  ),
   sizePremia: path.join(
     PROJECT_ROOT,
     'context',
@@ -290,11 +297,34 @@ async function buildUsMonthly() {
     series.cpi.push(parseFiniteNumber(columns[4], `shiller.csv ${date} cpi`));
   }
 
+  // Splice provenance written by scripts/extend-asset-classes.mjs (post-2023-06
+  // extension from SPY + FRED after Yale abandoned ie_data.xls). Optional: absent
+  // metadata means the file is pure Shiller-pipeline output.
+  let spliceMeta = null;
+  try {
+    const rawMeta = JSON.parse(await fs.readFile(INPUTS.shillerSpliceMeta, 'utf8'));
+    spliceMeta = {
+      splicedFrom: rawMeta.splicedFrom,
+      splicedThrough: rawMeta.splicedThrough,
+      spliceSources: rawMeta.sources,
+    };
+    if (rawMeta.splicedThrough !== dates.at(-1)) {
+      throw new Error(
+        `splice-meta.json splicedThrough ${rawMeta.splicedThrough} does not match shiller.csv end ${dates.at(-1)}; rerun scripts/extend-asset-classes.mjs`,
+      );
+    }
+  } catch (error) {
+    if (error?.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
   const payload = {
     source: 'Shiller / retirement-sim normalized',
     frequency: 'monthly',
     startDate: dates[0],
     endDate: dates.at(-1),
+    ...(spliceMeta ?? {}),
     series,
     dates,
   };
