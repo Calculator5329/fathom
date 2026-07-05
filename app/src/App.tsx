@@ -1,7 +1,11 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
+import { LogIn } from 'lucide-react'
 import { Toaster } from '@/components/ui/sonner'
+import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { PageSkeleton } from '@/components/LoadingSkeletons'
+import { ShellAuthProvider, useShellAuth } from '@/auth/shellAuth'
 import { Landing } from './pages/Landing'
 
 // Route-level code splitting: ECharts (~400KB) and the engine load only when
@@ -70,21 +74,13 @@ function Shell({ children }: { children: React.ReactNode }) {
           <NavLink to="/allocation" className={navLinkClass}>
             Asset allocation
           </NavLink>
-          <NavLink to="/projections" className={navLinkClass}>
-            Projections
-          </NavLink>
           <NavLink to="/montecarlo" className={navLinkClass}>
             Monte Carlo
           </NavLink>
           <NavLink to="/stock" className={navLinkClass}>
             Research
           </NavLink>
-          <NavLink to="/xray" className={navLinkClass}>
-            X-ray
-          </NavLink>
-          <NavLink to="/links" className={navLinkClass}>
-            Links
-          </NavLink>
+          <AccountNav />
         </nav>
       </header>
       {children}
@@ -92,10 +88,78 @@ function Shell({ children }: { children: React.ReactNode }) {
   )
 }
 
+/**
+ * Account-only tabs + the sign-in/out affordance. Signed out, the account
+ * tools stay out of sight and the only trace is one quiet button; a prior
+ * session restores silently (localStorage hint → Firebase persistence).
+ */
+function AccountNav() {
+  const { status, user, signIn, signOut } = useShellAuth()
+
+  return (
+    <>
+      {status === 'in' && (
+        <>
+          <NavLink to="/projections" className={navLinkClass}>
+            Projections
+          </NavLink>
+          <NavLink to="/xray" className={navLinkClass}>
+            X-ray
+          </NavLink>
+          <NavLink to="/links" className={navLinkClass}>
+            Links
+          </NavLink>
+        </>
+      )}
+      <div className="ml-auto flex shrink-0 items-center">
+        {status === 'out' && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            onClick={() => void signIn().catch(() => {})}
+          >
+            <LogIn />
+            Sign in
+          </Button>
+        )}
+        {status === 'in' && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                aria-label="Account"
+                title={user?.email ?? 'Account'}
+                className="flex size-7 items-center justify-center rounded-full border bg-surface-2 font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {(user?.name ?? user?.email ?? '?').slice(0, 1).toUpperCase()}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-56 p-3">
+              <p className="truncate text-sm text-muted-foreground" title={user?.email ?? ''}>
+                {user?.email}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2 -ml-2 text-muted-foreground"
+                onClick={() => void signOut()}
+              >
+                Sign out
+              </Button>
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
+    </>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter>
-      <Shell>
+      <ShellAuthProvider>
+        <Shell>
         <Suspense fallback={<PageSkeleton />}>
           <Routes>
             <Route path="/" element={<Landing />} />
@@ -111,8 +175,9 @@ export default function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
-        <Toaster position="bottom-right" />
-      </Shell>
+          <Toaster position="bottom-right" />
+        </Shell>
+      </ShellAuthProvider>
     </BrowserRouter>
   )
 }

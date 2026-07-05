@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { useShellAuth } from '@/auth/shellAuth'
 import { loadSeries } from '@/data/catalog'
 import { splitAdjustedCloses } from '@/lib/prices'
 
@@ -31,6 +32,10 @@ const TOOLS = [
     title: 'Stock research',
     body: 'Long-run price with market-era context and fundamentals from SEC filings — revenue, margins, valuation.',
   },
+]
+
+// Shown only when signed in, matching the nav.
+const ACCOUNT_TOOLS = [
   {
     to: '/projections',
     title: 'Stock projections',
@@ -91,6 +96,8 @@ function HeroSparkline() {
 }
 
 export function Landing() {
+  const { status } = useShellAuth()
+  const tools = status === 'in' ? [...TOOLS, ...ACCOUNT_TOOLS] : TOOLS
   return (
     <div className="mx-auto max-w-4xl px-6 py-10 xl:max-w-6xl">
       <h1 className="text-5xl font-semibold tracking-tight">
@@ -102,8 +109,8 @@ export function Landing() {
       </p>
       <HeroSparkline />
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {TOOLS.map((t) => (
+      <div className={`mt-8 grid gap-4 sm:grid-cols-2 ${tools.length > 4 ? 'xl:grid-cols-3' : ''}`}>
+        {tools.map((t) => (
           <Link key={t.to} to={t.to} className="group">
             <Card className="h-full transition-colors group-hover:bg-surface-2">
               <CardContent>

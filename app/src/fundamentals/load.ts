@@ -52,6 +52,20 @@ const DATA_BASE: string =
 
 const cache = new Map<string, Promise<Fundamentals | null>>()
 
+/**
+ * Some filers never tag total Liabilities directly (AMZN), but the balance
+ * sheet identity fills it: liabilities = assets − equity.
+ */
+function normalize(f: Fundamentals | null): Fundamentals | null {
+  if (!f) return null
+  for (const fy of f.fiscalYears) {
+    if (fy.totalLiabilities == null && fy.totalAssets != null && fy.stockholdersEquity != null) {
+      fy.totalLiabilities = fy.totalAssets - fy.stockholdersEquity
+    }
+  }
+  return f
+}
+
 /** Load a ticker's fundamentals (null if none — e.g. ETFs, foreign, uncovered). */
 export function loadFundamentals(ticker: string): Promise<Fundamentals | null> {
   const key = ticker.toUpperCase()
@@ -59,6 +73,7 @@ export function loadFundamentals(ticker: string): Promise<Fundamentals | null> {
   if (!p) {
     p = fetch(`${DATA_BASE}fundamentals/${key}.json`)
       .then((res) => (res.ok && res.headers.get('content-type')?.includes('json') ? res.json() : null))
+      .then((f) => normalize(f as Fundamentals | null))
       .catch(() => null)
     cache.set(key, p)
   }

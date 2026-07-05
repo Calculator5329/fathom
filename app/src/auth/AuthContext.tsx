@@ -7,6 +7,7 @@ import {
   type User,
 } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
+import { AUTH_EVENT, clearAuthHint, markAuthHint } from './shellAuth'
 
 interface AuthState {
   user: User | null
@@ -36,9 +37,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signInWithGoogle: async () => {
       await signInWithPopup(auth, provider)
+      markAuthHint()
+      window.dispatchEvent(new Event(AUTH_EVENT))
     },
     signOut: async () => {
       await fbSignOut(auth)
+      clearAuthHint()
+      window.dispatchEvent(new Event(AUTH_EVENT))
     },
   }
 
