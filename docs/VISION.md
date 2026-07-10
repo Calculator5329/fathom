@@ -205,3 +205,18 @@ REJECTED: Backtest→Monte Carlo handoff button (don't build).
   Firestore free tier). Any feature that would exceed them gets flagged to Ethan BEFORE building.
 - Auth surface area minimal: Google provider only, no custom user tables, security rules reviewed
   in the PR that adds any new collection.
+
+## 2026-07-09 — engine extracted to @calculator-5329/backtest-engine
+
+The pure engine (`app/src/engine/` internals) and the Monte Carlo simulator
+(`app/src/montecarlo/{simulate,data}.ts`) now live in the shared package
+`@calculator-5329/backtest-engine` (repo: `Dev/finance-kit`), lifted verbatim
+with their hand-computed fixture suites. Fathom consumes it via a vendored
+tarball (`app/vendor/`) until the npm publish. `@/engine` and the montecarlo
+module paths are unchanged compatibility seams, so app code and the sacred-
+engine conventions are untouched. The real-data golden regressions REMAIN in
+this repo (`app/src/engine/__tests__/realdata.test.ts`, 8 tests against
+`data/tickers/`) — invariant 1 is enforced here AND in the package. Engine
+math changes now happen in finance-kit first (same fixture rules), then a
+repacked tarball / version bump lands here. Consumers of the package:
+retirement-sim (migrated same day), Fathom, finance-master (planned).

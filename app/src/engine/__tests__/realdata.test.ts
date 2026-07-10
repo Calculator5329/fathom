@@ -7,9 +7,9 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { alignSeries } from '../align'
-import { runBacktest } from '../backtest'
-import type { BacktestConfig, TickerSeries } from '../types'
+import { alignSeries } from '@/engine'
+import { runBacktest } from '@/engine'
+import type { BacktestConfig, TickerSeries } from '@/engine'
 
 const DATA_DIR = path.resolve(import.meta.dirname, '../../../../data/tickers')
 
