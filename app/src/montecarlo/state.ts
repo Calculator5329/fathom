@@ -1,12 +1,13 @@
 import { ASSET_CLASSES } from '@/data/assetClasses'
 import { decodeWeightList, encodeWeightList, enumParam, numParam } from '@/lib/urlCodec'
 import type { AllocationWeight } from './data'
+import type { DisplayBasis } from './nominal'
 import type { WithdrawalStrategy } from './simulate'
 
 /**
  * URL codec for the Monte Carlo config (shareable scenarios):
  *   /montecarlo?a=usStocks:60,usBonds:40&bal=1000000&yrs=30&wr=4
- *     &strat=fixedReal&fee=0.1&mode=historical&trials=10000
+ *     &strat=fixedReal&fee=0.1&mode=historical&trials=10000&disp=nominal
  */
 export interface MonteCarloConfig {
   allocation: AllocationWeight[]
@@ -19,10 +20,12 @@ export interface MonteCarloConfig {
   trials: number
   accumulationYears: number
   annualContribution: number // real $/yr during accumulation
+  basis: DisplayBasis // display-only: real (default) vs re-inflated nominal
 }
 
 const VALID_IDS = new Set(ASSET_CLASSES.map((a) => a.id))
 const STRATEGIES: WithdrawalStrategy[] = ['fixedReal', 'fixedPercent', 'vpw', 'guardrails']
+const BASES: DisplayBasis[] = ['real', 'nominal']
 
 export const DEFAULT_MC: MonteCarloConfig = {
   allocation: [
@@ -38,6 +41,7 @@ export const DEFAULT_MC: MonteCarloConfig = {
   trials: 10_000,
   accumulationYears: 0,
   annualContribution: 0,
+  basis: 'real',
 }
 
 export function encodeMonteCarlo(c: MonteCarloConfig): URLSearchParams {
@@ -55,6 +59,7 @@ export function encodeMonteCarlo(c: MonteCarloConfig): URLSearchParams {
   if (c.trials !== DEFAULT_MC.trials) p.set('trials', String(c.trials))
   if (c.accumulationYears !== 0) p.set('acc', String(c.accumulationYears))
   if (c.annualContribution !== 0) p.set('save', String(c.annualContribution))
+  if (c.basis !== DEFAULT_MC.basis) p.set('disp', c.basis)
   return p
 }
 
@@ -78,5 +83,6 @@ export function decodeMonteCarlo(p: URLSearchParams): MonteCarloConfig {
     trials: numParam(p.get('trials'), DEFAULT_MC.trials, { min: 1000, max: 50_000 }),
     accumulationYears: numParam(p.get('acc'), 0, { min: 0, max: 50 }),
     annualContribution: numParam(p.get('save'), 0, { min: 0, max: 1e9 }),
+    basis: enumParam(p.get('disp'), BASES, DEFAULT_MC.basis),
   }
 }

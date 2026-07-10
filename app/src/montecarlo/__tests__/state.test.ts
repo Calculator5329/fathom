@@ -17,8 +17,17 @@ describe('monte carlo url state', () => {
       trials: 20_000,
       accumulationYears: 15,
       annualContribution: 24_000,
+      basis: 'nominal',
     }
     expect(decodeMonteCarlo(encodeMonteCarlo(c))).toEqual(c)
+  })
+
+  it('adds the display basis param only when non-default (real is byte-identical)', () => {
+    expect(encodeMonteCarlo(DEFAULT_MC).has('disp')).toBe(false)
+    expect(encodeMonteCarlo({ ...DEFAULT_MC, basis: 'nominal' }).get('disp')).toBe('nominal')
+    // Unknown values fall back to the real default.
+    expect(decodeMonteCarlo(new URLSearchParams('disp=weird')).basis).toBe('real')
+    expect(decodeMonteCarlo(new URLSearchParams('disp=nominal')).basis).toBe('nominal')
   })
 
   it('omits scalar defaults from the URL (only allocation is always present)', () => {

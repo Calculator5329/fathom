@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Segmented } from '@/components/ui/segmented'
 import {
   Table,
   TableBody,
@@ -26,9 +27,10 @@ import {
 import { ASSET_CLASSES, assetClass } from '@/data/assetClasses'
 import { formatPct, formatUsd, formatUsdCompact } from '@/lib/format'
 import { endingHistogramOption, fanChartOption, incomeFanOption } from '@/montecarlo/chart'
+import { type DisplayBasis, toNominalResult } from '@/montecarlo/nominal'
 import type { WithdrawalStrategy } from '@/montecarlo/simulate'
 import { decodeMonteCarlo, encodeMonteCarlo, type MonteCarloConfig } from '@/montecarlo/state'
-import { useSimulation } from '@/montecarlo/useSimulation'
+import { useInflationRate, useSimulation } from '@/montecarlo/useSimulation'
 
 /**
  * Tool 4 — Monte Carlo retirement simulator.
@@ -70,6 +72,8 @@ export function Montecarlo() {
     mode: config.mode,
     trials: config.trials,
   })
+
+  const inflationRate = useInflationRate()
 
   const sum = weightSum(config.allocation)
   const balanced = Math.abs(sum - 100) < 0.5
@@ -269,7 +273,10 @@ export function Montecarlo() {
           {config.mode === 'historical'
             ? 'Every rolling period in history as one trial.'
             : `${config.trials.toLocaleString()} resampled trials (24-mo blocks).`}
-          {' '}All figures in today's dollars.
+          {' '}
+          {config.basis === 'nominal'
+            ? 'Figures re-inflated to nominal dollars for display.'
+            : "All figures in today's dollars."}
         </p>
       </aside>
 
@@ -284,7 +291,13 @@ export function Montecarlo() {
             <p className="text-sm text-muted-foreground">Set an allocation to run.</p>
           )
         ) : (
-          <Results result={sim.result} maxSwr={sim.maxSwr} config={config} />
+          <Results
+            result={sim.result}
+            maxSwr={sim.maxSwr}
+            config={config}
+            inflationRate={inflationRate}
+            onBasisChange={(basis) => update({ ...config, basis })}
+          />
         )}
       </main>
     </div>
@@ -295,22 +308,48 @@ function Results({
   result,
   maxSwr,
   config,
+  inflationRate,
+  onBasisChange,
 }: {
   result: import('@/montecarlo/simulate').SimResult
   maxSwr: number
   config: MonteCarloConfig
+  inflationRate: number
+  onBasisChange: (basis: DisplayBasis) => void
 }) {
-  const fan = useMemo(() => fanChartOption(result), [result])
-  const incomeFan = useMemo(
-    () => (config.strategy !== 'fixedReal' ? incomeFanOption(result) : null),
-    [result, config.strategy],
+  const nominal = config.basis === 'nominal'
+  // Display-only re-inflation. Real mode passes the sim result through
+  // untouched, so every downstream chart/table stays byte-identical to before.
+  const display = useMemo(
+    () => (nominal ? toNominalResult(result, inflationRate) : result),
+    [nominal, result, inflationRate],
   )
-  const hist = useMemo(() => endingHistogramOption(result), [result])
-  const success = result.successRate
+  const unit = nominal ? 'nominal dollars' : "today's dollars"
+
+  const fan = useMemo(() => fanChartOption(display), [display])
+  const incomeFan = useMemo(
+    () => (config.strategy !== 'fixedReal' ? incomeFanOption(display) : null),
+    [display, config.strategy],
+  )
+  const hist = useMemo(() => endingHistogramOption(display), [display])
+  const success = display.successRate
   const successColor = success >= 0.9 ? 'text-gain' : success >= 0.75 ? 'text-chart-3' : 'text-loss'
 
   return (
     <div className="animate-enter space-y-6">
+      {/* Display basis — real (purchasing power) vs re-inflated nominal. */}
+      <div className="flex items-center justify-end gap-2">
+        <span className="text-sm text-muted-foreground">Display</span>
+        <Segmented
+          options={[
+            { v: 'real', label: 'Real' },
+            { v: 'nominal', label: 'Nominal' },
+          ]}
+          value={config.basis}
+          onChange={onBasisChange}
+        />
+      </div>
+
       {/* Headline metrics */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card className="gap-1">
@@ -319,7 +358,7 @@ function Results({
           </CardHeader>
           <CardContent>
             <p className={`text-3xl font-semibold tracking-tight tnum ${successColor}`}>{pctStr(success)}</p>
-            <p className="mt-0.5 text-sm text-muted-foreground">{result.trials.toLocaleString()} trials</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">{display.trials.toLocaleString()} trials</p>
           </CardContent>
         </Card>
         <Card className="gap-1">
@@ -327,8 +366,8 @@ function Results({
             <CardTitle className="text-sm font-normal text-muted-foreground">Median ending</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold tracking-tight tnum">{formatUsdCompact(result.medianEnding)}</p>
-            <p className="mt-0.5 text-sm text-muted-foreground">today's dollars</p>
+            <p className="text-3xl font-semibold tracking-tight tnum">{formatUsdCompact(display.medianEnding)}</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">{unit}</p>
           </CardContent>
         </Card>
         <Card className="gap-1">
@@ -354,7 +393,7 @@ function Results({
             <CardTitle className="text-sm font-normal text-muted-foreground">Worst ending</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold tracking-tight tnum">{formatUsdCompact(result.endingBalances[0])}</p>
+            <p className="text-3xl font-semibold tracking-tight tnum">{formatUsdCompact(display.endingBalances[0])}</p>
             <p className="mt-0.5 text-sm text-muted-foreground">{config.horizonYears}-yr horizon</p>
           </CardContent>
         </Card>
@@ -368,8 +407,8 @@ function Results({
               <CardTitle className="text-sm font-normal text-muted-foreground">First-year income</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-semibold tracking-tight tnum">{formatUsdCompact(result.income.firstYearMedian)}</p>
-              <p className="mt-0.5 text-sm text-muted-foreground">median, today's $</p>
+              <p className="text-2xl font-semibold tracking-tight tnum">{formatUsdCompact(display.income.firstYearMedian)}</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">median, {unit}</p>
             </CardContent>
           </Card>
           <Card className="gap-1">
@@ -377,7 +416,7 @@ function Results({
               <CardTitle className="text-sm font-normal text-muted-foreground">Worst year (median)</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-semibold tracking-tight tnum">{formatUsdCompact(result.income.worstYearMedian)}</p>
+              <p className="text-2xl font-semibold tracking-tight tnum">{formatUsdCompact(display.income.worstYearMedian)}</p>
               <p className="mt-0.5 text-sm text-muted-foreground">typical deepest pay cut</p>
             </CardContent>
           </Card>
@@ -386,7 +425,7 @@ function Results({
               <CardTitle className="text-sm font-normal text-muted-foreground">Worst year (5th pct)</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-semibold tracking-tight tnum text-loss">{formatUsdCompact(result.income.worstYearP5)}</p>
+              <p className="text-2xl font-semibold tracking-tight tnum text-loss">{formatUsdCompact(display.income.worstYearP5)}</p>
               <p className="mt-0.5 text-sm text-muted-foreground">bad-luck floor</p>
             </CardContent>
           </Card>
@@ -395,9 +434,9 @@ function Results({
               <CardTitle className="text-sm font-normal text-muted-foreground">Pay cut odds</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-semibold tracking-tight tnum">{pctStr(result.income.cutProbability)}</p>
+              <p className="text-2xl font-semibold tracking-tight tnum">{pctStr(display.income.cutProbability)}</p>
               <p className="mt-0.5 text-sm text-muted-foreground">
-                median {Math.round(result.income.yearsBelowStartMedian)} yrs below start
+                median {Math.round(display.income.yearsBelowStartMedian)} yrs below start
               </p>
             </CardContent>
           </Card>
@@ -411,7 +450,7 @@ function Results({
             <CardTitle className="text-base font-medium">
               Income over time
               <span className="ml-2 font-normal text-muted-foreground">
-                annual withdrawals, today's dollars &middot; median with 25&ndash;75 and 5&ndash;95 bands
+                annual withdrawals, {unit} &middot; median with 25&ndash;75 and 5&ndash;95 bands
               </span>
             </CardTitle>
           </CardHeader>
@@ -442,7 +481,7 @@ function Results({
         </CardContent>
       </Card>
 
-      {result.worstStarts.length > 0 && (
+      {display.worstStarts.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base font-medium">Worst starting years</CardTitle>
@@ -457,7 +496,7 @@ function Results({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {result.worstStarts.map((w) => (
+                {display.worstStarts.map((w) => (
                   <TableRow key={w.label}>
                     <TableCell className="font-mono tnum">{w.label}</TableCell>
                     <TableCell className="text-right font-mono tnum">{formatUsd(w.endingBalance)}</TableCell>

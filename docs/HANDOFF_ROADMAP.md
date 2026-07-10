@@ -41,11 +41,12 @@ committed with focused staging (never `git add -A`), then pushed.
   `docs/original-plan.md`, `docs/tech_spec.md`, `docs/changelog.md` are his untracked
   drafts, superseded by VISION/PLAN/this file. Do NOT edit or delete them — ask whether
   to archive. _Accept: Ethan answered; outcome noted in VISION.md._
-- [ ] **Monte Carlo: nominal display toggle.** Sim is correctly real-only internally;
-  add a display-layer toggle that re-inflates outputs using the CPI series already in
-  the asset-class data. No engine changes. _Accept: toggle on /montecarlo; real mode
-  byte-identical to today; nominal mode spot-checked against hand-computed CPI
-  compounding fixture; URL param ADDED (never renamed) per the codec contract._
+- [x] **Monte Carlo: nominal display toggle.** _(done 2026-07-10, burndown w2)_ Sim is
+  correctly real-only internally; add a display-layer toggle that re-inflates outputs
+  using the CPI series already in the asset-class data. No engine changes. _Accept:
+  toggle on /montecarlo; real mode byte-identical to today; nominal mode spot-checked
+  against hand-computed CPI compounding fixture; URL param ADDED (never renamed) per the
+  codec contract._
 
 ## Next
 
