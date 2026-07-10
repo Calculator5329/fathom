@@ -12,3 +12,5 @@ app/public/data/
 !app/.env.development
 *.local
 .DS_Store
+# agent-orchestrator local state
+.orc/
