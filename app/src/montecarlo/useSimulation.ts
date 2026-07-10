@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { loadAssetClassData } from '@/data/assetClasses'
 import type { AllocationWeight } from './data'
+import { annualInflationRate } from './nominal'
 import type { SimParams, SimResult } from './simulate'
 import type { WorkerRequest, WorkerResponse } from './simulate.worker'
 
@@ -86,4 +87,28 @@ export function useSimulation(config: RunConfig): SimOutput {
   }, [key]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return output
+}
+
+/**
+ * Long-run average annual inflation implied by the CPI series in the
+ * asset-class data — the rate the nominal display toggle re-inflates by.
+ * Loads once (shared, cached promise); returns 0 until data resolves so the
+ * initial render matches real mode. Display-only; never feeds the sim.
+ */
+export function useInflationRate(): number {
+  const [rate, setRate] = useState(0)
+  useEffect(() => {
+    let cancelled = false
+    loadAssetClassData()
+      .then((data) => {
+        if (!cancelled) setRate(annualInflationRate(data.cpi))
+      })
+      .catch(() => {
+        /* leave at 0 (no-op factor) on transient load failure */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  return rate
 }
