@@ -21,6 +21,9 @@ function load(ticker: string): TickerSeries {
 const hasData = ['SPY', 'BND', 'AAPL'].every((t) =>
   existsSync(path.join(DATA_DIR, `${t}.json`)),
 )
+const spy = hasData ? load('SPY') : undefined
+const bnd = hasData ? load('BND') : undefined
+const aapl = hasData ? load('AAPL') : undefined
 
 const base: BacktestConfig = {
   initialAmount: 10_000,
@@ -30,11 +33,10 @@ const base: BacktestConfig = {
 }
 
 describe.skipIf(!hasData)('real data: SPY', () => {
-  const spy = load('SPY')
   const spec = { name: 'SPY', allocations: [{ ticker: 'SPY', weight: 100 }] }
 
   it('internal consistency: totalReturn ≈ priceReturn + divYield each day', () => {
-    const { assets } = alignSeries([spy])
+    const { assets } = alignSeries([spy!])
     const a = assets.get('SPY')!
     let worst = 0
     for (let t = 1; t < a.totalReturn.length; t++) {
@@ -46,13 +48,13 @@ describe.skipIf(!hasData)('real data: SPY', () => {
   })
 
   it('1994–2023 CAGR lands in the known ~10% neighborhood', () => {
-    const r = runBacktest([spy], spec, { ...base, start: '1994-01-01', end: '2023-12-31' })
+    const r = runBacktest([spy!], spec, { ...base, start: '1994-01-01', end: '2023-12-31' })
     expect(r.metrics.cagr).toBeGreaterThan(0.09)
     expect(r.metrics.cagr).toBeLessThan(0.11)
   })
 
   it('GFC max drawdown ≈ −55% (total return)', () => {
-    const r = runBacktest([spy], spec, { ...base, start: '2007-01-01', end: '2012-12-31' })
+    const r = runBacktest([spy!], spec, { ...base, start: '2007-01-01', end: '2012-12-31' })
     expect(r.metrics.drawdown.maxDrawdown).toBeGreaterThan(-0.58)
     expect(r.metrics.drawdown.maxDrawdown).toBeLessThan(-0.5)
     expect(r.metrics.drawdown.troughDate.slice(0, 7)).toBe('2009-03')
@@ -60,15 +62,15 @@ describe.skipIf(!hasData)('real data: SPY', () => {
   })
 
   it('2008 annual return ≈ −37%', () => {
-    const r = runBacktest([spy], spec, { ...base, start: '2007-12-01', end: '2009-01-31' })
+    const r = runBacktest([spy!], spec, { ...base, start: '2007-12-01', end: '2009-01-31' })
     const y2008 = r.metrics.annualReturns.find((y) => y.year === 2008)!
     expect(y2008.return).toBeGreaterThan(-0.4)
     expect(y2008.return).toBeLessThan(-0.34)
   })
 
   it('reinvested beats non-reinvested over decades (dividends matter)', () => {
-    const on = runBacktest([spy], spec, { ...base, start: '1994-01-01', end: '2023-12-31' })
-    const off = runBacktest([spy], spec, {
+    const on = runBacktest([spy!], spec, { ...base, start: '1994-01-01', end: '2023-12-31' })
+    const off = runBacktest([spy!], spec, {
       ...base,
       start: '1994-01-01',
       end: '2023-12-31',
@@ -81,8 +83,6 @@ describe.skipIf(!hasData)('real data: SPY', () => {
 })
 
 describe.skipIf(!hasData)('real data: 60/40 SPY/BND', () => {
-  const spy = load('SPY')
-  const bnd = load('BND')
   const spec = {
     name: '60/40',
     allocations: [
@@ -93,8 +93,8 @@ describe.skipIf(!hasData)('real data: 60/40 SPY/BND', () => {
 
   it('balanced portfolio has lower volatility and shallower drawdown than SPY', () => {
     const cfg = { ...base, start: '2008-01-01', end: '2023-12-31', rebalance: 'annual' as const }
-    const mixed = runBacktest([spy, bnd], spec, cfg)
-    const pure = runBacktest([spy], { name: 'SPY', allocations: [{ ticker: 'SPY', weight: 100 }] }, cfg)
+    const mixed = runBacktest([spy!, bnd!], spec, cfg)
+    const pure = runBacktest([spy!], { name: 'SPY', allocations: [{ ticker: 'SPY', weight: 100 }] }, cfg)
     expect(mixed.metrics.volatility).toBeLessThan(pure.metrics.volatility)
     expect(mixed.metrics.drawdown.maxDrawdown).toBeGreaterThan(pure.metrics.drawdown.maxDrawdown)
     expect(mixed.metrics.cagr).toBeLessThan(pure.metrics.cagr)
@@ -102,17 +102,16 @@ describe.skipIf(!hasData)('real data: 60/40 SPY/BND', () => {
   })
 
   it('range clamps to BND inception (2007), not SPY (1993)', () => {
-    const r = runBacktest([spy, bnd], spec, base)
+    const r = runBacktest([spy!, bnd!], spec, base)
     expect(r.dates[0].slice(0, 4)).toBe('2007')
   })
 })
 
 describe.skipIf(!hasData)('real data: AAPL splits', () => {
-  const aapl = load('AAPL')
   const spec = { name: 'AAPL', allocations: [{ ticker: 'AAPL', weight: 100 }] }
 
   it('value is continuous across the 2020 4:1 split without reinvestment', () => {
-    const r = runBacktest([aapl], spec, {
+    const r = runBacktest([aapl!], spec, {
       ...base,
       reinvestDividends: false,
       start: '2020-08-24',

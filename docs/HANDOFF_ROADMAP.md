@@ -32,8 +32,9 @@ committed with focused staging (never `git add -A`), then pushed.
   private? Either way, update CLAUDE.md's working-style section if the answer changes
   anything. _Accept: Ethan's decision recorded in VISION.md; every local commit is
   pushed (local and origin `main` identical)._
-- [ ] **CI: GitHub Actions for vitest + tsc.** No cloud secrets needed — tests run on
-  committed data. Workflow: checkout, Node 22, `npm ci` in `app/`, `npx vitest run`,
+- [x] **CI: GitHub Actions for vitest + tsc.** *(done 2026-07-10)* No cloud secrets
+  needed — tests run on committed data. Workflow: checkout, Node 22, `npm ci` in
+  `app/`, `npx vitest run`,
   `npx tsc -b`. _Accept: workflow file committed; a push to `main` shows a green check
   on GitHub; no secrets referenced._
 - [ ] **Flag stale untracked docs to Ethan.** `[ETHAN]` `docs/roadmap.md`,
