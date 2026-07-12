@@ -1,7 +1,7 @@
 # Fathom — stock-analysis-project
 
 All-things-stocks analysis suite (backtesting, allocation, projections, Monte Carlo).
-Companion app to the personal-finance project at `C:\Users\et2bo\Desktop\New folder\finance-master`
+Companion app to the personal-finance project at `~/projects/finance/finance-master`
 (that one owns budgets/net-worth/personal money; THIS one owns markets. Keep the boundary clean:
 Fathom never stores personal account balances; finance-master never re-implements market analysis).
 
@@ -32,8 +32,7 @@ product spec, [docs/data-notes.md](docs/data-notes.md) before touching data.
 - Dev server: use the preview tooling with `.claude/launch.json` ("app"); port 5173 is taken by
   another project, autoPort is on and vite reads `process.env.PORT`.
 - Tests: `npx vitest run` from `app/`. Typecheck: `npx tsc -b` from `app/`. BOTH must pass before
-  every commit. PowerShell cwd sometimes resets between calls — `Set-Location` with absolute path
-  and verify with `Get-Location` before any npm command.
+  every commit.
 - Fetch ticker data: `node scripts/fetch-tiingo.mjs SPY QQQ ...` (skips existing; Tiingo free tier
   ≈50 unique symbols/hour, 1000 req/day — batches self-throttle but big batches will 429 and retry).
 - Rebuild catalog: `node scripts/build-catalog.mjs`. Asset classes: `node scripts/build-asset-classes.mjs`.
@@ -99,8 +98,8 @@ Near-black green-cast canvas, 4-step surface ladder, hairline borders, ONE emera
 
 ## Environment gotchas (each cost real time once)
 
-- NEVER edit source files via PowerShell string-replace — it mangles UTF-8 (use file tools; prefer
-  `&mdash;`-style entities in JSX text).
+- Windows workers only (for example, Jordy): PowerShell can mangle UTF-8 replacements, reset cwd,
+  and add CRLF to piped secrets; use absolute paths, file APIs, and defensive server-side `.trim()`.
 - shadcn CLI: `components.json` exists; use `npx shadcn@latest add <name> -y`. Do NOT run `init`
   (goes interactive / create-project mode). If Vite errors "Failed to resolve import tslib",
   delete `app/node_modules/.vite` and restart.
@@ -108,8 +107,6 @@ Near-black green-cast canvas, 4-step surface ladder, hairline borders, ONE emera
   portal-free `CaptionDropdown` in `app/src/components/ui/calendar.tsx`. Reuse that pattern for
   any dropdown inside a popover.
 - `/healthz` is reserved by Google's frontend on run.app — service health is `/api/health`.
-- Secrets via PowerShell pipes pick up trailing CRLF (Tiingo 403s). Write with
-  `[IO.File]::WriteAllText` and `.trim()` defensively server-side.
 - TS 6: `baseUrl` is deprecated; path aliases are configured without it.
 
 ## Working style (Ethan's rules)
@@ -120,9 +117,9 @@ Near-black green-cast canvas, 4-step surface ladder, hairline borders, ONE emera
   Ethan's untracked files (they are untracked on purpose).
 - Verify UI changes in the running preview before committing (drive the DOM via eval; the
   screenshot tool times out — use DOM assertions).
-- Delegate mechanical work to Codex subagents (see AGENTS.md for their guardrails):
-  write prompt to a temp file, then
-  `cat prompt.md | codex exec --sandbox workspace-write -C <projectRoot> -`
+- Delegate mechanical work to Codex subagents (see [AGENTS.md](AGENTS.md) for their guardrails):
+  write the prompt to a temp file under `~/.cache`, then
+  `codex exec --sandbox workspace-write -C ~/projects/finance/fathom - < ~/.cache/fathom-codex-prompt.md`
   (add `-c sandbox_workspace_write.network_access=true` for network). Cloud mutations (gcloud IAM,
   buckets, deploys) stay with Claude directly — the permission classifier blocks them inside Codex
   anyway. Review Codex output, then commit it yourself.
