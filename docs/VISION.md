@@ -9,7 +9,7 @@ Two companion apps, one clean boundary:
 - **Fathom (this repo):** everything about *markets and securities*. Backtests, allocations,
   projections, simulations, fundamentals, portfolio analytics. Public, no login for the
   market-data tools; login only where the user stores their own work.
-- **finance-master (`C:\Users\et2bo\Desktop\New folder\finance-master`):** everything about
+- **finance-master (`~/projects/finance/finance-master`):** everything about
   *Ethan's money*. Net worth, budgets, income, accounts. Private by nature.
 - The personal app may LINK into Fathom (e.g. "analyze my brokerage allocation" deep-links a
   Fathom portfolio URL) — it never re-implements market analysis, and Fathom never stores
@@ -205,6 +205,19 @@ REJECTED: Backtest→Monte Carlo handoff button (don't build).
   Firestore free tier). Any feature that would exceed them gets flagged to Ethan BEFORE building.
 - Auth surface area minimal: Google provider only, no custom user tables, security rules reviewed
   in the PR that adds any new collection.
+
+## 2026-07-10 — roadmap/TODO doc sweep
+
+- `docs/roadmap.md` (untracked pre-build draft) superseded in place: banner added,
+  checkboxes reconciled against the shipped app so MASTER_TODO stops listing 19 stale
+  open items. Living roadmap remains `docs/HANDOFF_ROADMAP.md`.
+- `docs/PLAN.md` §8 setup checklist checked off (GCP, gcloud, Tiingo, Firebase Hosting,
+  Fathom name all verified in repo/infra).
+- `HANDOFF_ROADMAP.md`: engine-extraction item checked off (2026-07-09 ship).
+
+*(Merged back 2026-07-12 from the diverged duplicate working copy at
+`finance/stock-analysis-project` — that copy had this entry, the canonical repo
+didn't. Consolidation of the duplicate itself remains ETHAN-QUEUE #8.)*
 
 ## 2026-07-09 — engine extracted to @calculator-5329/backtest-engine
 
