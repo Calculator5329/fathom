@@ -18,7 +18,7 @@ real TWR/IRR from broker CSV exports, entirely client-side).
 
 It is a portfolio-quality solo project with an unusually strict engineering discipline
 around its portfolio-math engine (see "The engine" below). The companion app
-**finance-master** (`C:\Users\et2bo\Desktop\New folder\finance-master`) owns personal
+**finance-master** (`~/projects/finance/finance-master`) owns personal
 money — budgets, net worth, accounts. The boundary is hard: Fathom never stores personal
 account balances; finance-master never re-implements market analysis. Integration is
 deep links via Fathom's URL-state contracts (query params are a public API — only add

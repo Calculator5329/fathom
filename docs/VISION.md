@@ -223,7 +223,7 @@ didn't. Consolidation of the duplicate itself remains ETHAN-QUEUE #8.)*
 
 The pure engine (`app/src/engine/` internals) and the Monte Carlo simulator
 (`app/src/montecarlo/{simulate,data}.ts`) now live in the shared package
-`@calculator-5329/backtest-engine` (repo: `Dev/finance-kit`), lifted verbatim
+`@calculator-5329/backtest-engine` (repo: `~/projects/finance/finance-kit`), lifted verbatim
 with their hand-computed fixture suites. Fathom consumes it via a vendored
 tarball (`app/vendor/`) until the npm publish. `@/engine` and the montecarlo
 module paths are unchanged compatibility seams, so app code and the sacred-
