@@ -215,6 +215,10 @@ REJECTED: Backtest→Monte Carlo handoff button (don't build).
   Fathom name all verified in repo/infra).
 - `HANDOFF_ROADMAP.md`: engine-extraction item checked off (2026-07-09 ship).
 
+*(Merged back 2026-07-12 from the diverged duplicate working copy at
+`finance/stock-analysis-project` — that copy had this entry, the canonical repo
+didn't. Consolidation of the duplicate itself remains ETHAN-QUEUE #8.)*
+
 ## 2026-07-09 — engine extracted to @calculator-5329/backtest-engine
 
 The pure engine (`app/src/engine/` internals) and the Monte Carlo simulator
