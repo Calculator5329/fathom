@@ -1,0 +1,24 @@
+{
+  "description": "Absolute paths to full datasets on this machine. Not portable — update if projects move.",
+  "tickerData": {
+    "masterSiteStockJsonDir": "C:\\Users\\et2bo\\Desktop\\New folder\\master-site\\public\\stock-data",
+    "stockSiteDownloadScript": "C:\\Users\\et2bo\\Desktop\\New folder\\stock-site\\backend\\download_data.py",
+    "stockSiteCacheDir": "C:\\Users\\et2bo\\Desktop\\New folder\\stock-site\\backend\\data_cache",
+    "dailyPricesCsv": "C:\\Users\\et2bo\\Desktop\\Projects\\Finance\\finance reports\\portfolio-quarterly-reports\\src\\data\\raw\\daily-prices.csv",
+    "stockBacktestDataDir": "C:\\Users\\et2bo\\Desktop\\New folder\\stock-backtest\\public\\data",
+    "stockBacktest2Dir": "C:\\Users\\et2bo\\Desktop\\Projects\\Finance\\finance-tools\\stock-backtest-2",
+    "financeMasterDb": "C:\\Users\\et2bo\\Desktop\\New folder\\finance-master\\data\\master.db",
+    "financeMasterIngest": "C:\\Users\\et2bo\\Desktop\\New folder\\finance-master\\apps\\sidecar\\src\\pipeline\\referenceData.ts"
+  },
+  "assetClassData": {
+    "masterSiteLongTermDir": "C:\\Users\\et2bo\\Desktop\\New folder\\master-site\\public\\long-term",
+    "retirementSimShillerCsv": "C:\\Users\\et2bo\\Desktop\\Projects\\Finance\\retirement-sim\\public\\data\\shiller.csv",
+    "retirementSimBuildScript": "C:\\Users\\et2bo\\Desktop\\Projects\\Finance\\retirement-sim\\scripts\\build-data.ts",
+    "longTermParser": "C:\\Users\\et2bo\\Desktop\\New folder\\master-site\\src\\data\\longTermDataService.ts"
+  },
+  "engines": {
+    "stockBacktest2": "C:\\Users\\et2bo\\Desktop\\Projects\\Finance\\finance-tools\\stock-backtest-2",
+    "financeMasterBacktestUi": "C:\\Users\\et2bo\\Desktop\\New folder\\finance-master\\apps\\web\\src\\ui\\backtest",
+    "retirementSimEngine": "C:\\Users\\et2bo\\Desktop\\Projects\\Finance\\retirement-sim\\src\\sim"
+  }
+}

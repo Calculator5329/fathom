@@ -1,0 +1,16 @@
+{
+  "splicedFrom": "2023-07",
+  "splicedThrough": "2026-05",
+  "generatedAt": "2026-07-05T05:56:52.488Z",
+  "generatedBy": "scripts/extend-asset-classes.mjs",
+  "sources": {
+    "usStocks": "SPY adjClose month-end total return (data/tickers/SPY.json, Tiingo) from 2023-07; S&P composite (Shiller) before. ~3bp/yr ETF fee drag vs index.",
+    "usBonds": "FRED GS10 with the original Shiller-pipeline formula gs10/12 - 7*(gs10Next - gs10) from 2023-07.",
+    "cash": "FRED GS10 / 12 / 4 proxy (unchanged convention; not TB3MS) from 2023-07.",
+    "cpi": "FRED CPIAUCNS (CPI-U NSA, matches Shiller levels exactly) from 2023-07."
+  },
+  "interpolatedCpiMonths": [
+    "2025-10"
+  ],
+  "interpolationNote": "Geometric interpolation of neighboring CPIAUCNS levels; 2025-10 CPI was never published by BLS (2025 federal shutdown)."
+}

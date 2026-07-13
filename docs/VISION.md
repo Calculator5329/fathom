@@ -206,6 +206,15 @@ REJECTED: Backtest→Monte Carlo handoff button (don't build).
 - Auth surface area minimal: Google provider only, no custom user tables, security rules reviewed
   in the PR that adds any new collection.
 
+## 2026-07-10 — roadmap/TODO doc sweep
+
+- `docs/roadmap.md` (untracked pre-build draft) superseded in place: banner added,
+  checkboxes reconciled against the shipped app so MASTER_TODO stops listing 19 stale
+  open items. Living roadmap remains `docs/HANDOFF_ROADMAP.md`.
+- `docs/PLAN.md` §8 setup checklist checked off (GCP, gcloud, Tiingo, Firebase Hosting,
+  Fathom name all verified in repo/infra).
+- `HANDOFF_ROADMAP.md`: engine-extraction item checked off (2026-07-09 ship).
+
 ## 2026-07-09 — engine extracted to @calculator-5329/backtest-engine
 
 The pure engine (`app/src/engine/` internals) and the Monte Carlo simulator

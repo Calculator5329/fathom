@@ -112,22 +112,16 @@ Near-black green-cast canvas, 4-step surface ladder, hairline borders, ONE emera
   `[IO.File]::WriteAllText` and `.trim()` defensively server-side.
 - TS 6: `baseUrl` is deprecated; path aliases are configured without it.
 
-## Working style (Ethan's rules)
+## Working style (project-specific — universal rules in global `~/.claude/CLAUDE.md`)
 
-- Commit each self-contained change; stage only files you created/edited; NEVER `git add -A`.
-  Remote: `origin = https://github.com/Calculator5329/fathom.git` — a PUBLIC repo (AGPL). Push
-  after committing. Because it's public: never commit tokens, personal financial figures, or
-  Ethan's untracked files (they are untracked on purpose).
-- Verify UI changes in the running preview before committing (drive the DOM via eval; the
-  screenshot tool times out — use DOM assertions).
-- Delegate mechanical work to Codex subagents (see AGENTS.md for their guardrails):
-  write prompt to a temp file, then
-  `cat prompt.md | codex exec --sandbox workspace-write -C <projectRoot> -`
-  (add `-c sandbox_workspace_write.network_access=true` for network). Cloud mutations (gcloud IAM,
-  buckets, deploys) stay with Claude directly — the permission classifier blocks them inside Codex
-  anyway. Review Codex output, then commit it yourself.
-- Keep judgment work (engine math, API shape, design) in the main session; Codex gets
-  well-specified data/scripts/sweeps with explicit "do not touch X" boundaries.
+Global covers git hygiene (never `git add -A`), the Codex delegation recipe, verify-in-preview
+(DOM-assert when the screenshot tool times out), and design defaults. This repo adds:
+- **Override the global "never push" rule:** remote `origin =
+  https://github.com/Calculator5329/fathom.git` is a PUBLIC repo (AGPL) — commit locally, then
+  **push**. Because it's public: never commit tokens, personal financial figures, or Ethan's
+  untracked files (they are untracked on purpose).
+- Cloud mutations (gcloud IAM, buckets, deploys) stay with Claude directly, never inside Codex
+  (the permission classifier blocks them there anyway).
 - Leave Ethan's files alone: root `README.md`, `DATA_SOURCES_*.md`, `SOURCE_PROJECTS.md`,
   `docs/{changelog,roadmap,tech_spec}.md`, `stock-analysis/` (dead starter), `context/`,
   root `package-lock.json`.
