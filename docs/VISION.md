@@ -9,7 +9,7 @@ Two companion apps, one clean boundary:
 - **Fathom (this repo):** everything about *markets and securities*. Backtests, allocations,
   projections, simulations, fundamentals, portfolio analytics. Public, no login for the
   market-data tools; login only where the user stores their own work.
-- **finance-master (`C:\Users\et2bo\Desktop\New folder\finance-master`):** everything about
+- **finance-master (`~/projects/finance/finance-master`):** everything about
   *Ethan's money*. Net worth, budgets, income, accounts. Private by nature.
 - The personal app may LINK into Fathom (e.g. "analyze my brokerage allocation" deep-links a
   Fathom portfolio URL) — it never re-implements market analysis, and Fathom never stores
@@ -219,7 +219,7 @@ REJECTED: Backtest→Monte Carlo handoff button (don't build).
 
 The pure engine (`app/src/engine/` internals) and the Monte Carlo simulator
 (`app/src/montecarlo/{simulate,data}.ts`) now live in the shared package
-`@calculator-5329/backtest-engine` (repo: `Dev/finance-kit`), lifted verbatim
+`@calculator-5329/backtest-engine` (repo: `~/projects/finance/finance-kit`), lifted verbatim
 with their hand-computed fixture suites. Fathom consumes it via a vendored
 tarball (`app/vendor/`) until the npm publish. `@/engine` and the montecarlo
 module paths are unchanged compatibility seams, so app code and the sacred-

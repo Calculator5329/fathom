@@ -6,10 +6,10 @@ How to get daily (and weekly) price history for stocks, ETFs, and mutual funds �
 
 | Need | Best source | History | Dividends/splits | Location |
 |------|-------------|---------|------------------|----------|
-| **Broad ticker universe (~1,570 symbols)** | master-site yfinance JSON | ~1970 → 2025 | Yes (`Dividends`, `Stock Splits`) | `C:\Users\et2bo\Desktop\New folder\master-site\public\stock-data\` |
-| **Download script (same schema)** | stock-site | ~1970 → configurable | Yes | `C:\Users\et2bo\Desktop\New folder\stock-site\backend\download_data.py` |
-| **Held-symbol daily closes (high quality)** | portfolio-quarterly-reports | ~2021 → present | Close only | `C:\Users\et2bo\Desktop\Projects\Finance\finance reports\portfolio-quarterly-reports\src\data\raw\daily-prices.csv` |
-| **Weekly OHLCV + adjusted close** | stock-backtest / stock-backtest-2 | Full (Alpha Vantage) | Via `adjustedClose` | `C:\Users\et2bo\Desktop\New folder\stock-backtest\public\data\` |
+| **Broad ticker universe (~1,570 symbols)** | master-site yfinance JSON | ~1970 → 2025 | Yes (`Dividends`, `Stock Splits`) | `~/projects/finance/finance-master-workspace/master-site/public/stock-data/` |
+| **Download script (same schema)** | stock-site | ~1970 → configurable | Yes | `~/projects/finance/finance-master-workspace/stock-site/backend/download_data.py` |
+| **Held-symbol daily closes (high quality)** | portfolio-quarterly-reports | ~2021 → present | Close only | `~/projects/finance/finance reports/portfolio-quarterly-reports/src/data/raw/daily-prices.csv` |
+| **Weekly OHLCV + adjusted close** | stock-backtest / stock-backtest-2 | Full (Alpha Vantage) | Via `adjustedClose` | `~/projects/finance/finance-master-workspace/stock-backtest/public/data/` |
 | **Live refresh** | finance-master sidecar | Configurable range | Close only (Yahoo) | `finance-master/apps/sidecar/src/providers/prices.ts` |
 | **SQLite pipeline (personal app)** | finance-master | Merged from above | Partial | `finance-master/data/master.db` → `priceHistory` table |
 
@@ -19,7 +19,7 @@ How to get daily (and weekly) price history for stocks, ETFs, and mutual funds �
 
 ## 1. master-site stock-data (primary seed)
 
-**Path:** `C:\Users\et2bo\Desktop\New folder\master-site\public\stock-data\`  
+**Path:** `~/projects/finance/finance-master-workspace/master-site/public/stock-data/`  
 **Size:** ~1,570 JSON files, ~1 GB  
 **Not copied into this repo** — reference only.
 
@@ -59,8 +59,8 @@ Universe: S&P 500 + major ETFs + extended ticker list (~1,500+ symbols). Saved a
 `finance-master` can load these into SQLite:
 
 ```bash
-cd "C:\Users\et2bo\Desktop\New folder\finance-master"
-npx tsx apps/sidecar/src/cli.ts ingest-master-stock-data "C:\Users\et2bo\Desktop\New folder\master-site\public\stock-data"
+cd "~/projects/finance/finance-master"
+npx tsx apps/sidecar/src/cli.ts ingest-master-stock-data "~/projects/finance/finance-master-workspace/master-site/public/stock-data"
 ```
 
 Implementation: `finance-master/apps/sidecar/src/pipeline/referenceData.ts` → `ingestMasterStockData()`.  
@@ -70,13 +70,13 @@ Implementation: `finance-master/apps/sidecar/src/pipeline/referenceData.ts` → 
 
 ## 2. stock-site download script
 
-**Path:** `C:\Users\et2bo\Desktop\New folder\stock-site\backend\download_data.py`  
+**Path:** `~/projects/finance/finance-master-workspace/stock-site/backend/download_data.py`  
 **Output:** `backend/data_cache/{TICKER}.pkl` (pandas DataFrame pickle)
 
 Re-run to refresh or extend universe:
 
 ```bash
-cd "C:\Users\et2bo\Desktop\New folder\stock-site\backend"
+cd "~/projects/finance/finance-master-workspace/stock-site/backend"
 pip install yfinance pandas
 python download_data.py
 ```
@@ -87,7 +87,7 @@ Adjust `START_DATE`, `END_DATE`, and ticker lists at top of file.
 
 ## 3. portfolio-quarterly-reports daily-prices.csv
 
-**Path:** `C:\Users\et2bo\Desktop\Projects\Finance\finance reports\portfolio-quarterly-reports\src\data\raw\daily-prices.csv`
+**Path:** `~/projects/finance/finance reports/portfolio-quarterly-reports/src/data/raw/daily-prices.csv`
 
 Wide spreadsheet matrix:
 
@@ -111,8 +111,8 @@ npx tsx apps/sidecar/src/cli.ts ingest-daily-prices "<path-to-daily-prices.csv>"
 
 **Paths:**
 
-- `C:\Users\et2bo\Desktop\New folder\stock-backtest\`
-- `C:\Users\et2bo\Desktop\Projects\Finance\finance-tools\stock-backtest-2\` (has full README)
+- `~/projects/finance/finance-master-workspace/stock-backtest/`
+- `~/projects/finance/stock-backtest-2/` (has full README)
 
 **Fetch:**
 
@@ -183,6 +183,6 @@ corporate_actions(instrument_id, ex_date, type: dividend|split, amount, ratio)
 
 ## Related docs
 
-- `finance-master/INGESTION.md` — full sidecar ingest pipeline
+- `finance-master/docs/INGESTION.md` — full sidecar ingest pipeline
 - `finance-master/apps/web/src/ui/backtest/README.md` — dividend/total-return policy
 - `finance-master/packages/schema/src/tables.ts` — current `priceHistory` Drizzle schema

@@ -21,7 +21,7 @@ Long-horizon monthly (and some daily) return series for **asset-class backtestin
 
 ### Raw — master-site
 
-**Path:** `C:\Users\et2bo\Desktop\New folder\master-site\public\long-term\data.csv`  
+**Path:** `~/projects/finance/finance-master-workspace/master-site/public/long-term/data.csv`  
 **Source:** Robert Shiller, Yale — [http://www.econ.yale.edu/~shiller/data.htm](http://www.econ.yale.edu/~shiller/data.htm)  
 **Also:** `ie_data.xls` in same folder (original Excel download)
 
@@ -43,11 +43,11 @@ Long-horizon monthly (and some daily) return series for **asset-class backtestin
 
 ### Normalized — retirement-sim
 
-**Path:** `C:\Users\et2bo\Desktop\Projects\Finance\retirement-sim\public\data\shiller.csv`  
+**Path:** `~/projects/finance/retirement-sim/public/data/shiller.csv`  
 **Build:**
 
 ```bash
-cd "C:\Users\et2bo\Desktop\Projects\Finance\retirement-sim"
+cd "~/projects/finance/retirement-sim"
 npm run build:data
 ```
 
@@ -70,7 +70,7 @@ date,spReturn,bondReturn,cashReturn,cpi
 
 ## 2. Fama-French-style portfolios
 
-**Path:** `C:\Users\et2bo\Desktop\New folder\master-site\public\long-term\Portfolios_Formed_on_ME.csv`  
+**Path:** `~/projects/finance/finance-master-workspace/master-site/public/long-term/Portfolios_Formed_on_ME.csv`  
 **Size:** ~935 KB  
 **Content:** Monthly returns for portfolios formed on market equity (size deciles, etc.)
 

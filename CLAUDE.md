@@ -1,7 +1,7 @@
 # Fathom — stock-analysis-project
 
 All-things-stocks analysis suite (backtesting, allocation, projections, Monte Carlo).
-Companion app to the personal-finance project at `C:\Users\et2bo\Desktop\New folder\finance-master`
+Companion app to the personal-finance project at `~/projects/finance/finance-master`
 (that one owns budgets/net-worth/personal money; THIS one owns markets. Keep the boundary clean:
 Fathom never stores personal account balances; finance-master never re-implements market analysis).
 
@@ -116,12 +116,12 @@ Near-black green-cast canvas, 4-step surface ladder, hairline borders, ONE emera
 
 Global covers git hygiene (never `git add -A`), the Codex delegation recipe, verify-in-preview
 (DOM-assert when the screenshot tool times out), and design defaults. This repo adds:
-- **Override the global "never push" rule:** remote `origin =
+- **Pushes are allowed under workspace policy.** Remote `origin =
   https://github.com/Calculator5329/fathom.git` is a PUBLIC repo (AGPL) — commit locally, then
   **push**. Because it's public: never commit tokens, personal financial figures, or Ethan's
   untracked files (they are untracked on purpose).
 - Cloud mutations (gcloud IAM, buckets, deploys) stay with Claude directly, never inside Codex
   (the permission classifier blocks them there anyway).
-- Leave Ethan's files alone: root `README.md`, `DATA_SOURCES_*.md`, `SOURCE_PROJECTS.md`,
+- Leave Ethan's files alone: root `README.md`, `docs/DATA_SOURCES_*.md`, `docs/SOURCE_PROJECTS.md`,
   `docs/{changelog,roadmap,tech_spec}.md`, `stock-analysis/` (dead starter), `context/`,
   root `package-lock.json`.

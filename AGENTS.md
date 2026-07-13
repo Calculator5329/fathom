@@ -15,7 +15,7 @@ scripts, sweeps, QA). The orchestrating session (Claude) reviews and commits you
 4. **Never print or write secrets.** Root `.env` holds API tokens — read keys you need, never
    echo values into logs, reports, or generated files.
 5. **Read-only areas:** `context/` (reference datasets), the legacy archive under
-   `C:\Users\et2bo\Desktop\New folder\master-site\` and anything else outside this repo.
+   `~/projects/finance/finance-master-workspace/master-site/` and anything else outside this repo.
 
 ## Conventions that make your output land without rework
 

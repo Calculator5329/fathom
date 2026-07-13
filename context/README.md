@@ -36,9 +36,9 @@ context/
 Refresh local Shiller copy:
 
 ```bash
-cd "C:\Users\et2bo\Desktop\Projects\Finance\retirement-sim"
+cd "~/projects/finance/retirement-sim"
 npm run build:data
-copy public\data\shiller.csv "..\stock-analysis-project\context\reference-data\shiller\shiller.csv"
+copy public/data/shiller.csv "../stock-analysis-project/context/reference-data/shiller/shiller.csv"
 ```
 
 Refresh asset-class files: re-copy from `master-site/public/long-term/` when Yale or FF sources update.

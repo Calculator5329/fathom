@@ -18,7 +18,7 @@ real TWR/IRR from broker CSV exports, entirely client-side).
 
 It is a portfolio-quality solo project with an unusually strict engineering discipline
 around its portfolio-math engine (see "The engine" below). The companion app
-**finance-master** (`C:\Users\et2bo\Desktop\New folder\finance-master`) owns personal
+**finance-master** (`~/projects/finance/finance-master`) owns personal
 money — budgets, net worth, accounts. The boundary is hard: Fathom never stores personal
 account balances; finance-master never re-implements market analysis. Integration is
 deep links via Fathom's URL-state contracts (query params are a public API — only add
@@ -74,7 +74,7 @@ stock-analysis/         dead starter — ignore, never touch
 ```
 
 Ethan's pre-existing, deliberately-uncommitted files (never edit or commit): root
-`README.md` is his but committed; `DATA_SOURCES_*.md`, `SOURCE_PROJECTS.md`,
+`README.md` is his but committed; `docs/DATA_SOURCES_*.md`, `docs/SOURCE_PROJECTS.md`,
 `docs/{changelog,roadmap,tech_spec}.md`, `context/`, `stock-analysis/`, root
 `package-lock.json` are untracked on purpose. `docs/roadmap.md` is his stale
 pre-project draft — the living roadmap is `docs/VISION.md` + `docs/HANDOFF_ROADMAP.md`.
