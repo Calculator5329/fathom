@@ -1,6 +1,6 @@
 # Stock Analysis Project — Master Plan
 
-_Last updated: 2026-07-02_
+_Last updated: 2026-07-10 (setup checklist verified)_
 
 A personal, public (no-login) suite of finance tools. Linear-inspired dark design, minimal and intentional — every screen has one job and a written user story. Hosted on Google Cloud with daily auto-updating price data.
 
@@ -163,8 +163,8 @@ Stock projections tool · Monte Carlo simulation (port from `retirement-sim` eng
 
 ## 8. Setup checklist (user)
 
-- [ ] GCP project created, billing enabled; APIs: Cloud Run, Firestore, Cloud Scheduler, Secret Manager
-- [ ] `gcloud` CLI installed + authenticated locally
-- [ ] Tiingo account (free) + API token
-- [ ] Firebase Hosting decision confirmed (or Cloud Storage + LB)
-- [ ] Site name / domain (TBD — pick before Tool 1 ships)
+- [x] GCP project created, billing enabled; APIs: Cloud Run, Firestore, Cloud Scheduler, Secret Manager (`ethan-488900`, verified in CLAUDE.md)
+- [x] `gcloud` CLI installed + authenticated locally
+- [x] Tiingo account (free) + API token (Secret Manager `tiingo-token`; local `.env` gitignored)
+- [x] Firebase Hosting decision confirmed — `firebase.json` committed; Hosting deployed (VISION.md 2026-07-03)
+- [x] Site name ratified: **Fathom** (VISION.md 2026-07-04). Custom domain still TBD — tracked in HANDOFF_ROADMAP Later.

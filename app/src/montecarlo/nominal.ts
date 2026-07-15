@@ -4,7 +4,7 @@ import type { SimResult } from './simulate'
  * Display-layer real→nominal conversion for the Monte Carlo results.
  *
  * The simulation is (correctly) REAL-terms internally — the math lives in
- * @calculator-5329/backtest-engine and is never touched here. This module only
+ * @calculator53295/backtest-engine and is never touched here. This module only
  * re-inflates the *outputs* for display: a value that the sim reports "in
  * today's dollars" at year t becomes the nominal dollar amount you'd actually
  * see on a statement t years out, using the long-run average inflation implied

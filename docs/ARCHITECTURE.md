@@ -74,7 +74,7 @@ stock-analysis/         dead starter — ignore, never touch
 ```
 
 Ethan's pre-existing, deliberately-uncommitted files (never edit or commit): root
-`README.md` is his but committed; `DATA_SOURCES_*.md`, `SOURCE_PROJECTS.md`,
+`README.md` is his but committed; `docs/DATA_SOURCES_*.md`, `docs/SOURCE_PROJECTS.md`,
 `docs/{changelog,roadmap,tech_spec}.md`, `context/`, `stock-analysis/`, root
 `package-lock.json` are untracked on purpose. `docs/roadmap.md` is his stale
 pre-project draft — the living roadmap is `docs/VISION.md` + `docs/HANDOFF_ROADMAP.md`.

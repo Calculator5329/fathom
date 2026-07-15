@@ -53,7 +53,7 @@ After screens: cloud half (GCS bucket for series JSONs, Cloud Run API for search
 - Port 5173 is occupied by an unrelated process. `.claude/launch.json` has `autoPort: true` and `app/vite.config.ts` reads `process.env.PORT`. Preview screenshot tooling was flaky (timeouts) — verify via DOM inspection/eval instead.
 - shadcn CLI v4: `init` goes into create-new-project mode with `-t vite` and prompts interactively otherwise. **Skip init**; `components.json` already exists — `npx shadcn@latest add <component> -y` works fine. `tslib` had to be added manually (unified radix-ui needs it); if Vite says "Failed to resolve import tslib", delete `app/node_modules/.vite` and restart dev server.
 - TypeScript 6: `baseUrl` is deprecated (removed already — don't re-add). Node types are in tsconfig.app.json `types` so engine tests (which read data files with node:fs) typecheck.
-- Root `package-lock.json`, `stock-analysis/` (old abandoned starter), `README.md`, `DATA_SOURCES_*.md`, `SOURCE_PROJECTS.md`, `docs/{changelog,roadmap,tech_spec}.md` are Ethan's pre-existing files — leave them alone, don't commit them.
+- Root `package-lock.json`, `stock-analysis/` (old abandoned starter), `README.md`, `docs/DATA_SOURCES_*.md`, `docs/SOURCE_PROJECTS.md`, `docs/{changelog,roadmap,tech_spec}.md` are Ethan's pre-existing files — leave them alone, don't commit them.
 
 ## Design guardrails (Ethan's explicit preferences)
 

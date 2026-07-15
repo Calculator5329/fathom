@@ -11,7 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@calculator-5329/backtest-engine": "file:vendor/calculator-5329-backtest-engine-0.1.0-dev.tgz",
+    "@calculator53295/backtest-engine": "^0.1.0",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@tailwindcss/vite": "^4.3.2",
