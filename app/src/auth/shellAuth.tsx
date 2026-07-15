@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { copyFreshOwnerIdToken } from './ownerToken'
 
 /**
  * App-shell auth state WITHOUT pulling Firebase into the initial bundle.
@@ -26,6 +27,7 @@ interface ShellAuthState {
   user: ShellUser | null
   signIn: () => Promise<void>
   signOut: () => Promise<void>
+  copyFreshIdToken: () => Promise<void>
 }
 
 const Ctx = createContext<ShellAuthState>({
@@ -33,6 +35,7 @@ const Ctx = createContext<ShellAuthState>({
   user: null,
   signIn: async () => {},
   signOut: async () => {},
+  copyFreshIdToken: async () => {},
 })
 
 async function fb() {
@@ -83,7 +86,17 @@ export function ShellAuthProvider({ children }: { children: React.ReactNode }) {
     setStatus('out')
   }
 
-  return <Ctx.Provider value={{ status, user, signIn, signOut }}>{children}</Ctx.Provider>
+  const copyFreshIdToken = async () => {
+    if (!import.meta.env.DEV) throw new Error('Owner token helper is local-development only')
+    const { auth } = await fb()
+    await copyFreshOwnerIdToken(auth.currentUser, navigator.clipboard)
+  }
+
+  return (
+    <Ctx.Provider value={{ status, user, signIn, signOut, copyFreshIdToken }}>
+      {children}
+    </Ctx.Provider>
+  )
 }
 
 export const useShellAuth = () => useContext(Ctx)

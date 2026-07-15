@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
-import { LogIn } from 'lucide-react'
+import { KeyRound, LogIn } from 'lucide-react'
+import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -95,7 +96,7 @@ function Shell({ children }: { children: React.ReactNode }) {
  * session restores silently (localStorage hint → Firebase persistence).
  */
 function AccountNav() {
-  const { status, user, signIn, signOut } = useShellAuth()
+  const { status, user, signIn, signOut, copyFreshIdToken } = useShellAuth()
 
   return (
     <>
@@ -141,6 +142,21 @@ function AccountNav() {
               <p className="truncate text-sm text-muted-foreground" title={user?.email ?? ''}>
                 {user?.email}
               </p>
+              {import.meta.env.DEV && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 -ml-2 text-muted-foreground"
+                  onClick={() => {
+                    void copyFreshIdToken()
+                      .then(() => toast.success('Fresh owner token copied'))
+                      .catch(() => toast.error('Could not copy owner token'))
+                  }}
+                >
+                  <KeyRound />
+                  Copy owner token
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"

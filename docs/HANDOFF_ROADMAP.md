@@ -22,6 +22,14 @@ committed with focused staging (never `git add -A`), then pushed.
 
 ## Now
 
+- [x] **Local Firebase owner-token helper.** *(done 2026-07-15)* Signed-in
+  local development sessions expose one account-popover action that
+  force-refreshes the Firebase ID token and copies it directly to the clipboard.
+  It never renders or logs credential bytes, returns no token to the UI caller,
+  and is compiled out of production builds. Synthetic tests cover refresh,
+  signed-out, and empty-token behavior. This supports finance-master's
+  owner-gated migration without making Fathom a personal-finance data plane.
+
 - [x] **Protect the work — remote backup.** VERIFIED 2026-07-05: the repo is pushed to
   `https://github.com/Calculator5329/fathom` (origin, up to date at `5327ab3`). The
   original concern ("no remote — best work exists only on this machine") is resolved.
