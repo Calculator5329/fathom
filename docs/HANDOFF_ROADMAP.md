@@ -22,6 +22,20 @@ committed with focused staging (never `git add -A`), then pushed.
 
 ## Now
 
+- [ ] **Subdue history-helper copy (Ethan top-priority, 2026-07-16).** Make the
+  two helper messages more minimal/out of the way: "Using max available
+  history — limited by ADBE, inception Aug 1986." (AllocationBuilder.tsx,
+  BuilderPanel.tsx) and "Every rolling period in history as one trial. All
+  figures in today's dollars." (Montecarlo.tsx). Keep the information
+  reachable (muted/secondary treatment or disclosure), respect the 15px
+  floor and theme tokens. Number-input spinner removal is ALREADY DONE
+  (`4fbe3ad`, app/src/index.css `appearance:none` — CSS-only, so keyboard
+  ArrowUp/ArrowDown increments are untouched); any follow-up must preserve
+  that behavior. _Accept: both messages visually subordinate on their pages,
+  vitest + tsc green, DOM-verified in preview._ (Filed from board notes
+  note-20260716062926/063135; requested by Ethan via
+  session:codex-fathom-todo-20260716.)
+
 - [x] **Rate-budgeted ticker refresh with freshness contract.** *(done
   2026-07-16; cloud activation remains below)* The token-gated refresh endpoint
   now splits the catalog into automatically sized batches capped at 25 symbols,
