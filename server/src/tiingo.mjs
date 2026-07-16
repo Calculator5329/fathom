@@ -3,10 +3,11 @@
 const TIINGO = 'https://api.tiingo.com'
 
 export class TiingoError extends Error {
-  constructor(path, status) {
+  constructor(path, status, retryAfterMs = null) {
     super(`Tiingo ${path}: HTTP ${status}`)
     this.name = 'TiingoError'
     this.status = status
+    this.retryAfterMs = retryAfterMs
   }
 }
 
@@ -18,26 +19,40 @@ function token() {
   return t
 }
 
-async function tiingoJson(path, params = {}) {
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+async function tiingoJson(path, params = {}, options = {}) {
   const url = new URL(`${TIINGO}${path}`)
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v)
   url.searchParams.set('token', token())
-  const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } })
-  if (res.status === 404) return null
-  if (!res.ok) throw new TiingoError(path, res.status)
-  return res.json()
+  const max429Retries = options.max429Retries ?? 0
+  const retryDelayMs = options.retryDelayMs ?? 60_000
+  for (let attempt = 0; ; attempt += 1) {
+    const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } })
+    if (res.status === 404) return null
+    if (res.ok) return res.json()
+    const retryAfterSeconds = Number(res.headers.get('retry-after'))
+    const retryAfterMs = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+      ? retryAfterSeconds * 1_000
+      : retryDelayMs
+    if (res.status === 429 && attempt < max429Retries) {
+      await wait(Math.max(retryDelayMs, retryAfterMs))
+      continue
+    }
+    throw new TiingoError(path, res.status, retryAfterMs)
+  }
 }
 
 const round6 = (x) => (x == null ? 0 : Math.round(x * 1e6) / 1e6)
 
 /** Full normalized history + metadata, or null when the ticker is unknown. */
-export async function fetchTickerFull(symbol) {
-  const meta = await tiingoJson(`/tiingo/daily/${encodeURIComponent(symbol)}`)
+export async function fetchTickerFull(symbol, options = {}) {
+  const meta = await tiingoJson(`/tiingo/daily/${encodeURIComponent(symbol)}`, {}, options)
   if (!meta || !meta.ticker) return null
   const prices = await tiingoJson(`/tiingo/daily/${encodeURIComponent(symbol)}/prices`, {
     startDate: '1900-01-01',
     format: 'json',
-  })
+  }, options)
   if (!Array.isArray(prices) || prices.length === 0) return null
 
   const records = prices.map((p) => ({

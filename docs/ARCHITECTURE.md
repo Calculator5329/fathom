@@ -38,7 +38,7 @@ Rules are enumerated in root `CLAUDE.md` — they are enforced preferences, not 
 | API | `server/` — Cloud Run service `fathom-api` (us-central1), Node 22 ESM, single dep `@google-cloud/storage` |
 | Data pipeline | `scripts/*.mjs` — Node 22 ESM, stdlib only |
 | Tests | vitest 4 (`app/`), oxlint |
-| Cloud | GCP project `ethan-488900`; Cloud Scheduler `fathom-nightly-refresh` (10:30pm ET weekdays); secrets in Secret Manager (`tiingo-token`, `fathom-refresh-token`) |
+| Cloud | GCP project `ethan-488900`; Cloud Scheduler `fathom-nightly-refresh`; secrets in Secret Manager (`tiingo-token`, `fathom-refresh-token`) |
 
 ## Directory map
 
@@ -88,7 +88,12 @@ splitFactor}` (floats, 6dp). Monthly asset-class schema: `data/asset-classes/*.j
    in gitignored root `.env`; free tier ≈50 unique symbols/hour, 1000 req/day, scripts
    self-throttle). Output `data/tickers/<T>.json` → synced to GCS. ~75 tickers full-history.
    **Nightly refresh is a FULL refetch per ticker, never append** — adjusted closes rebase
-   on every dividend; appending silently corrupts history.
+   on every dividend; appending silently corrupts history. The Cloud Run endpoint
+   automatically divides the catalog into provider-budgeted batches of at most 25
+   symbols, advances the next incomplete batch within one market-day cycle, retries
+   HTTP 429 responses with the provider's delay, and aggregates every invocation into
+   `refresh-report.json`. `/api/freshness` returns 503 until the complete cycle is
+   successful; `/api/health` exposes the same summary without changing service health.
 2. **Catalog** — `node scripts/build-catalog.mjs`. Unknown tickers are also admitted
    on demand at runtime by `fathom-api` (Tiingo → bucket → catalog).
 3. **Fundamentals** — `node scripts/build-fundamentals.mjs`: SEC EDGAR companyfacts →
@@ -135,8 +140,22 @@ npm run build                      # from app/ (tsc -b && vite build)
 firebase deploy --only hosting     # from repo root; project ethan-488900
 firebase deploy --only firestore   # rules only, when firestore.rules changes
 
-# server deploy (cloud access; see git log for full flags)
-gcloud run deploy fathom-api --source server ...
+# server deploy (owner/cloud access; omitted settings retain the existing secrets)
+gcloud run deploy fathom-api \
+  --source=server \
+  --region=us-central1 \
+  --project=ethan-488900
+
+# OWNER ACTION after deploying the batched endpoint: preserve the existing URI
+# and secret header while expanding the one scheduler to quota-spaced runs.
+gcloud scheduler jobs update http fathom-nightly-refresh \
+  --location=us-central1 \
+  --project=ethan-488900 \
+  --schedule="30 0,18,20,22 * * *" \
+  --time-zone="America/New_York"
+
+# acceptance: 200 only after every required catalog batch succeeds
+curl -fsS https://fathom-api-108003293186.us-central1.run.app/api/freshness
 ```
 
 ## Known limitations / tech debt
@@ -150,8 +169,9 @@ gcloud run deploy fathom-api --source server ...
 - **Efficient frontier is two-asset only** (allocation tool).
 - Monte Carlo follow-ups not done: parametric mode, nominal display toggle (sim is
   correctly real-only).
-- **No CI** — vitest/tsc run locally by convention only; a GitHub Actions workflow
-  would make the discipline mechanical.
+- **No automatic production deploy** — GitHub Actions verifies vitest + TypeScript,
+  but Cloud Run and Firebase Hosting publication remain owner actions. Market-data
+  bucket refreshes are independent of frontend Hosting deploys.
 - `useUrlSyncedState` was deliberately NOT built (see VISION.md 2026-07-04 §5) —
   the three pages' PUSH/REPLACE semantics differ by design; don't "unify" them.
 - The repo is **public** (AGPL); secrets live in Secret Manager and gitignored `.env` —

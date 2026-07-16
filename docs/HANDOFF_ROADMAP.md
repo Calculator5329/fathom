@@ -22,6 +22,36 @@ committed with focused staging (never `git add -A`), then pushed.
 
 ## Now
 
+- [x] **Rate-budgeted ticker refresh with freshness contract.** *(done
+  2026-07-16; cloud activation remains below)* The token-gated refresh endpoint
+  now splits the catalog into automatically sized batches capped at 25 symbols,
+  advances batches across one New York market-day cycle, retries provider 429s,
+  and produces one aggregate report. `/api/freshness` fails visibly on missing,
+  failed, or stale cycles. Server-native tests cover coverage, catalog growth,
+  midnight cycle boundaries, aggregation, and stale/failure behavior.
+
+- [ ] **Activate the quota-spaced Fathom refresh schedule.** `[ETHAN]` `[CLOUD]`
+  Deploy the prepared Cloud Run server, then update the existing authenticated
+  `fathom-nightly-refresh` job to `30 0,18,20,22 * * *` in
+  `America/New_York`. The endpoint maps the 00:30 invocation to the prior market
+  day and skips weekend cycles, so the existing secret header stays on one job.
+  _Accept: `/api/freshness` returns HTTP 200 with `refreshed === catalogSize`,
+  `failureCount === 0`, and a current `freshThrough` date after the full cycle._
+  _Progress 2026-07-16 06:30Z (verified live, not assumed): Ethan's deploy is
+  real — revision `fathom-api-00006-pqw` (created 06:10:25Z) serves 100% and
+  exposes `/api/freshness`; scheduler shows the exact cron/timezone above,
+  ENABLED. The 02:30Z fire predated the deploy (old code: 27/75, 48× 429), so
+  the endpoint correctly reports 503 until the first full new-code cycle —
+  batches fire 18:30/20:30/22:30 ET Jul 16 + 00:30 ET Jul 17; bucket catalog
+  is 88 tickers → 4 batches. Acceptance check runs after 00:35 ET Jul 17._
+
+- [x] **Quiet numeric controls and quote-date metadata.** *(done 2026-07-15)*
+  Removed browser-native spinner arrows from number inputs without changing
+  keyboard entry, bounds, steps, or value handling. The projection editor's
+  current-price date remains full-size and readable but is visually subordinate
+  to the price. CSS/component-only; no finance data, engine, API, auth, Firebase,
+  backend, or deployment behavior changed.
+
 - [x] **Local Firebase owner-token helper.** *(done 2026-07-15)* Signed-in
   local development sessions expose one account-popover action that
   force-refreshes the Firebase ID token and copies it directly to the clipboard.

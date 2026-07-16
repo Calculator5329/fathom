@@ -8,7 +8,8 @@
   },
   "main": "src/index.mjs",
   "scripts": {
-    "start": "node src/index.mjs"
+    "start": "node src/index.mjs",
+    "test": "node --test test-refresh.mjs test-edgar.mjs"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.14.0"

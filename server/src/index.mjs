@@ -18,6 +18,13 @@
 import http from 'node:http'
 import { Storage } from '@google-cloud/storage'
 import { fetchFundamentals } from './edgar.mjs'
+import {
+  isWeekdayCycle,
+  mergeRefreshBatch,
+  refreshFreshness,
+  resolveRefreshPlan,
+  selectRefreshBatch,
+} from './refresh.mjs'
 import { TiingoError, fetchTickerFull, searchTiingo } from './tiingo.mjs'
 
 const PORT = Number(process.env.PORT) || 8080
@@ -132,6 +139,16 @@ async function saveReport(path, report) {
   return saveVersionedJson(path, report, CACHE_CONTROL)
 }
 
+async function loadReport(path) {
+  try {
+    const [buffer] = await bucket.file(path).download()
+    return JSON.parse(buffer.toString())
+  } catch (err) {
+    if (Number(err?.code ?? err?.statusCode) === 404) return null
+    throw err
+  }
+}
+
 async function saveFundamentals(data) {
   return saveVersionedJson(`fundamentals/${data.ticker}.json`, data, CACHE_CONTROL)
 }
@@ -227,18 +244,28 @@ function admitTicker(symbol) {
   return p
 }
 
-async function handleRefresh() {
+async function handleRefresh(searchParams) {
   const startedAt = Date.now()
   const cat = await loadCatalog(true)
+  const existingReport = await loadReport('refresh-report.json')
+  const plan = resolveRefreshPlan({ searchParams, existingReport, catalogSize: cat.length })
+  if (!isWeekdayCycle(plan.cycleId)) {
+    return { skipped: true, reason: 'weekend market cycle', cycleId: plan.cycleId }
+  }
+  if (plan.alreadyComplete) return existingReport
+  const selected = selectRefreshBatch(cat, plan.batchIndex, plan.batchCount)
   const results = { refreshed: 0, failed: [] }
   const updated = []
-  for (const entry of cat) {
+  const endDateCounts = {}
+  for (const entry of selected) {
     try {
-      const data = await fetchTickerFull(entry.ticker)
+      const data = await fetchTickerFull(entry.ticker, { max429Retries: 3, retryDelayMs: 60_000 })
       if (!data) throw new Error('no data')
       await saveSeries(data)
       updated.push({ ...entry, startDate: data.startDate })
       results.refreshed++
+      const endDate = data.endDate ?? 'missing'
+      endDateCounts[endDate] = (endDateCounts[endDate] ?? 0) + 1
     } catch (err) {
       results.failed.push(`${entry.ticker}: ${err.message}`)
       updated.push(entry)
@@ -247,13 +274,21 @@ async function handleRefresh() {
   }
   const updatedByTicker = new Map(updated.map((entry) => [entry.ticker, entry]))
   await updateCatalog((fresh) => fresh.map((entry) => updatedByTicker.get(entry.ticker) ?? entry))
-  const report = {
+  const batchReport = {
+    batchIndex: plan.batchIndex,
+    batchCount: plan.batchCount,
     ranAt: new Date().toISOString(),
     durationMs: Date.now() - startedAt,
+    attempted: selected.length,
     refreshed: results.refreshed,
     failed: results.failed,
-    catalogSize: cat.length,
+    endDateCounts,
   }
+  const report = mergeRefreshBatch(existingReport, batchReport, {
+    cycleId: plan.cycleId,
+    batchCount: plan.batchCount,
+    catalogSize: cat.length,
+  })
   return saveReport('refresh-report.json', report)
 }
 
@@ -299,7 +334,15 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`)
   try {
     if (req.method === 'GET' && url.pathname === '/api/health') {
-      return send(res, 200, { ok: true })
+      const freshness = refreshFreshness(await loadReport('refresh-report.json'))
+      return send(res, 200, { ok: true, refresh: freshness })
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/freshness') {
+      const freshness = refreshFreshness(await loadReport('refresh-report.json'))
+      return send(res, freshness.ok ? 200 : 503, freshness, {
+        'Cache-Control': 'public, max-age=60',
+      })
     }
 
     if (req.method === 'GET' && url.pathname === '/api/search') {
@@ -333,7 +376,7 @@ const server = http.createServer(async (req, res) => {
       ) {
         return send(res, 401, { error: 'unauthorized' })
       }
-      const results = await handleRefresh()
+      const results = await handleRefresh(url.searchParams)
       console.log('refresh complete:', JSON.stringify(results))
       return send(res, 200, results)
     }
