@@ -2,6 +2,16 @@
 
 _Planned 2026-07-03 by the orchestrating session; implementation handed to Opus + Codex._
 
+## 2026-07-15 — Numeric-control polish
+
+- Removed browser-native up/down spinner chrome from number inputs across the
+  app while retaining their numeric semantics, keyboard entry, configured
+  bounds, and steps.
+- Reduced the visual emphasis of the projection editor's current-price `as of`
+  date without dropping below the 15px readability floor. No finance behavior,
+  data, engine, API, authentication, Firebase, backend, or deployment path
+  changed.
+
 ## Positioning
 
 Two companion apps, one clean boundary:

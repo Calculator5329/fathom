@@ -125,6 +125,19 @@
     line-height: 1.5;
   }
 
+  /* Number fields keep keyboard entry without browser-native spinner chrome. */
+  input[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
   ::selection {
     background: oklch(0.78 0.125 163 / 30%);
   }

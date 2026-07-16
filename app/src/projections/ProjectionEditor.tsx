@@ -147,7 +147,11 @@ export function ProjectionEditor({
             <p className="text-sm text-muted-foreground">
               {usingManualPrice ? 'Manual price' : 'Current'}{' '}
               <span className="font-mono tnum text-foreground">{formatUsd(effectiveCurrentPrice)}</span>
-              {priceAsOf && <span className="ml-1">as of {priceAsOf}</span>}
+              {priceAsOf && (
+                <span className="ml-2 font-mono text-muted-foreground/70 tnum">
+                  as of {priceAsOf}
+                </span>
+              )}
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
