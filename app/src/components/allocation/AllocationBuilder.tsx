@@ -253,7 +253,7 @@ export function AllocationBuilder({
         </div>
       </div>
       {limitingAssetLabel && effectiveStart && (
-        <p className="-mt-3 text-sm text-muted-foreground">
+        <p className="tnum -mt-3 text-sm leading-snug text-muted-foreground/70">
           Using max available history &mdash; limited by {limitingAssetLabel}, data from{' '}
           {monthName(effectiveStart)}.
         </p>

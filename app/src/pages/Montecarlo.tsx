@@ -269,7 +269,7 @@ export function Montecarlo() {
             </Select>
           </div>
         </div>
-        <p className="mt-4 text-sm text-muted-foreground">
+        <p className="tnum mt-3 text-sm leading-snug text-muted-foreground/70">
           {config.mode === 'historical'
             ? 'Every rolling period in history as one trial.'
             : `${config.trials.toLocaleString()} resampled trials (24-mo blocks).`}
