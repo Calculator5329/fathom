@@ -32,7 +32,337 @@ export interface CashFlowInput {
   amount: number
 }
 
+type ActionKind = 'buy' | 'sell' | 'dividend' | 'foreignTax' | 'deposit' | 'withdrawal' | 'ignore'
+type BrokerPresetId = 'fidelity' | 'schwab' | 'vanguard' | 'generic'
+
+interface PositionColumns {
+  ticker: number
+  shares: number
+  positionAsOf: number
+}
+
+interface ActivityColumns {
+  date: number
+  ticker: number
+  action: number
+  shares: number
+  price: number
+  amount: number
+}
+
+interface BrokerPreset {
+  id: BrokerPresetId
+  scorePositions(headers: string[], sampleRows: string[][]): number
+  scoreActivity(headers: string[], sampleRows: string[][]): number
+  mapPositions(headers: string[]): PositionColumns | null
+  mapActivity(headers: string[]): ActivityColumns | null
+  classifyAction(raw: string): ActionKind
+  ignorePositionRow(raw: string, cells: string[]): string | null
+  ignoreActivityRow(raw: string, cells: string[]): string | null
+}
+
 const TICKER_RE = /^[A-Za-z][A-Za-z0-9.\-]{0,11}$/
+
+const toLower = (value: string) => value.toLowerCase().trim()
+const normalizeHeader = (value: string) => toLower(value).replace(/[\u2011\u2013]/g, '-')
+
+function findCol(headers: string[], aliases: string[]): number {
+  const idx = headers.findIndex((h) => aliases.includes(h))
+  if (idx >= 0) return idx
+  return headers.findIndex((h) => aliases.some((a) => h.includes(a)))
+}
+
+function findAlias(headers: string[], aliases: string[]): boolean {
+  return headers.some((header) => {
+    const c = header
+    return aliases.includes(c) || aliases.some((a) => c.includes(a))
+  })
+}
+
+function parseNumber(raw: string): number | null {
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  const minusSign = trimmed.replace(/\u2212/g, '-')
+  const unparenthesized = minusSign.replace(/^\((.+)\)$/u, '-$1')
+  const cleaned = unparenthesized.replace(/[,$"]/g, '')
+  const value = Number(cleaned)
+  return Number.isFinite(value) ? value : null
+}
+
+function isNumeric(raw: string): boolean {
+  return /^-?\(?\d/.test(raw.trim())
+}
+
+const presets: BrokerPreset[] = [
+  {
+    id: 'fidelity',
+    scorePositions(headers: string[], sampleRows: string[][]) {
+      let score = 0
+      if (findAlias(headers, ['account number', 'account name'])) score += 70
+      if (findAlias(headers, ['symbol', 'ticker'])) score += 10
+      if (findAlias(headers, ['quantity', 'shares'])) score += 10
+      if (sampleRows.some((row: string[]) => row.some((cell: string) => /money market|pending activity|sweep/i.test(cell)))) {
+        score += 10
+      }
+      return score
+    },
+    scoreActivity(headers: string[], sampleRows: string[][]) {
+      if (!findAlias(headers, ['cash balance', 'account number', 'account name'])) return 0
+      let score = 0
+      if (findAlias(headers, ['run date', 'trade date', 'settlement date'])) score += 35
+      if (findAlias(headers, ['action', 'transaction type', 'type'])) score += 25
+      if (findAlias(headers, ['symbol', 'ticker'])) score += 15
+      if (findAlias(headers, ['amount', 'amount ($)', 'net amount'])) score += 10
+      if (findAlias(headers, ['quantity', 'shares', 'qty'])) score += 10
+      if (sampleRows.some((row: string[]) => row.some((cell: string) => /pending activity|money market|sweep/i.test(cell)))) {
+        score += 10
+      }
+      return score
+    },
+    mapPositions(headers) {
+      const ticker = findCol(headers, ['symbol', 'ticker'])
+      const shares = findCol(headers, ['quantity', 'shares', 'qty'])
+      if (ticker < 0 || shares < 0) return null
+      return {
+        ticker,
+        shares,
+        positionAsOf: findCol(headers, ['as of date', 'position as of', 'position as of date']),
+      }
+    },
+    mapActivity(headers) {
+      const date = findCol(headers, ['run date', 'trade date', 'settlement date'])
+      const ticker = findCol(headers, ['symbol', 'ticker'])
+      const action = findCol(headers, ['action', 'type', 'transaction type', 'activity'])
+      const shares = findCol(headers, ['shares', 'quantity', 'qty'])
+      const price = findCol(headers, ['price ($)', 'price', 'price per share', 'execution price', 'unit price'])
+      const amount = findCol(headers, ['amount ($)', 'amount', 'net amount', 'cash balance ($)'])
+      if (date < 0 || ticker < 0 || shares < 0) return null
+      return { date, ticker, action, shares, price, amount }
+    },
+    classifyAction(raw) {
+      const s = raw.toLowerCase()
+      if (/\b(you )?bought\b|\bbuy\b|reinvest|purchase/.test(s)) return 'buy'
+      if (/\b(you )?sold\b|sale/.test(s)) return 'sell'
+      if (/dividend/i.test(s)) return 'dividend'
+      if (/foreign tax/i.test(s)) return 'foreignTax'
+      if (/electronic funds transfer paid|withdraw|withdrawal|eft paid|purchased/.test(s)) return 'withdrawal'
+      if (/electronic funds transfer received|direct deposit|wire|ach|deposit/.test(s)) return 'deposit'
+      return 'ignore'
+    },
+    ignorePositionRow(raw) {
+      if (/pending activity/.test(toLower(raw))) return 'pending activity row'
+      return null
+    },
+    ignoreActivityRow(raw) {
+      const s = toLower(raw)
+      if (s.includes('pending activity')) return 'pending activity row'
+      if (s.includes('money market') || s.includes('sweep')) return 'money-market row'
+      if (s.includes('disclaimer')) return 'disclaimer row'
+      return null
+    },
+  },
+  {
+    id: 'schwab',
+    scorePositions(headers, sampleRows) {
+      let score = 0
+      if (findAlias(headers, ['symbol', 'ticker'])) score += 15
+      if (findAlias(headers, ['quantity', 'qty', 'shares'])) score += 20
+      if (findAlias(headers, ['cost basis', 'market value', 'position value'])) score += 12
+      if (findAlias(headers, ['fund symbol', 'position as of'])) score += 15
+      if (sampleRows.some((row) => row.some((cell) => /commission|fees|position value/i.test(cell)))) score += 10
+      return score
+    },
+    scoreActivity(headers, sampleRows) {
+      let score = 0
+      if (findAlias(headers, ['trade date', 'activity date', 'settlement date'])) score += 30
+      if (findAlias(headers, ['transaction type', 'action', 'type'])) score += 25
+      if (findAlias(headers, ['symbol', 'ticker'])) score += 15
+      if (findAlias(headers, ['quantity', 'shares', 'qty'])) score += 15
+      if (sampleRows.some((row) => row.some((cell) => /commission|fees|principal|settlement/i.test(cell)))) score += 10
+      return score
+    },
+    mapPositions(headers) {
+      const ticker = findCol(headers, ['symbol', 'ticker', 'security', 'symbol description'])
+      const shares = findCol(headers, ['quantity', 'shares', 'shares held', 'qty', 'units'])
+      if (ticker < 0 || shares < 0) return null
+      return {
+        ticker,
+        shares,
+        positionAsOf: findCol(headers, ['position as of', 'as of', 'as-of']),
+      }
+    },
+    mapActivity(headers) {
+      const date = findCol(headers, ['trade date', 'activity date', 'run date', 'settlement date', 'as of date'])
+      const ticker = findCol(headers, ['symbol', 'ticker', 'security'])
+      const action = findCol(headers, ['transaction', 'action', 'type', 'activity'])
+      const shares = findCol(headers, ['quantity', 'shares', 'qty', 'units'])
+      const price = findCol(headers, ['price', 'price per share', 'trade price', 'execution price'])
+      const amount = findCol(headers, ['amount', 'amount ($)', 'net amount', 'total amount', 'commission', 'fees'])
+      if (date < 0 || ticker < 0 || shares < 0) return null
+      return { date, ticker, action, shares, price, amount }
+    },
+    classifyAction(raw) {
+      const s = raw.toLowerCase()
+      if (/\byou bought\b|\breinvestment\b|\bbuy\b|\badd\b|\bpurchase\b/.test(s)) return 'buy'
+      if (/\byou sold\b|\bsell\b|\bsale\b|\bclose\b/.test(s)) return 'sell'
+      if (/dividend|distribution|payment/.test(s)) return 'dividend'
+      if (/foreign tax|withholding/.test(s)) return 'foreignTax'
+      if (/contribution|cash deposit|ach in|wire in|deposit/.test(s)) return 'deposit'
+      if (/withdraw|withdrawal|ach out|wire out|cash out|fee|service/.test(s)) return 'withdrawal'
+      return 'ignore'
+    },
+    ignorePositionRow(raw) {
+      if (/subtotal|summary|disclaimer|pending/.test(toLower(raw))) return 'summary/footer row'
+      return null
+    },
+    ignoreActivityRow(raw) {
+      if (/subtotal|summary|disclaimer|pending/.test(toLower(raw))) return 'summary/footer row'
+      return null
+    },
+  },
+  {
+    id: 'vanguard',
+    scorePositions(headers, sampleRows) {
+      let score = 0
+      if (findAlias(headers, ['fund symbol', 'fund ticker'])) score += 70
+      if (findAlias(headers, ['position as of', 'as of date'])) score += 20
+      if (findAlias(headers, ['shares held', 'quantity', 'shares'])) score += 20
+      if (sampleRows.some((row) => row.some((cell) => /fund family|expense|yield/i.test(cell)))) score += 8
+      return score
+    },
+    scoreActivity(headers, sampleRows) {
+      let score = 0
+      if (findAlias(headers, ['transaction date', 'trade date'])) score += 30
+      if (findAlias(headers, ['transaction type', 'activity type', 'type'])) score += 25
+      if (findAlias(headers, ['fund symbol', 'symbol', 'ticker'])) score += 15
+      if (findAlias(headers, ['shares', 'quantity'])) score += 10
+      if (sampleRows.some((row) => row.some((cell) => /distribution|dividend|withdrawal|contribution/i.test(cell)))) score += 10
+      return score
+    },
+    mapPositions(headers) {
+      const ticker = findCol(headers, ['fund symbol', 'symbol', 'ticker'])
+      const shares = findCol(headers, ['shares', 'shares held', 'quantity', 'units'])
+      if (ticker < 0 || shares < 0) return null
+      return {
+        ticker,
+        shares,
+        positionAsOf: findCol(headers, ['position as of', 'as of date']),
+      }
+    },
+    mapActivity(headers) {
+      const date = findCol(headers, ['transaction date', 'trade date', 'settlement date'])
+      const ticker = findCol(headers, ['fund symbol', 'symbol', 'ticker'])
+      const action = findCol(headers, ['transaction type', 'activity type', 'type', 'action'])
+      const shares = findCol(headers, ['quantity', 'shares', 'units'])
+      const price = findCol(headers, ['price', 'price paid', 'share price', 'unit price'])
+      const amount = findCol(headers, ['amount', 'amount ($)', 'net amount', 'net contributions'])
+      if (date < 0 || ticker < 0 || shares < 0) return null
+      return { date, ticker, action, shares, price, amount }
+    },
+    classifyAction(raw) {
+      const s = raw.toLowerCase()
+      if (/\byou bought\b|\bbuy\b|\badd\b/.test(s)) return 'buy'
+      if (/\bsell\b|\bredeem\b|\bremove\b|\bredemption\b/.test(s)) return 'sell'
+      if (/dividend|distribution/.test(s)) return 'dividend'
+      if (/foreign tax|withholding/.test(s)) return 'foreignTax'
+      if (/contribution|deposit|inflow|transfer in|wire in/.test(s)) return 'deposit'
+      if (/withdrawal|withdraw|outflow|transfer out|wire out|redemption/.test(s)) return 'withdrawal'
+      return 'ignore'
+    },
+    ignorePositionRow(raw) {
+      if (/subtotal|summary|disclaimer|fund transfer/i.test(toLower(raw))) return 'summary/footer row'
+      return null
+    },
+    ignoreActivityRow(raw) {
+      if (/subtotal|summary|disclaimer|fund transfer/i.test(toLower(raw))) return 'summary/footer row'
+      return null
+    },
+  },
+  {
+    id: 'generic',
+    scorePositions(headers, _sampleRows) {
+      return findAlias(headers, ['symbol', 'ticker', 'instrument', 'security']) &&
+        findAlias(headers, ['shares', 'qty', 'quantity'])
+        ? 12
+        : 0
+    },
+    scoreActivity(headers, _sampleRows) {
+      if (!findAlias(headers, ['date', 'run date', 'trade date', 'activity date', 'settlement date'])) return 0
+      if (!findAlias(headers, ['symbol', 'ticker', 'instrument', 'security'])) return 0
+      return findAlias(headers, ['shares', 'qty', 'quantity']) ? 12 : 0
+    },
+    mapPositions(headers) {
+      const ticker = findCol(headers, ['symbol', 'ticker', 'instrument', 'security', 'description'])
+      const shares = findCol(headers, ['shares', 'quantity', 'qty'])
+      if (ticker < 0 || shares < 0) return null
+      return {
+        ticker,
+        shares,
+        positionAsOf: findCol(headers, ['position as of', 'as of', 'asof']),
+      }
+    },
+    mapActivity(headers) {
+      const date = findCol(headers, ['date', 'run date', 'trade date', 'activity date', 'settlement date'])
+      const ticker = findCol(headers, ['symbol', 'ticker', 'instrument', 'security', 'description'])
+      const action = findCol(headers, ['action', 'side', 'type', 'transaction type', 'transaction', 'activity'])
+      const shares = findCol(headers, ['shares', 'quantity', 'qty', 'units'])
+      if (date < 0 || ticker < 0 || shares < 0) return null
+      return {
+        date,
+        ticker,
+        action,
+        shares,
+        price: findCol(headers, ['price', 'price ($)', 'price per share', 'execution price']),
+        amount: findCol(headers, ['amount', 'amount ($)', 'net amount', 'cash amount']),
+      }
+    },
+    classifyAction(raw) {
+      const s = raw.toLowerCase()
+      if (/\b(you )?bought\b|\bbuy\b|\badded\b|\breceived\b/.test(s)) return 'buy'
+      if (/\b(you )?sold\b|\bsell\b|\bremoved\b/.test(s)) return 'sell'
+      if (/dividend|distribution/.test(s)) return 'dividend'
+      if (/foreign tax|withholding/.test(s)) return 'foreignTax'
+      if (/contribution|electronic funds transfer|direct deposit|ach|deposit|wire|inflow/.test(s)) return 'deposit'
+      if (/withdrawal|electronic funds transfer paid|withdraw|outflow|wire|payment out/.test(s)) return 'withdrawal'
+      return 'ignore'
+    },
+    ignorePositionRow(raw) {
+      if (/pending activity|disclaimer|summary/.test(toLower(raw))) return 'summary/footer row'
+      return null
+    },
+    ignoreActivityRow(raw) {
+      if (/pending activity|disclaimer|summary/.test(toLower(raw))) return 'summary/footer row'
+      return null
+    },
+  },
+]
+
+function selectPreset(kind: 'positions' | 'activity', headers: string[], sampleRows: string[][] = []) {
+  const normalized = headers.map(normalizeHeader)
+  let best: { preset: BrokerPreset; columns: PositionColumns | ActivityColumns } | null = null
+  let bestScore = -1
+
+  for (const preset of presets) {
+    const columns = kind === 'positions' ? preset.mapPositions(normalized) : preset.mapActivity(normalized)
+    if (!columns) continue
+    const score = kind === 'positions' ? preset.scorePositions(normalized, sampleRows) : preset.scoreActivity(normalized, sampleRows)
+    if (score > bestScore) {
+      bestScore = score
+      best = { preset, columns }
+      if ((preset.id === 'fidelity' && kind === 'activity' && score >= 40) || score >= 90) {
+        break
+      }
+    }
+  }
+
+  if (!best) {
+    const generic = presets[presets.length - 1]!
+    const columns = kind === 'positions' ? generic.mapPositions(normalized) : generic.mapActivity(normalized)
+    return columns ? { preset: generic, columns } : null
+  }
+
+  return best
+}
 
 /**
  * Positions: one per line — "AAPL 10", "VTI, 25%", "MSFT\t12 shares".
@@ -96,22 +426,28 @@ function dedupePositions(
  */
 function parsePositionsCsv(text: string): { positions: PositionInput[]; errors: string[] } | null {
   const lines = text.split(/\r?\n/).filter((l) => l.trim())
+  const preview = lines.slice(0, 12).map((line) => splitCsv(line).map((c) => toLower(c.trim())))
+
   for (let i = 0; i < Math.min(lines.length, 10); i++) {
-    const headers = splitCsv(lines[i]).map((h) => h.toLowerCase().trim())
-    if (headers.length < 3) continue
-    const sym = findCol(headers, H.ticker)
-    const qty = findCol(headers, H.shares)
-    if (sym < 0 || qty < 0) continue
+    const headers = preview[i] ?? []
+    const detected = selectPreset('positions', headers, preview.slice(i + 1, i + 12))
+    if (!detected) continue
+    const { preset, columns } = detected
+    const cols = columns as PositionColumns
 
     const positions: PositionInput[] = []
     for (const line of lines.slice(i + 1)) {
+      if (isCashRow(line)) continue
       const cells = splitCsv(line)
-      // Footer disclaimers collapse to one cell; cash rows aren't positions.
-      if (cells.length < 3 || isCashRow(line)) continue
-      // Fidelity marks core/money-market symbols with trailing asterisks.
-      const ticker = (cells[sym] ?? '').trim().toUpperCase().replace(/\*+$/, '')
-      const shares = Number((cells[qty] ?? '').replace(/[,$"]/g, ''))
-      if (!TICKER_RE.test(ticker) || !Number.isFinite(shares) || shares <= 0) continue
+      const ignoreReason = preset.ignorePositionRow(line, cells)
+      if (ignoreReason) continue
+      if (cells.length < 3) continue
+      const ticker = (cells[cols.ticker] ?? '').trim().toUpperCase().replace(/\*+$/, '')
+      const sharesRaw = cells[cols.shares] ?? ''
+      const shares = parseNumber(sharesRaw)
+      if (!isNumeric(sharesRaw) || !TICKER_RE.test(ticker) || shares == null || shares <= 0) {
+        continue
+      }
       positions.push({ ticker, shares })
     }
     return positions.length > 0 ? dedupePositions(positions, []) : null
@@ -119,28 +455,12 @@ function parsePositionsCsv(text: string): { positions: PositionInput[]; errors: 
   return null
 }
 
-// Header aliases seen across broker exports.
-const H = {
-  date: ['date', 'trade date', 'tradedate', 'transaction date', 'activity date', 'run date', 'settlement date'],
-  ticker: ['ticker', 'symbol', 'instrument', 'security'],
-  side: ['side', 'action', 'type', 'transaction type', 'transaction', 'activity', 'buy/sell', 'description'],
-  shares: ['shares', 'quantity', 'qty', 'units', 'amount of shares'],
-  price: ['price', 'share price', 'price per share', 'execution price', 'unit price'],
-  amount: ['amount ($)', 'amount', 'net amount', 'total amount'],
-}
-
-function findCol(headers: string[], aliases: string[]): number {
-  const idx = headers.findIndex((h) => aliases.includes(h))
-  if (idx >= 0) return idx
-  return headers.findIndex((h) => aliases.some((a) => h.includes(a)))
-}
-
 function normalizeDate(raw: string): string | null {
   const s = raw.trim().replace(/"/g, '')
   let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)
   if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`
   // US-broker orderings: MM/DD/YYYY and Fidelity's MM-DD-YYYY.
-  m = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/)
+  m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/)
   if (m) return `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`
   return null
 }
@@ -152,13 +472,6 @@ function normalizeDate(raw: string): string | null {
  */
 function isCashRow(line: string): boolean {
   return /money market|pending activity/i.test(line)
-}
-
-function normalizeSide(raw: string): 'buy' | 'sell' | null {
-  const s = raw.toLowerCase()
-  if (/\bbuy|bought|purchase|reinvest/.test(s)) return 'buy'
-  if (/\bsell|sold|sale\b/.test(s)) return 'sell'
-  return null
 }
 
 /** Split a CSV line respecting double quotes. */
@@ -209,82 +522,103 @@ export function parseTrades(text: string): ParsedActivity {
 
   // Find the header row (some exports have preamble lines).
   let headerIdx = -1
-  let cols = { date: -1, ticker: -1, side: -1, shares: -1, price: -1, amount: -1 }
+  let presetChoice: { preset: BrokerPreset; columns: ActivityColumns } | null = null
+
+  const preview = lines.slice(0, 12).map((line) => splitCsv(line).map((c) => toLower(c.trim())))
+
   for (let i = 0; i < Math.min(lines.length, 10); i++) {
-    const headers = splitCsv(lines[i]).map((h) => h.toLowerCase().trim())
-    const c = {
-      date: findCol(headers, H.date),
-      ticker: findCol(headers, H.ticker),
-      side: findCol(headers, H.side),
-      shares: findCol(headers, H.shares),
-      price: findCol(headers, H.price),
-      amount: findCol(headers, H.amount),
-    }
-    if (c.date >= 0 && c.ticker >= 0 && c.shares >= 0) {
-      headerIdx = i
-      cols = c
-      break
-    }
+    const headers = preview[i] ?? []
+    const detected = selectPreset('activity', headers, preview.slice(i + 1, i + 20))
+    if (!detected || (detected.columns as ActivityColumns).date < 0) continue
+    const cols = detected.columns as ActivityColumns
+    if (cols.date < 0 || cols.ticker < 0 || cols.shares < 0) continue
+    headerIdx = i
+    presetChoice = { preset: detected.preset, columns: cols }
+    break
   }
-  if (headerIdx < 0) {
+
+  if (headerIdx < 0 || !presetChoice) {
     return EMPTY_ACTIVITY([
       'Could not find columns for date, ticker/symbol, and shares/quantity in the header.',
     ])
   }
 
+  const { preset, columns: cols } = presetChoice
+
   const trades: TradeInput[] = []
   const dividends: DividendInput[] = []
   const cashFlows: CashFlowInput[] = []
   let skipped = 0
+
   for (const line of lines.slice(headerIdx + 1)) {
-    // Cash-sweep noise (e.g. SPAXX reinvestments) matches /reinvest/ below
-    // and would register as bogus buys — drop it before side detection.
     if (isCashRow(line)) {
       skipped++
       continue
     }
     const cells = splitCsv(line)
-    const date = normalizeDate(cells[cols.date] ?? '')
-    const amount =
-      cols.amount >= 0 ? Number((cells[cols.amount] ?? '').replace(/[,$"]/g, '')) : NaN
-    const action = cols.side >= 0 ? (cells[cols.side] ?? '') : ''
-    const tickerRaw = (cells[cols.ticker] ?? '').toUpperCase().trim()
-
-    // Income / external-flow rows (captured, not skipped) — checked before
-    // trade parsing since they have qty 0 and would otherwise fall through.
-    if (date && Number.isFinite(amount) && amount !== 0) {
-      if (/dividend received/i.test(action) && TICKER_RE.test(tickerRaw)) {
-        dividends.push({ date, ticker: tickerRaw, amount })
-        continue
-      }
-      if (/foreign tax paid/i.test(action) && TICKER_RE.test(tickerRaw)) {
-        dividends.push({ date, ticker: tickerRaw, amount }) // negative clawback
-        continue
-      }
-      if (/electronic funds transfer|direct deposit|ach |wire /i.test(action)) {
-        cashFlows.push({ date, amount })
-        continue
-      }
-    }
-    const shares = Math.abs(Number((cells[cols.shares] ?? '').replace(/[,$"]/g, '')))
-    let side = normalizeSide(action)
-    // Some exports encode sells as negative quantities with no side column.
-    if (!side && cols.side < 0) {
-      side = Number((cells[cols.shares] ?? '').replace(/[,$"]/g, '')) < 0 ? 'sell' : 'buy'
-    }
-    if (!date || !TICKER_RE.test(tickerRaw) || !Number.isFinite(shares) || shares <= 0 || !side) {
+    const ignoreReason = preset.ignoreActivityRow(line, cells)
+    if (ignoreReason) {
       skipped++
       continue
     }
-    const priceRaw = cols.price >= 0 ? Number((cells[cols.price] ?? '').replace(/[,$"]/g, '')) : NaN
+
+    const date = normalizeDate(cells[cols.date] ?? '')
+    const sharesRaw = parseNumber(cells[cols.shares] ?? '')
+    const action = cols.action >= 0 ? (cells[cols.action] ?? '') : ''
+    const actionKind = preset.classifyAction(action)
+    const tickerRaw = (cells[cols.ticker] ?? '').toUpperCase().trim()
+    const amount = cols.amount >= 0 ? parseNumber(cells[cols.amount] ?? '') : null
+    const priceRaw = cols.price >= 0 ? parseNumber(cells[cols.price] ?? '') : null
+
+    if (date && amount != null && amount !== 0) {
+      if (actionKind === 'dividend' && TICKER_RE.test(tickerRaw)) {
+        dividends.push({ date, ticker: tickerRaw, amount })
+        continue
+      }
+      if (actionKind === 'foreignTax' && TICKER_RE.test(tickerRaw)) {
+        dividends.push({ date, ticker: tickerRaw, amount: -Math.abs(amount) })
+        continue
+      }
+      if (actionKind === 'deposit') {
+        cashFlows.push({ date, amount: amount >= 0 ? amount : -amount })
+        continue
+      }
+      if (actionKind === 'withdrawal') {
+        cashFlows.push({ date, amount: amount <= 0 ? amount : -amount })
+        continue
+      }
+    }
+
+    let side: TradeInput['side'] | null = null
+    let shares = sharesRaw
+    if (actionKind === 'buy' || actionKind === 'sell') {
+      side = actionKind
+      if (shares == null || shares === 0) shares = null
+      else shares = Math.abs(shares)
+    } else if (cols.action < 0 && sharesRaw != null && sharesRaw !== 0) {
+      side = sharesRaw < 0 ? 'sell' : 'buy'
+      shares = Math.abs(sharesRaw)
+    } else if (actionKind === 'ignore' && cols.action < 0) {
+      side = null
+    } else {
+      side = null
+    }
+
+    const hasRequiredTicker = (actionKind === 'deposit' || actionKind === 'withdrawal') ? true : TICKER_RE.test(tickerRaw)
+    if (!date || !hasRequiredTicker || shares == null || !Number.isFinite(shares) || shares <= 0 || !side) {
+      skipped++
+      continue
+    }
+
     trades.push({
       date,
       ticker: tickerRaw,
       side,
       shares,
-      price: Number.isFinite(priceRaw) && priceRaw > 0 ? priceRaw : undefined,
+      price: priceRaw != null && priceRaw > 0 ? priceRaw : undefined,
     })
   }
+
   trades.sort((a, b) => a.date.localeCompare(b.date))
   dividends.sort((a, b) => a.date.localeCompare(b.date))
   cashFlows.sort((a, b) => a.date.localeCompare(b.date))
