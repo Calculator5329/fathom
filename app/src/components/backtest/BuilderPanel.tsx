@@ -247,9 +247,8 @@ export function BuilderPanel({ setup, onChange, effectiveStart, limitingTicker }
         </div>
       </div>
       {limitingEntry && effectiveStart && (
-        <p className="tnum -mt-3 text-sm leading-snug text-muted-foreground/70">
-          Using max available history &mdash; limited by{' '}
-          <span className="font-mono">{limitingEntry.ticker}</span>, inception{' '}
+        <p className="tnum -mt-3 text-sm leading-snug text-muted-foreground/60">
+          Max history &mdash; <span className="font-mono">{limitingEntry.ticker}</span> from{' '}
           {monthName(effectiveStart)}.
         </p>
       )}
