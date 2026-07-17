@@ -2,6 +2,12 @@ import { describe, expect, it } from 'vitest'
 import type { TickerSeries } from '@/engine'
 import { inferOpeningPositions, reconstructHistory } from '../analyze'
 import { parsePositions, parseTrades } from '../parse'
+import {
+  SCHWAB_ACTIVITY_CSV,
+  SCHWAB_POSITIONS_CSV,
+  VANGUARD_ACTIVITY_CSV,
+  VANGUARD_POSITIONS_CSV,
+} from '../__fixtures__/broker-csv-presets'
 
 // ---------- parsers ----------------------------------------------------------
 
@@ -109,6 +115,59 @@ describe('parseTrades', () => {
     ])
     // Dividend + its tax clawback both land on ASML (net 4.31).
     expect(dividends.reduce((s, d) => s + d.amount, 0)).toBeCloseTo(4.31, 6)
+  })
+})
+
+describe('parsePositions (broker preset sniffing)', () => {
+  it('parses a Schwab positions CSV with symbol+shares headers', () => {
+    const { positions, errors } = parsePositions(SCHWAB_POSITIONS_CSV)
+    expect(errors).toEqual([])
+    expect(positions).toEqual([
+      { ticker: 'AAPL', shares: 12 },
+      { ticker: 'MSFT', shares: 5 },
+    ])
+  })
+
+  it('parses a Vanguard positions CSV with fund symbols', () => {
+    const { positions, errors } = parsePositions(VANGUARD_POSITIONS_CSV)
+    expect(errors).toEqual([])
+    expect(positions).toEqual([
+      { ticker: 'VOO', shares: 8 },
+      { ticker: 'BND', shares: 12 },
+    ])
+  })
+})
+
+describe('parseTrades (broker preset sniffing)', () => {
+  it('parses Schwab activity rows using Schwab-style headers', () => {
+    const { trades, dividends, cashFlows, skipped } = parseTrades(SCHWAB_ACTIVITY_CSV)
+    expect(trades).toEqual([
+      { date: '2026-01-05', ticker: 'TSLA', side: 'buy', shares: 10, price: 150 },
+      { date: '2026-01-07', ticker: 'TSLA', side: 'sell', shares: 3, price: 160 },
+    ])
+    expect(dividends).toEqual([{ date: '2026-01-20', ticker: 'NVDA', amount: 22.5 }])
+    expect(cashFlows).toEqual([
+      { date: '2026-01-10', amount: 1250 },
+      { date: '2026-01-12', amount: -450 },
+    ])
+    expect(skipped).toBe(1)
+  })
+
+  it('parses Vanguard activity rows using Vanguard-style headers', () => {
+    const { trades, dividends, cashFlows, skipped } = parseTrades(VANGUARD_ACTIVITY_CSV)
+    expect(trades).toEqual([
+      { date: '2026-01-02', ticker: 'VOO', side: 'buy', shares: 10, price: 450.5 },
+      { date: '2026-01-12', ticker: 'VOO', side: 'sell', shares: 4, price: 452 },
+    ])
+    expect(dividends).toEqual([
+      { date: '2026-01-20', ticker: 'VTI', amount: 12.5 },
+      { date: '2026-01-22', ticker: 'VTI', amount: -1.1 },
+    ])
+    expect(cashFlows).toEqual([
+      { date: '2026-01-23', amount: 1000 },
+      { date: '2026-01-24', amount: -250 },
+    ])
+    expect(skipped).toBe(1)
   })
 })
 
