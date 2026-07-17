@@ -19,10 +19,11 @@ import {
   priceHistoryOption,
   quarterRows,
   revenueIncomeOption,
-  valuationOption,
   yearRows,
+  valuationSeries,
   type ValuationMetric,
 } from '@/fundamentals/charts'
+import { buildValuationBandOption, computeValuationBandSummary, type ValuationBandPoint } from '@/data/valuationBands'
 import { loadFundamentals, type FiscalYear, type Fundamentals } from '@/fundamentals/load'
 
 /**
@@ -181,6 +182,34 @@ export function Stock() {
   const allYears = fundamentals?.fiscalYears.filter((y) => y.revenue != null) ?? []
   const incomeRows = periodRows(incomePeriod, allYears, fundamentals)
   const hasBalanceSheet = allYears.some((y) => y.totalAssets != null)
+  const valuationRows = sliceRange(allYears, valRange)
+  const valuationPoints = useMemo<ValuationBandPoint[]>(() => {
+    if (!series) return []
+    return valuationSeries(series.records, valuationRows, valMetric).map(([fiscalYear, value]) => [fiscalYear, value])
+  }, [series, valuationRows, valMetric])
+  const valuationSummary = useMemo(() => computeValuationBandSummary(valuationPoints, valMetric), [valuationPoints, valMetric])
+  const valuationChartOption = useMemo(
+    () => (valuationPoints.length ? buildValuationBandOption(valuationPoints, valMetric, valuationSummary) : null),
+    [valuationPoints, valMetric, valuationSummary],
+  )
+  const valuationSummaryStrip = valuationSummary.boundaries == null ? null : [
+    {
+      label: 'Latest FY',
+      value: valuationSummary.latest
+        ? `${valuationSummary.latest.value.toFixed(1)}×`
+        : '—',
+      subtitle: valuationSummary.latest ? valuationSummary.latest.fiscalYear : '',
+    },
+    {
+      label: 'Percentile',
+      value: valuationSummary.latest ? `${valuationSummary.latest.percentile}th` : '—',
+    },
+    {
+      label: '10–90%',
+      value: valuationSummary.boundaries == null ? '—' : `${valuationSummary.boundaries.p10.toFixed(1)}–${valuationSummary.boundaries.p90.toFixed(1)}×`,
+    },
+    { label: 'Median', value: valuationSummary.boundaries == null ? '—' : `${valuationSummary.boundaries.p50.toFixed(1)}×` },
+  ]
 
   if (!ticker) {
     return (
@@ -389,10 +418,31 @@ export function Stock() {
               </CardHeader>
               <CardContent>
                 <p className="mb-2 text-sm text-muted-foreground">{VALUATION_LABELS[valMetric]}</p>
-                <EChart
-                  option={valuationOption(series.records, sliceRange(allYears, valRange), valMetric)}
-                  className="h-64 w-full"
-                />
+                {valuationPoints.length > 0 && valuationChartOption && (
+                  <EChart option={valuationChartOption} className="h-64 w-full" />
+                )}
+                <div className="mt-3">
+                  {valuationSummaryStrip ? (
+                    <>
+                      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                        {valuationSummaryStrip.map((item) => (
+                          <div key={item.label}>
+                            <p className="text-sm text-muted-foreground">{item.label}</p>
+                            <p className="mt-0.5 font-mono text-base font-medium tnum">{item.value}</p>
+                            {item.subtitle && <p className="text-xs text-muted-foreground">FY {item.subtitle}</p>}
+                          </div>
+                        ))}
+                      </div>
+                      <p className="mt-3 text-sm text-muted-foreground">
+                        Historical position, not a fair-value estimate.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Not enough comparable history for bands ({valuationSummary.sampleCount} valid years). Try a longer range.
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}
