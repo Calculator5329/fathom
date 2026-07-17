@@ -19,9 +19,12 @@ import http from 'node:http'
 import { Storage } from '@google-cloud/storage'
 import { fetchFundamentals } from './edgar.mjs'
 import {
+  MAX_TICKERS_PER_BATCH,
   isWeekdayCycle,
   mergeRefreshBatch,
   refreshFreshness,
+  selectCatchUpTickers,
+  shouldRunCatchUpPass,
   resolveRefreshPlan,
   selectRefreshBatch,
 } from './refresh.mjs'
@@ -244,33 +247,92 @@ function admitTicker(symbol) {
   return p
 }
 
+function mergeDateCounts(base = {}, additional = {}) {
+  const merged = { ...base }
+  for (const [date, count] of Object.entries(additional)) {
+    merged[date] = (merged[date] ?? 0) + count
+  }
+  return merged
+}
+
+async function fetchCatalogEndDate(ticker) {
+  const file = bucket.file(`tickers/${ticker}.json`)
+  try {
+    const [buffer] = await file.download()
+    const data = JSON.parse(buffer.toString())
+    return data?.endDate ?? null
+  } catch (err) {
+    if (Number(err?.code ?? err?.statusCode) === 404) return null
+    throw err
+  }
+}
+
+async function pickCatchUpCandidates(catalog, cycleId, maxTickers = MAX_TICKERS_PER_BATCH) {
+  const entries = []
+  for (const entry of catalog.toSorted((a, b) => a.ticker.localeCompare(b.ticker))) {
+    const endDate = await fetchCatalogEndDate(entry.ticker)
+    if (endDate && endDate < cycleId) entries.push({ ticker: entry.ticker, endDate })
+  }
+  return selectCatchUpTickers(entries, cycleId, maxTickers)
+}
+
+async function refreshBatch(entries) {
+  const results = {
+    attempted: 0,
+    refreshed: 0,
+    failed: [],
+    updated: [],
+    endDateCounts: {},
+    endDateByTicker: {},
+  }
+
+  for (const entry of entries) {
+    results.attempted += 1
+    try {
+      const data = await fetchTickerFull(entry.ticker, { max429Retries: 3, retryDelayMs: 60_000 })
+      if (!data) throw new Error('no data')
+      await saveSeries(data)
+      results.updated.push({ ...entry, startDate: data.startDate })
+      results.refreshed += 1
+      const endDate = data.endDate ?? 'missing'
+      results.endDateCounts[endDate] = (results.endDateCounts[endDate] ?? 0) + 1
+      results.endDateByTicker[entry.ticker] = endDate
+    } catch (err) {
+      results.failed.push(`${entry.ticker}: ${err.message}`)
+      results.updated.push(entry)
+    }
+    await new Promise((r) => setTimeout(r, 1200))
+  }
+
+  return results
+}
+
 async function handleRefresh(searchParams) {
   const startedAt = Date.now()
+  const now = new Date()
   const cat = await loadCatalog(true)
   const existingReport = await loadReport('refresh-report.json')
-  const plan = resolveRefreshPlan({ searchParams, existingReport, catalogSize: cat.length })
+  const plan = resolveRefreshPlan({ searchParams, existingReport, catalogSize: cat.length, now })
   if (!isWeekdayCycle(plan.cycleId)) {
     return { skipped: true, reason: 'weekend market cycle', cycleId: plan.cycleId }
   }
   if (plan.alreadyComplete) return existingReport
   const selected = selectRefreshBatch(cat, plan.batchIndex, plan.batchCount)
-  const results = { refreshed: 0, failed: [] }
-  const updated = []
-  const endDateCounts = {}
-  for (const entry of selected) {
-    try {
-      const data = await fetchTickerFull(entry.ticker, { max429Retries: 3, retryDelayMs: 60_000 })
-      if (!data) throw new Error('no data')
-      await saveSeries(data)
-      updated.push({ ...entry, startDate: data.startDate })
-      results.refreshed++
-      const endDate = data.endDate ?? 'missing'
-      endDateCounts[endDate] = (endDateCounts[endDate] ?? 0) + 1
-    } catch (err) {
-      results.failed.push(`${entry.ticker}: ${err.message}`)
-      updated.push(entry)
-    }
-    await new Promise((r) => setTimeout(r, 1200)) // stay polite to Tiingo
+  const selectedResults = await refreshBatch(selected)
+  const willRunCatchUp = !searchParams.has('batch') && shouldRunCatchUpPass(plan, now)
+  const catchUpSymbolList = willRunCatchUp ? await pickCatchUpCandidates(cat, plan.cycleId) : []
+  const catchUpResults = catchUpSymbolList.length > 0
+    ? await refreshBatch(catchUpSymbolList.map((ticker) => ({ ticker })))
+    : null
+  const updated = [...selectedResults.updated, ...(catchUpResults?.updated ?? [])]
+  const failed = [...selectedResults.failed, ...(catchUpResults?.failed ?? [])]
+  const endDateCounts = mergeDateCounts(
+    selectedResults.endDateCounts,
+    catchUpResults?.endDateCounts ?? {},
+  )
+  const endDateByTicker = {
+    ...(selectedResults.endDateByTicker ?? {}),
+    ...(catchUpResults?.endDateByTicker ?? {}),
   }
   const updatedByTicker = new Map(updated.map((entry) => [entry.ticker, entry]))
   await updateCatalog((fresh) => fresh.map((entry) => updatedByTicker.get(entry.ticker) ?? entry))
@@ -279,10 +341,11 @@ async function handleRefresh(searchParams) {
     batchCount: plan.batchCount,
     ranAt: new Date().toISOString(),
     durationMs: Date.now() - startedAt,
-    attempted: selected.length,
-    refreshed: results.refreshed,
-    failed: results.failed,
+    attempted: selectedResults.attempted + (catchUpResults?.attempted ?? 0),
+    refreshed: selectedResults.refreshed + (catchUpResults?.refreshed ?? 0),
+    failed,
     endDateCounts,
+    endDateByTicker,
   }
   const report = mergeRefreshBatch(existingReport, batchReport, {
     cycleId: plan.cycleId,

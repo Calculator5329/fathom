@@ -22,6 +22,35 @@ export function marketCycleId(date = new Date()) {
   return `${byType.year}-${byType.month}-${byType.day}`
 }
 
+export function isFinalRefreshInvocation(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(now)
+  const byType = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return byType.hour === '00' && byType.minute === '30'
+}
+
+export function isCatchUpCandidateEndDate(entry, cycleDate) {
+  return entry?.endDate != null && entry.endDate < cycleDate
+}
+
+export function selectCatchUpTickers(entries, cycleDate, maxCatchUp = MAX_TICKERS_PER_BATCH) {
+  const normalizedMax = Number.isInteger(maxCatchUp) ? maxCatchUp : MAX_TICKERS_PER_BATCH
+  if (normalizedMax <= 0) return []
+  return entries
+    .filter((entry) => isCatchUpCandidateEndDate(entry, cycleDate))
+    .toSorted((a, b) => a.ticker.localeCompare(b.ticker))
+    .slice(0, normalizedMax)
+    .map((entry) => entry.ticker)
+}
+
+export function shouldRunCatchUpPass({ batchIndex, batchCount }, now = new Date()) {
+  return batchIndex === batchCount - 1 && isFinalRefreshInvocation(now)
+}
+
 export function isWeekdayCycle(cycleId) {
   const day = new Date(`${cycleId}T12:00:00Z`).getUTCDay()
   return day >= 1 && day <= 5
@@ -76,12 +105,28 @@ export function mergeRefreshBatch(existingReport, batch, { cycleId, batchCount, 
   const batches = [...prior.filter((entry) => entry.batchIndex !== batch.batchIndex), batch]
     .toSorted((a, b) => a.batchIndex - b.batchIndex)
   const failed = batches.flatMap((entry) => entry.failed)
+  let endDateByTicker = existingReport?.endDateByTicker != null ? { ...existingReport.endDateByTicker } : null
+  if (endDateByTicker == null && batch.endDateByTicker != null) endDateByTicker = {}
   const endDateCounts = {}
-  for (const entry of batches) {
-    for (const [date, count] of Object.entries(entry.endDateCounts)) {
-      endDateCounts[date] = (endDateCounts[date] ?? 0) + count
+  if (endDateByTicker) {
+    for (const entry of batches) {
+      if (entry.endDateByTicker == null) continue
+      for (const [ticker, endDate] of Object.entries(entry.endDateByTicker)) {
+        endDateByTicker[ticker] = endDate
+      }
+    }
+    for (const [ticker, endDate] of Object.entries(endDateByTicker)) {
+      if (endDate == null || endDate === 'missing') continue
+      endDateCounts[endDate] = (endDateCounts[endDate] ?? 0) + 1
+    }
+  } else {
+    for (const entry of batches) {
+      for (const [date, count] of Object.entries(entry.endDateCounts ?? {})) {
+        endDateCounts[date] = (endDateCounts[date] ?? 0) + count
+      }
     }
   }
+
   const refreshed = batches.reduce((sum, entry) => sum + entry.refreshed, 0)
   const attempted = batches.reduce((sum, entry) => sum + entry.attempted, 0)
   const complete = batches.length === batchCount && batches.every((entry, index) => entry.batchIndex === index)
@@ -101,6 +146,7 @@ export function mergeRefreshBatch(existingReport, batch, { cycleId, batchCount, 
     refreshed,
     failed,
     catalogSize,
+    endDateByTicker,
     freshThrough: complete && failed.length === 0 ? successfulDates[0] ?? null : null,
     endDateCounts,
     batches,

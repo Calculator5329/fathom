@@ -5,6 +5,9 @@ import {
   isWeekdayCycle,
   marketCycleId,
   mergeRefreshBatch,
+  isFinalRefreshInvocation,
+  selectCatchUpTickers,
+  shouldRunCatchUpPass,
   refreshFreshness,
   resolveRefreshPlan,
   selectRefreshBatch,
@@ -80,6 +83,28 @@ test('aggregate report is only fresh after every batch succeeds', () => {
   assert.deepEqual(refreshFreshness(report, new Date('2026-07-16T06:00:00Z')).reasons, [])
 })
 
+test('catch-up candidates are budget-capped and skip already-current tickers', () => {
+  const cycleId = '2026-07-16'
+  const staleList = [
+    { ticker: 'BBB', endDate: '2026-07-10' },
+    { ticker: 'AAA', endDate: '2026-07-16' },
+    { ticker: 'CCC', endDate: '2026-07-14' },
+    { ticker: 'DDD', endDate: '2026-07-15' },
+    { ticker: 'EEE', endDate: '2026-07-14' },
+  ]
+  const selected = selectCatchUpTickers(staleList, cycleId, 2)
+  assert.deepEqual(selected, ['BBB', 'CCC'])
+})
+
+test('catch-up pass runs only on the final scheduled batch and final invocation time', () => {
+  const finalBatch = { batchIndex: 3, batchCount: 4 }
+  assert.equal(shouldRunCatchUpPass(finalBatch, new Date('2026-07-17T04:30:00Z')), true)
+  assert.equal(shouldRunCatchUpPass(finalBatch, new Date('2026-07-17T03:30:00Z')), false)
+  assert.equal(shouldRunCatchUpPass({ batchIndex: 2, batchCount: 4 }, new Date('2026-07-17T04:30:00Z')), false)
+  assert.equal(isFinalRefreshInvocation(new Date('2026-07-17T04:30:00Z')), true)
+  assert.equal(isFinalRefreshInvocation(new Date('2026-07-17T04:31:00Z')), false)
+})
+
 test('failed and stale cycles fail the freshness contract', () => {
   const report = mergeRefreshBatch(null, {
     batchIndex: 0,
@@ -95,6 +120,30 @@ test('failed and stale cycles fail the freshness contract', () => {
   assert.match(freshness.reasons.join('; '), /incomplete/)
   assert.match(freshness.reasons.join('; '), /failed/)
   assert.match(freshness.reasons.join('; '), /stale/)
+})
+
+test('latest catch-up data replaces earlier close-date samples for a replaced batch', () => {
+  let report = mergeRefreshBatch(null, {
+    batchIndex: 0,
+    ranAt: '2026-07-10T02:30:00Z',
+    durationMs: 1_000,
+    attempted: 1,
+    refreshed: 1,
+    failed: [],
+    endDateCounts: { '2026-07-14': 1 },
+    endDateByTicker: { A: '2026-07-14' },
+  }, { cycleId: '2026-07-14', batchCount: 1, catalogSize: 1 })
+  report = mergeRefreshBatch(report, {
+    batchIndex: 0,
+    ranAt: '2026-07-10T02:31:00Z',
+    durationMs: 1_000,
+    attempted: 1,
+    refreshed: 1,
+    failed: [],
+    endDateCounts: { '2026-07-15': 1 },
+    endDateByTicker: { A: '2026-07-15' },
+  }, { cycleId: '2026-07-14', batchCount: 1, catalogSize: 1 })
+  assert.equal(report.freshThrough, '2026-07-15')
 })
 
 test('market cycle date stays stable across UTC midnight for the evening refresh window', () => {
