@@ -22,6 +22,16 @@ committed with focused staging (never `git add -A`), then pushed.
 
 ## Now
 
+- [ ] **Freshness catch-up pass for late-publishing EOD data.** First live
+  full cycle (2026-07-16, 4 batches, 88/88, 0 failures, HTTP 200) surfaced a
+  currency lag: freshThrough reported the PRIOR market date because the
+  18:30/20:30 ET batches fetched before Tiingo published that day's EOD for
+  their symbols. Make the final (00:30) invocation a catch-up pass: after its
+  own batch, refetch any symbol whose latest close < the cycle's market date
+  (budget-capped, reuse the 429 backoff). _Accept: freshThrough equals the
+  cycle market date on the next healthy weekday cycle._
+
+
 - [ ] **Subdue history-helper copy (Ethan top-priority, 2026-07-16).** Make the
   two helper messages more minimal/out of the way: "Using max available
   history — limited by ADBE, inception Aug 1986." (AllocationBuilder.tsx,
