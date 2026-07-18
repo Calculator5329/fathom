@@ -7,6 +7,8 @@ history, Monte Carlo retirement simulation, SEC-filing stock research, and a
 portfolio X-ray that reconstructs your real performance from broker CSV exports.
 Free, no account for the core tools, every analysis shareable by link.
 
+![Fathom landing page](docs/screenshots/landing.png)
+
 ## Tools
 
 | Tool | What it does |
