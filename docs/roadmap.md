@@ -67,3 +67,5 @@ Stack: Vite frontend + Google Cloud Run backend.
 - Tiingo/Polygon (no existing pipeline)
 
 - [ ] [lost] Reconcile three shipped-but-unchecked HANDOFF_ROADMAP items (added via Visions, 2026-07-19)
+
+- [ ] [lost] Execute the approved D8 archive of finance/stock-analysis-project (added via Visions, 2026-07-19)
