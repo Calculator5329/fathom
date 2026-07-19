@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 import { buildRealReturns, type AllocationWeight, type AssetData } from './data'
+import { type ParametricInput, runParametric } from './parametric'
 import {
   maxSafeWithdrawal,
   mulberry32,
@@ -16,9 +17,11 @@ export interface WorkerRequest {
   returns: Array<[string, Array<[string, number]>]>
   cpi: Array<[string, number]>
   params: SimParams
-  mode: 'historical' | 'bootstrap'
+  mode: 'historical' | 'bootstrap' | 'parametric'
   trials: number
   seed: number
+  /** Present only for parametric mode: the user-set return distribution. */
+  parametric?: ParametricInput
 }
 
 export interface WorkerResponse {
@@ -29,6 +32,27 @@ export interface WorkerResponse {
 
 self.onmessage = (e: MessageEvent<WorkerRequest>) => {
   try {
+    // Parametric mode needs no historical series — returns come straight from
+    // the user's distribution. Max-safe-rate stays a historical concept, so it
+    // is not reported here (NaN → the UI shows the "spending adapts" dash for
+    // rate-driven strategies, which is the honest reading with no history).
+    if (e.data.mode === 'parametric') {
+      if (!e.data.parametric || e.data.parametric.assets.length === 0) {
+        postMessage({
+          result: null,
+          maxSwr: 0,
+          error: 'Set expected return and volatility to run the parametric model.',
+        } satisfies WorkerResponse)
+        return
+      }
+      const result = runParametric(e.data.parametric, e.data.params, {
+        trials: e.data.trials,
+        seed: e.data.seed,
+      })
+      postMessage({ result, maxSwr: NaN } satisfies WorkerResponse)
+      return
+    }
+
     const data: AssetData = {
       returns: new Map(e.data.returns.map(([id, entries]) => [id, new Map(entries)])),
       cpi: new Map(e.data.cpi),
