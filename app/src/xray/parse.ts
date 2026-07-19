@@ -52,6 +52,8 @@ interface ActivityColumns {
 
 interface BrokerPreset {
   id: BrokerPresetId
+  sniffPositions(headers: string[], sampleRows: string[][]): number
+  sniffActivity(headers: string[], sampleRows: string[][]): number
   scorePositions(headers: string[], sampleRows: string[][]): number
   scoreActivity(headers: string[], sampleRows: string[][]): number
   mapPositions(headers: string[]): PositionColumns | null
@@ -96,6 +98,19 @@ function isNumeric(raw: string): boolean {
 const presets: BrokerPreset[] = [
   {
     id: 'fidelity',
+    sniffPositions(headers, _sampleRows) {
+      if (!findAlias(headers, ['account number', 'account name'])) return 0
+      if (!findAlias(headers, ['symbol', 'ticker'])) return 0
+      if (!findAlias(headers, ['quantity', 'shares', 'qty'])) return 0
+      return 120
+    },
+    sniffActivity(headers, _sampleRows) {
+      if (!findAlias(headers, ['run date', 'trade date', 'settlement date'])) return 0
+      if (!findAlias(headers, ['symbol', 'ticker'])) return 0
+      if (!findAlias(headers, ['action', 'transaction type', 'type'])) return 0
+      if (findAlias(headers, ['cash balance', 'account number', 'account name'])) return 120
+      return 0
+    },
     scorePositions(headers: string[], sampleRows: string[][]) {
       let score = 0
       if (findAlias(headers, ['account number', 'account name'])) score += 70
@@ -163,6 +178,23 @@ const presets: BrokerPreset[] = [
   },
   {
     id: 'schwab',
+    sniffPositions(headers, sampleRows) {
+      if (!findAlias(headers, ['symbol', 'ticker', 'security'])) return 0
+      if (!findAlias(headers, ['quantity', 'qty', 'shares'])) return 0
+      let score = 60
+      if (findAlias(headers, ['position as of', 'as of', 'as-of'])) score += 40
+      if (sampleRows.some((row) => row.some((cell) => /commission|fees|position value|settlement/i.test(cell)))) score += 10
+      return score
+    },
+    sniffActivity(headers, sampleRows) {
+      if (!findAlias(headers, ['trade date', 'activity date', 'run date', 'settlement date'])) return 0
+      if (!findAlias(headers, ['symbol', 'ticker', 'security'])) return 0
+      if (!findAlias(headers, ['transaction', 'action', 'type'])) return 0
+      let score = 60
+      if (findAlias(headers, ['quantity', 'qty', 'shares'])) score += 25
+      if (sampleRows.some((row) => row.some((cell) => /commission|fees|principal|settlement|dividend|distribution/i.test(cell)))) score += 10
+      return score
+    },
     scorePositions(headers, sampleRows) {
       let score = 0
       if (findAlias(headers, ['symbol', 'ticker'])) score += 15
@@ -222,6 +254,21 @@ const presets: BrokerPreset[] = [
   },
   {
     id: 'vanguard',
+    sniffPositions(headers, _sampleRows) {
+      if (!findAlias(headers, ['fund symbol', 'fund ticker'])) return 0
+      if (!findAlias(headers, ['shares held', 'shares', 'quantity'])) return 0
+      let score = 80
+      if (findAlias(headers, ['position as of', 'as of date'])) score += 20
+      return score
+    },
+    sniffActivity(headers, sampleRows) {
+      if (!findAlias(headers, ['transaction date', 'trade date'])) return 0
+      if (!findAlias(headers, ['fund symbol', 'fund ticker'])) return 0
+      if (!findAlias(headers, ['transaction type', 'activity type', 'type'])) return 0
+      let score = 80
+      if (sampleRows.some((row) => row.some((cell) => /distribution|dividend|withdrawal|contribution|foreign tax/i.test(cell)))) score += 15
+      return score
+    },
     scorePositions(headers, sampleRows) {
       let score = 0
       if (findAlias(headers, ['fund symbol', 'fund ticker'])) score += 70
@@ -280,6 +327,12 @@ const presets: BrokerPreset[] = [
   },
   {
     id: 'generic',
+    sniffPositions() {
+      return 0
+    },
+    sniffActivity() {
+      return 0
+    },
     scorePositions(headers, _sampleRows) {
       return findAlias(headers, ['symbol', 'ticker', 'instrument', 'security']) &&
         findAlias(headers, ['shares', 'qty', 'quantity'])
@@ -341,10 +394,18 @@ function selectPreset(kind: 'positions' | 'activity', headers: string[], sampleR
   const normalized = headers.map(normalizeHeader)
   let best: { preset: BrokerPreset; columns: PositionColumns | ActivityColumns } | null = null
   let bestScore = -1
+  let sniffed: { preset: BrokerPreset; columns: PositionColumns | ActivityColumns } | null = null
+  let sniffedScore = 0
 
   for (const preset of presets) {
     const columns = kind === 'positions' ? preset.mapPositions(normalized) : preset.mapActivity(normalized)
     if (!columns) continue
+    const sniff = kind === 'positions' ? preset.sniffPositions(normalized, sampleRows) : preset.sniffActivity(normalized, sampleRows)
+    if (sniff > sniffedScore) {
+      sniffed = { preset, columns }
+      sniffedScore = sniff
+      if (sniff >= 120) return sniffed
+    }
     const score = kind === 'positions' ? preset.scorePositions(normalized, sampleRows) : preset.scoreActivity(normalized, sampleRows)
     if (score > bestScore) {
       bestScore = score
@@ -355,6 +416,8 @@ function selectPreset(kind: 'positions' | 'activity', headers: string[], sampleR
     }
   }
 
+  if (sniffed) return sniffed
+
   if (!best) {
     const generic = presets[presets.length - 1]!
     const columns = kind === 'positions' ? generic.mapPositions(normalized) : generic.mapActivity(normalized)
@@ -362,6 +425,30 @@ function selectPreset(kind: 'positions' | 'activity', headers: string[], sampleR
   }
 
   return best
+}
+
+export function detectBrokerFromCsv(
+  kind: 'positions' | 'activity',
+  text: string,
+): BrokerPresetId | null {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim())
+  if (lines.length === 0) return null
+  const preview = lines.slice(0, 12).map((line) => splitCsv(line).map((c) => toLower(c.trim())))
+
+  for (let i = 0; i < Math.min(lines.length, 10); i++) {
+    const headers = preview[i] ?? []
+    const detected = selectPreset(kind, headers, preview.slice(i + 1, i + 12))
+    if (!detected) continue
+    if (kind === 'positions') {
+      const cols = detected.columns as PositionColumns
+      if (cols.ticker < 0 || cols.shares < 0) continue
+      return detected.preset.id
+    }
+    const cols = detected.columns as ActivityColumns
+    if (cols.date < 0 || cols.ticker < 0 || cols.shares < 0) continue
+    return detected.preset.id
+  }
+  return null
 }
 
 /**
