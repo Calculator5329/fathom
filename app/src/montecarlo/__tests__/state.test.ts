@@ -45,4 +45,34 @@ describe('monte carlo url state', () => {
     expect(c.strategy).toBe('fixedReal')
     expect(c.mode).toBe('historical')
   })
+
+  it('leaves the parametric block undefined outside parametric mode', () => {
+    expect(decodeMonteCarlo(new URLSearchParams('a=usStocks:100')).parametric).toBeUndefined()
+    expect('parametric' in decodeMonteCarlo(new URLSearchParams('mode=bootstrap'))).toBe(false)
+  })
+
+  it('round-trips a parametric config', () => {
+    const c: MonteCarloConfig = {
+      ...DEFAULT_MC,
+      mode: 'parametric',
+      parametric: {
+        assets: [
+          { assetId: 'usStocks', mean: 6.5, vol: 15.2 },
+          { assetId: 'usBonds', mean: -1.25, vol: 5.5 },
+        ],
+        correlation: 0.2,
+      },
+    }
+    expect(decodeMonteCarlo(encodeMonteCarlo(c))).toEqual(c)
+  })
+
+  it('fills unspecified parametric assets from default assumptions', () => {
+    // Only usStocks overridden; usBonds falls back to its default assumption.
+    const c = decodeMonteCarlo(
+      new URLSearchParams('a=usStocks:60,usBonds:40&mode=parametric&pm=usStocks:9'),
+    )
+    expect(c.parametric?.assets[0]).toEqual({ assetId: 'usStocks', mean: 9, vol: 16 })
+    expect(c.parametric?.assets[1]).toEqual({ assetId: 'usBonds', mean: 2, vol: 6 })
+    expect(c.parametric?.correlation).toBe(0.15)
+  })
 })
