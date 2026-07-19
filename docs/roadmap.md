@@ -65,3 +65,5 @@ Stack: Vite frontend + Google Cloud Run backend.
 - Personal budget / net worth (finance-master)
 - Live trading or brokerage integration
 - Tiingo/Polygon (no existing pipeline)
+
+- [ ] [lost] Reconcile three shipped-but-unchecked HANDOFF_ROADMAP items (added via Visions, 2026-07-19)
