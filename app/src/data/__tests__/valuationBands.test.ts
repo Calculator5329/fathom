@@ -83,8 +83,10 @@ describe('buildValuationBandOption', () => {
     const original = globalThis.getComputedStyle
     const originalDocument = globalThis.document
     globalThis.document = { documentElement: {} } as unknown as Document
+    // Echo the requested CSS custom property so we can assert cssVar() actually
+    // resolved the token (canvas ECharts can't render raw `var(--x)` strings).
     globalThis.getComputedStyle = (() =>
-      ({ getPropertyValue: () => '' }) as unknown as CSSStyleDeclaration) as unknown as typeof globalThis.getComputedStyle
+      ({ getPropertyValue: (name: string) => `resolved(${name})` }) as unknown as CSSStyleDeclaration) as unknown as typeof globalThis.getComputedStyle
 
     try {
       const input = points([10, 11, 12, 13, 14, 15, 16, 17, 18])
@@ -102,7 +104,16 @@ describe('buildValuationBandOption', () => {
       expect(markLine.data).toHaveLength(1)
       expect(markLine).toMatchObject({ data: [{ yAxis: summary.boundaries!.p50 }] })
       expect(markLine).toMatchObject({ lineStyle: expect.objectContaining({ type: 'dashed' }) })
-      expect(series.lineStyle).toMatchObject({ color: 'var(--primary)' })
+      // Colors go through cssVar() (resolved), never raw `var(--x)` canvas can't parse.
+      expect(series.lineStyle).toMatchObject({ color: 'resolved(--primary)' })
+      const bands = (series.markArea as { data: [{ itemStyle: { color: string } }, unknown][] }).data
+      expect(bands.map((b) => b[0].itemStyle.color)).toEqual([
+        'resolved(--chart-1)',
+        'resolved(--chart-2)',
+        'resolved(--chart-3)',
+        'resolved(--chart-4)',
+        'resolved(--chart-5)',
+      ])
     } finally {
       globalThis.document = originalDocument
       globalThis.getComputedStyle = original

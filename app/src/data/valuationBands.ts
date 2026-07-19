@@ -1,6 +1,6 @@
 import type { EChartsCoreOption } from 'echarts'
 import { VALUATION_LABELS, type ValuationMetric } from '@/fundamentals/charts'
-import { baseOption } from '@/components/charts/EChart'
+import { baseOption, cssVar } from '@/components/charts/EChart'
 
 export type ValuationBandPoint = [string, number | null]
 
@@ -161,9 +161,9 @@ export function buildValuationBandOption(
         showSymbol: false,
         connectNulls: true,
         data: rows,
-        lineStyle: { width: 2, color: 'var(--primary)' },
-        itemStyle: { color: 'var(--primary)' },
-        areaStyle: { color: 'var(--primary)', opacity: 0.08 },
+        lineStyle: { width: 2, color: cssVar('--primary') },
+        itemStyle: { color: cssVar('--primary') },
+        areaStyle: { color: cssVar('--primary'), opacity: 0.08 },
         emphasis: { disabled: true },
         markArea:
           bandRanges.length === 0
@@ -171,14 +171,14 @@ export function buildValuationBandOption(
             : {
                 silent: true,
                 data: bandRanges.map((range, index) => {
-                  const colorIndex = Math.min(1 + index, 4)
+                  const colorIndex = Math.min(1 + index, 5)
                   return [
                     {
                       ...range[0],
-                      itemStyle: { color: `var(--chart-${colorIndex})`, opacity: 0.08 },
+                      itemStyle: { color: cssVar(`--chart-${colorIndex}`), opacity: 0.08 },
                       label: {
                         show: true,
-                        color: 'var(--muted-foreground)',
+                        color: cssVar('--muted-foreground'),
                         fontSize: 12,
                         formatter: '{b}',
                         position: 'inside',
@@ -194,9 +194,9 @@ export function buildValuationBandOption(
               markLine: {
                 silent: true,
                 symbol: 'none',
-                lineStyle: { color: 'var(--muted-foreground)', type: 'dashed', width: 1 },
+                lineStyle: { color: cssVar('--muted-foreground'), type: 'dashed', width: 1 },
                 label: {
-                  color: 'var(--muted-foreground)',
+                  color: cssVar('--muted-foreground'),
                   fontSize: 12,
                   position: 'insideEndTop',
                   formatter: `P50 ${boundaries.p50.toFixed(1)}×`,
