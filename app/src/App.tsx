@@ -14,6 +14,7 @@ import { Landing } from './pages/Landing'
 // a tool page is visited, keeping the landing page instant.
 const Backtest = lazy(() => import('./pages/Backtest').then((m) => ({ default: m.Backtest })))
 const Allocation = lazy(() => import('./pages/Allocation').then((m) => ({ default: m.Allocation })))
+const Income = lazy(() => import('./pages/Income').then((m) => ({ default: m.Income })))
 const Projections = lazy(() => import('./pages/Projections').then((m) => ({ default: m.Projections })))
 const Montecarlo = lazy(() => import('./pages/Montecarlo').then((m) => ({ default: m.Montecarlo })))
 const Stock = lazy(() => import('./pages/Stock').then((m) => ({ default: m.Stock })))
@@ -75,6 +76,9 @@ function Shell({ children }: { children: React.ReactNode }) {
           </NavLink>
           <NavLink to="/allocation" className={navLinkClass}>
             Asset allocation
+          </NavLink>
+          <NavLink to="/income" className={navLinkClass}>
+            Income
           </NavLink>
           <NavLink to="/montecarlo" className={navLinkClass}>
             Monte Carlo
@@ -183,6 +187,7 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/backtest" element={<Backtest />} />
             <Route path="/allocation" element={<Allocation />} />
+            <Route path="/income" element={<Income />} />
           <Route path="/projections" element={<Projections />} />
           <Route path="/montecarlo" element={<Montecarlo />} />
           <Route path="/stock" element={<Stock />} />
