@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { TickerSeries } from '@/engine'
 import { inferOpeningPositions, reconstructHistory } from '../analyze'
-import { parsePositions, parseTrades } from '../parse'
+import { detectBrokerFromCsv, parsePositions, parseTrades } from '../parse'
 import {
   SCHWAB_ACTIVITY_CSV,
   SCHWAB_POSITIONS_CSV,
@@ -119,6 +119,10 @@ describe('parseTrades', () => {
 })
 
 describe('parsePositions (broker preset sniffing)', () => {
+  it('sniffs Schwab positions exports', () => {
+    expect(detectBrokerFromCsv('positions', SCHWAB_POSITIONS_CSV)).toBe('schwab')
+  })
+
   it('parses a Schwab positions CSV with symbol+shares headers', () => {
     const { positions, errors } = parsePositions(SCHWAB_POSITIONS_CSV)
     expect(errors).toEqual([])
@@ -126,6 +130,10 @@ describe('parsePositions (broker preset sniffing)', () => {
       { ticker: 'AAPL', shares: 12 },
       { ticker: 'MSFT', shares: 5 },
     ])
+  })
+
+  it('sniffs Vanguard positions exports', () => {
+    expect(detectBrokerFromCsv('positions', VANGUARD_POSITIONS_CSV)).toBe('vanguard')
   })
 
   it('parses a Vanguard positions CSV with fund symbols', () => {
@@ -139,6 +147,14 @@ describe('parsePositions (broker preset sniffing)', () => {
 })
 
 describe('parseTrades (broker preset sniffing)', () => {
+  it('sniffs Schwab activity exports', () => {
+    expect(detectBrokerFromCsv('activity', SCHWAB_ACTIVITY_CSV)).toBe('schwab')
+  })
+
+  it('sniffs Vanguard activity exports', () => {
+    expect(detectBrokerFromCsv('activity', VANGUARD_ACTIVITY_CSV)).toBe('vanguard')
+  })
+
   it('parses Schwab activity rows using Schwab-style headers', () => {
     const { trades, dividends, cashFlows, skipped } = parseTrades(SCHWAB_ACTIVITY_CSV)
     expect(trades).toEqual([
