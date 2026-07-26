@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-26 — App documentation cleanup
+
+- Replaced the generic Vite starter text in `app/README.md` with a
+  Fathom-specific guide to the client purpose, structure, local verification,
+  data/privacy boundaries, and owner-only deployment boundary.
+- Preserved the superseded starter README under
+  `docs/archive/2026-07-26/vite-app-readme.md`.
+
 ## 2026-07-02 — Project context bootstrap
 
 - Added project README with architecture overview (Vite + Cloud Run, dual backtest modes).
