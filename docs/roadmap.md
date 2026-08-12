@@ -56,7 +56,7 @@ Stack: Vite frontend + Google Cloud Run backend.
 
 - [x] <!-- workspace:id=work:091e9d6c-77b6-5b4b-bf2e-e88dbf73b63d --> Auth (optional) — Firebase Google auth for `/projections` only
 - [x] <!-- workspace:id=work:891920e0-fa3c-5703-846c-919115716209 --> Saved portfolios / scenarios — shareable URLs + Firestore projections
-- [ ] <!-- workspace:id=work:b0c5f7ad-496f-5814-91c5-9d3aa80e66fc --> CI, deploy pipeline — Firebase Hosting + Cloud Run deployed; GitHub Actions CI still open (see HANDOFF_ROADMAP.md)
+- [x] <!-- workspace:id=work:b0c5f7ad-496f-5814-91c5-9d3aa80e66fc --> <!-- closed 2026-08-12: landed — .github/workflows/ci.yml exists (commit c8e4c8d, vitest+tsc) and HANDOFF_ROADMAP.md records CI done 2026-07-10; the item's only remaining clause was GitHub Actions CI --> CI, deploy pipeline — Firebase Hosting + Cloud Run deployed; GitHub Actions CI still open (see HANDOFF_ROADMAP.md)
 
 ---
 
@@ -68,4 +68,4 @@ Stack: Vite frontend + Google Cloud Run backend.
 
 - [ ] <!-- workspace:id=work:8ffadab1-a03c-5c76-85b3-72fa8235886a --> [lost] Reconcile three shipped-but-unchecked HANDOFF_ROADMAP items (added via Visions, 2026-07-19)
 
-- [ ] <!-- workspace:id=work:3f188023-3076-55ec-be44-3f24bc7f82c0 --> [lost] Execute the approved D8 archive of finance/stock-analysis-project (added via Visions, 2026-07-19)
+- [x] <!-- workspace:id=work:3f188023-3076-55ec-be44-3f24bc7f82c0 --> <!-- closed 2026-08-12: superseded by landed work — the D8 archive happened: workspace.json registers _archive/2026-07-fathom-dedup/stock-analysis-project (status archived, 'pure ancestor of fathom'); the old path is an empty stub --> [lost] Execute the approved D8 archive of finance/stock-analysis-project (added via Visions, 2026-07-19)
