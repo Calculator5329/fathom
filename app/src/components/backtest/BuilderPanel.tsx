@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { HelperNote } from '@/components/ui/HelperNote'
 import { getCatalog, lookup } from '@/data/catalog'
 import type { PortfolioSpec, RebalanceFrequency } from '@/engine'
 import type { BacktestSetup } from '@/lib/urlState'
@@ -247,11 +248,11 @@ export function BuilderPanel({ setup, onChange, effectiveStart, limitingTicker }
         </div>
       </div>
       {limitingEntry && effectiveStart && (
-        <p className="tnum -mt-3 text-sm leading-snug text-muted-foreground/60">
-          Using max available history &mdash;{' '}
-          <span className="font-mono">{limitingEntry.ticker}</span> starts in{' '}
+        <HelperNote className="-mt-3">
+          Using max available history &mdash; limited by{' '}
+          <span className="font-mono">{limitingEntry.ticker}</span>, inception{' '}
           {monthName(effectiveStart)}.
-        </p>
+        </HelperNote>
       )}
 
       {/* Advanced — collapsed by default (progressive disclosure) */}

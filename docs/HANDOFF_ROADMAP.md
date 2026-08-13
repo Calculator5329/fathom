@@ -32,7 +32,12 @@ committed with focused staging (never `git add -A`), then pushed.
   cycle market date on the next healthy weekday cycle._
 
 
-- [ ] **Subdue history-helper copy (Ethan top-priority, 2026-07-16).** Make the
+- [x] **Subdue history-helper copy (Ethan top-priority, 2026-07-16).** *(Done
+  2026-08-13: all three call sites now use a shared, token-derived secondary
+  note treatment; the two history-limit messages use the requested “limited
+  by …, inception …” wording, and Monte Carlo retains the requested concise
+  methodology copy. Full verification also repaired the pre-existing preset
+  tie that classified Vanguard position exports as Schwab.)* Make the
   two helper messages more minimal/out of the way: "Using max available
   history — limited by ADBE, inception Aug 1986." (AllocationBuilder.tsx,
   BuilderPanel.tsx) and "Every rolling period in history as one trial. All

@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Segmented } from '@/components/ui/segmented'
+import { HelperNote } from '@/components/ui/HelperNote'
 import {
   Table,
   TableBody,
@@ -269,7 +270,7 @@ export function Montecarlo() {
             </Select>
           </div>
         </div>
-        <p className="tnum mt-3 text-sm leading-snug text-muted-foreground/60">
+        <HelperNote className="mt-3">
           {config.mode === 'historical'
             ? 'Every rolling period in history as one trial.'
             : `${config.trials.toLocaleString()} resampled trials (24-mo blocks).`}
@@ -277,7 +278,7 @@ export function Montecarlo() {
           {config.basis === 'nominal'
             ? 'Figures re-inflated to nominal dollars for display.'
             : "All figures in today's dollars."}
-        </p>
+        </HelperNote>
       </aside>
 
       {/* Results */}

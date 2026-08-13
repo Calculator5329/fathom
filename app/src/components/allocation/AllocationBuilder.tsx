@@ -16,6 +16,7 @@ import { ASSET_CLASSES, assetClass } from '@/data/assetClasses'
 import type { PortfolioSpec, RebalanceFrequency } from '@/engine'
 import type { AllocationSetup } from '@/lib/allocationState'
 import { DatePicker } from '@/components/backtest/DatePicker'
+import { HelperNote } from '@/components/ui/HelperNote'
 
 interface AllocationBuilderProps {
   setup: AllocationSetup
@@ -253,10 +254,10 @@ export function AllocationBuilder({
         </div>
       </div>
       {limitingAssetLabel && effectiveStart && (
-        <p className="tnum -mt-3 text-sm leading-snug text-muted-foreground/60">
-          Using max available history &mdash; {limitingAssetLabel} starts in{' '}
+        <HelperNote className="-mt-3">
+          Using max available history &mdash; limited by {limitingAssetLabel}, inception{' '}
           {monthName(effectiveStart)}.
-        </p>
+        </HelperNote>
       )}
 
       <div>
