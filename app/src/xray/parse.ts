@@ -179,6 +179,10 @@ const presets: BrokerPreset[] = [
   {
     id: 'schwab',
     sniffPositions(headers, sampleRows) {
+      // Fund-specific headers are stronger evidence for Vanguard. Without this
+      // exclusion, substring aliases make "Fund Symbol" and "Shares Held"
+      // tie Schwab's generic Symbol/Shares score, and preset order wins.
+      if (findAlias(headers, ['fund symbol', 'fund ticker'])) return 0
       if (!findAlias(headers, ['symbol', 'ticker', 'security'])) return 0
       if (!findAlias(headers, ['quantity', 'qty', 'shares'])) return 0
       let score = 60
