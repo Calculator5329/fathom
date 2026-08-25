@@ -2,16 +2,16 @@
   "schema": "agent-handles/testid-registry/v1",
   "grammar": "area.component.element[.qualifier]",
   "generatedFrom": "src/**/*.tsx and journeys/manifest.json",
-  "sourceDigest": "sha256:a9ea51b001c003e8ac7221ac74fe65072304fb4997f1408c29a2a35dda13e32c",
+  "sourceDigest": "sha256:2ef13b8991c431525796d9ddb9d798b8ac69f6b6eb8440ce684c2db542583038",
   "journeyCoverage": {
     "controlPath": 2,
     "urlPath": 3
   },
   "coverage": {
-    "interactiveElements": 139,
-    "identifiedInteractive": 47,
-    "unidentifiedInteractive": 92,
-    "maximumUnidentifiedInteractive": 92
+    "interactiveElements": 138,
+    "identifiedInteractive": 138,
+    "unidentifiedInteractive": 0,
+    "maximumUnidentifiedInteractive": 0
   },
   "journeyReferences": [
     "allocation.builder.advanced-toggle",
@@ -35,16 +35,114 @@
   ],
   "entries": [
     {
+      "id": "allocation.asset-picker.search",
+      "file": "src/components/AssetClassPicker.tsx",
+      "line": 51,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "allocation.builder.add-portfolio",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 207,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
       "id": "allocation.builder.advanced-toggle",
       "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 266,
+      "line": 272,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "allocation.builder.inflation-toggle",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 228,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "allocation.builder.initial-amount",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 293,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "allocation.builder.monthly-contribution",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 316,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "allocation.builder.rebalance-annual",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 351,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "allocation.builder.rebalance-monthly",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 353,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "allocation.builder.rebalance-none",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 350,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "allocation.builder.rebalance-quarterly",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 352,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "allocation.builder.rebalance-trigger",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 346,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "allocation.layout.builder-toggle",
+      "file": "src/pages/Allocation.tsx",
+      "line": 96,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },
     {
       "id": "app.header.account",
       "file": "src/App.tsx",
-      "line": 138,
+      "line": 139,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.header.copy-owner-token",
+      "file": "src/App.tsx",
+      "line": 153,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.header.sign-in",
+      "file": "src/App.tsx",
+      "line": 124,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.header.sign-out",
+      "file": "src/App.tsx",
+      "line": 168,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },
@@ -108,6 +206,20 @@
       "id": "app.nav.xray",
       "file": "src/App.tsx",
       "line": 113,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.not-found.home",
+      "file": "src/App.tsx",
+      "line": 35,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.palette.input",
+      "file": "src/components/CommandPalette.tsx",
+      "line": 88,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },
@@ -196,6 +308,20 @@
       "attribute": "data-testid"
     },
     {
+      "id": "backtest.layout.builder-toggle",
+      "file": "src/pages/Backtest.tsx",
+      "line": 108,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.results.copy-link",
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 247,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
       "id": "backtest.results.export-csv",
       "file": "src/components/backtest/ResultsPanel.tsx",
       "line": 236,
@@ -203,9 +329,198 @@
       "attribute": "data-testid"
     },
     {
+      "id": "backtest.results.log-scale",
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 260,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.results.tab-annual",
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 272,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.results.tab-holdings",
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 278,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.results.tab-income",
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 277,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.results.tab-risk",
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 273,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.results.tab-rolling",
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 274,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "income.setup.load-sample",
+      "file": "src/pages/Income.tsx",
+      "line": 301,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "income.setup.total-value",
+      "file": "src/pages/Income.tsx",
+      "line": 115,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.plan.annual-saving",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 191,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.plan.fee-rate",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 258,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.plan.horizon",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 207,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.plan.method-bootstrap",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 276,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.plan.method-historical",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 275,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.plan.method-trigger",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 271,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.plan.starting-balance",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 158,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.plan.strategy-trigger",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 236,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.plan.withdrawal-rate",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 223,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.plan.years-to-retire",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 172,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "montecarlo.portfolio.picker",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 141,
+      "element": "jsx-prop",
+      "attribute": "testId"
+    },
+    {
+      "id": "projections.editor.add-notes",
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 339,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "projections.editor.delete",
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 165,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "projections.editor.manual-price-toggle",
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 201,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
       "id": "projections.editor.notes",
       "file": "src/projections/ProjectionEditor.tsx",
-      "line": 328,
+      "line": 331,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "projections.editor.save",
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 170,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "projections.hero.sign-in",
+      "file": "src/pages/Projections.tsx",
+      "line": 189,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "projections.list.new",
+      "file": "src/pages/Projections.tsx",
+      "line": 211,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "stock.header.backtest",
+      "file": "src/pages/Stock.tsx",
+      "line": 278,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "stock.header.project",
+      "file": "src/pages/Stock.tsx",
+      "line": 281,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },
@@ -224,9 +539,149 @@
       "attribute": "data-testid"
     },
     {
+      "id": "stock.price-chart.log-scale",
+      "file": "src/pages/Stock.tsx",
+      "line": 330,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.buttons.destructive",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 163,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.buttons.disabled",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 164,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.buttons.ghost",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 155,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.buttons.outline",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 159,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.buttons.primary",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 150,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.buttons.secondary",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 154,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.form.rebalance-annual",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 217,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.form.rebalance-monthly",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 219,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.form.rebalance-none",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 216,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.form.rebalance-quarterly",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 218,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.form.rebalance-trigger",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 212,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.form.reinvest",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 226,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.form.ticker",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 207,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.tabs.annual",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 250,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.tabs.income",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 253,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.tabs.risk",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 252,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "styleguide.tabs.rolling",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 251,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "ui.dialog.close",
+      "file": "src/components/ui/dialog.tsx",
+      "line": 112,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
       "id": "ui.ticker-picker.search",
       "file": "src/components/backtest/TickerPicker.tsx",
       "line": 69,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "xray.holdings.backtest-mix",
+      "file": "src/pages/Xray.tsx",
+      "line": 769,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },
@@ -252,9 +707,44 @@
       "attribute": "data-testid"
     },
     {
+      "id": "xray.inputs.import-csvs",
+      "file": "src/pages/Xray.tsx",
+      "line": 470,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "xray.inputs.import-csvs.activity",
+      "file": "src/pages/Xray.tsx",
+      "line": 493,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
       "id": "xray.inputs.positions",
       "file": "src/pages/Xray.tsx",
       "line": 459,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "xray.inputs.reconstruct-history",
+      "file": "src/pages/Xray.tsx",
+      "line": 490,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "xray.inputs.tab-activity",
+      "file": "src/pages/Xray.tsx",
+      "line": 452,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "xray.inputs.tab-positions",
+      "file": "src/pages/Xray.tsx",
+      "line": 451,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },
@@ -264,13 +754,56 @@
       "line": 438,
       "element": "jsx-prop",
       "attribute": "data-testid"
+    },
+    {
+      "id": "xray.insights.export-master",
+      "file": "src/pages/Xray.tsx",
+      "line": 742,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
     }
   ],
   "patterns": [
     {
       "pattern": "allocation.asset-picker.option-*",
       "file": "src/components/AssetClassPicker.tsx",
-      "line": 82,
+      "line": 85,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "allocation.builder.balance-p*",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 74,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "allocation.builder.picker-p*",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 142,
+      "attribute": "testId"
+    },
+    {
+      "pattern": "allocation.builder.remove-p*",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 122,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "allocation.builder.weight-p*",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 101,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "app.palette.ticker-*",
+      "file": "src/components/CommandPalette.tsx",
+      "line": 101,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "app.palette.tool-*",
+      "file": "src/components/CommandPalette.tsx",
+      "line": 115,
       "attribute": "data-testid"
     },
     {
@@ -304,9 +837,57 @@
       "attribute": "data-testid"
     },
     {
+      "pattern": "backtest.results.rolling-window-*",
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 330,
+      "attribute": "data-testid"
+    },
+    {
       "pattern": "income.holdings.remove-*",
       "file": "src/pages/Income.tsx",
-      "line": 150,
+      "line": 152,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "income.setup.weight-*",
+      "file": "src/pages/Income.tsx",
+      "line": 136,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "landing.tools.card-*",
+      "file": "src/pages/Landing.tsx",
+      "line": 135,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "montecarlo.plan.strategy-*",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 241,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "montecarlo.portfolio.remove-*",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 129,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "montecarlo.portfolio.weight-*",
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 113,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "projections.editor.field-*",
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 71,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "projections.editor.scenario-*",
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 260,
       "attribute": "data-testid"
     },
     {
@@ -316,15 +897,57 @@
       "attribute": "data-testid"
     },
     {
+      "pattern": "styleguide.rows.edit-*",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 189,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "styleguide.rows.remove-*",
+      "file": "src/pages/Styleguide.tsx",
+      "line": 192,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "ui.calendar.day-*",
+      "file": "src/components/ui/calendar.tsx",
+      "line": 302,
+      "attribute": "data-testid"
+    },
+    {
       "pattern": "ui.calendar.dropdown-*",
       "file": "src/components/ui/calendar.tsx",
       "line": 256,
       "attribute": "data-testid"
     },
     {
+      "pattern": "ui.date-picker.clear-*",
+      "file": "src/components/backtest/DatePicker.tsx",
+      "line": 138,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "ui.date-picker.input-*",
+      "file": "src/components/backtest/DatePicker.tsx",
+      "line": 113,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "ui.date-picker.open-*",
+      "file": "src/components/backtest/DatePicker.tsx",
+      "line": 150,
+      "attribute": "data-testid"
+    },
+    {
       "pattern": "ui.echart.export-*",
       "file": "src/components/charts/EChart.tsx",
       "line": 139,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "ui.segmented.option-*",
+      "file": "src/components/ui/segmented.tsx",
+      "line": 22,
       "attribute": "data-testid"
     },
     {
@@ -340,466 +963,5 @@
       "attribute": "data-testid"
     }
   ],
-  "unidentifiedInteractive": [
-    {
-      "file": "src/App.tsx",
-      "line": 35,
-      "element": "Link"
-    },
-    {
-      "file": "src/App.tsx",
-      "line": 123,
-      "element": "Button"
-    },
-    {
-      "file": "src/App.tsx",
-      "line": 135,
-      "element": "PopoverTrigger"
-    },
-    {
-      "file": "src/App.tsx",
-      "line": 151,
-      "element": "Button"
-    },
-    {
-      "file": "src/App.tsx",
-      "line": 165,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 73,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 83,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 99,
-      "element": "Input"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 119,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 202,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 221,
-      "element": "Switch"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 285,
-      "element": "Input"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 307,
-      "element": "Input"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 338,
-      "element": "SelectTrigger"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 342,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 343,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 344,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/components/allocation/AllocationBuilder.tsx",
-      "line": 345,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/components/AssetClassPicker.tsx",
-      "line": 48,
-      "element": "Input"
-    },
-    {
-      "file": "src/components/backtest/DatePicker.tsx",
-      "line": 111,
-      "element": "Input"
-    },
-    {
-      "file": "src/components/backtest/DatePicker.tsx",
-      "line": 136,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/backtest/DatePicker.tsx",
-      "line": 147,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 247,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 260,
-      "element": "Switch"
-    },
-    {
-      "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 272,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 273,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 274,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 277,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 278,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 328,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/CommandPalette.tsx",
-      "line": 87,
-      "element": "CommandInput"
-    },
-    {
-      "file": "src/components/CommandPalette.tsx",
-      "line": 98,
-      "element": "CommandItem"
-    },
-    {
-      "file": "src/components/CommandPalette.tsx",
-      "line": 113,
-      "element": "CommandItem"
-    },
-    {
-      "file": "src/components/ui/calendar.tsx",
-      "line": 298,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/ui/dialog.tsx",
-      "line": 112,
-      "element": "Button"
-    },
-    {
-      "file": "src/components/ui/segmented.tsx",
-      "line": 20,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Allocation.tsx",
-      "line": 95,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Backtest.tsx",
-      "line": 107,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Income.tsx",
-      "line": 113,
-      "element": "Input"
-    },
-    {
-      "file": "src/pages/Income.tsx",
-      "line": 134,
-      "element": "Input"
-    },
-    {
-      "file": "src/pages/Income.tsx",
-      "line": 298,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Landing.tsx",
-      "line": 135,
-      "element": "Link"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 112,
-      "element": "Input"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 127,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 154,
-      "element": "Input"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 167,
-      "element": "Input"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 185,
-      "element": "Input"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 200,
-      "element": "Input"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 215,
-      "element": "Input"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 229,
-      "element": "SelectTrigger"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 234,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 249,
-      "element": "Input"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 263,
-      "element": "SelectTrigger"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 267,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/pages/Montecarlo.tsx",
-      "line": 268,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/pages/Projections.tsx",
-      "line": 189,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Projections.tsx",
-      "line": 211,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Stock.tsx",
-      "line": 278,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Stock.tsx",
-      "line": 281,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Stock.tsx",
-      "line": 330,
-      "element": "Switch"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 150,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 154,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 155,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 159,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 163,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 164,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 189,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 192,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 207,
-      "element": "Input"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 212,
-      "element": "SelectTrigger"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 216,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 217,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 218,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 219,
-      "element": "SelectItem"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 226,
-      "element": "Switch"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 250,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 251,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 252,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/pages/Styleguide.tsx",
-      "line": 253,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/pages/Xray.tsx",
-      "line": 451,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/pages/Xray.tsx",
-      "line": 452,
-      "element": "TabsTrigger"
-    },
-    {
-      "file": "src/pages/Xray.tsx",
-      "line": 470,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Xray.tsx",
-      "line": 490,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Xray.tsx",
-      "line": 493,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Xray.tsx",
-      "line": 742,
-      "element": "Button"
-    },
-    {
-      "file": "src/pages/Xray.tsx",
-      "line": 769,
-      "element": "Button"
-    },
-    {
-      "file": "src/projections/ProjectionEditor.tsx",
-      "line": 70,
-      "element": "Input"
-    },
-    {
-      "file": "src/projections/ProjectionEditor.tsx",
-      "line": 164,
-      "element": "Button"
-    },
-    {
-      "file": "src/projections/ProjectionEditor.tsx",
-      "line": 169,
-      "element": "Button"
-    },
-    {
-      "file": "src/projections/ProjectionEditor.tsx",
-      "line": 198,
-      "element": "Switch"
-    },
-    {
-      "file": "src/projections/ProjectionEditor.tsx",
-      "line": 257,
-      "element": "Input"
-    },
-    {
-      "file": "src/projections/ProjectionEditor.tsx",
-      "line": 336,
-      "element": "Button"
-    }
-  ]
+  "unidentifiedInteractive": []
 }

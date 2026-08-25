@@ -71,6 +71,7 @@ function PortfolioEditor({
         <div className="flex items-center gap-1">
           {!balanced && portfolio.allocations.length > 0 && (
             <Button
+              data-testid={`allocation.builder.balance-p${index + 1}`}
               variant="ghost"
               size="xs"
               onClick={() => onChange({ ...portfolio, allocations: equalizeAll(portfolio.allocations) })}
@@ -80,7 +81,7 @@ function PortfolioEditor({
             </Button>
           )}
           {onRemove && (
-            <Button variant="ghost" size="icon-xs" aria-label={`Remove ${portfolio.name}`} onClick={onRemove}>
+            <Button data-testid={`allocation.builder.remove-p${index + 1}`} variant="ghost" size="icon-xs" aria-label={`Remove ${portfolio.name}`} onClick={onRemove}>
               <X />
             </Button>
           )}
@@ -97,6 +98,7 @@ function PortfolioEditor({
             </span>
             <div className="relative w-24 shrink-0">
               <Input
+                data-testid={`allocation.builder.weight-p${index + 1}-${a.ticker}`}
                 type="number"
                 min={0}
                 max={100}
@@ -117,6 +119,7 @@ function PortfolioEditor({
               </span>
             </div>
             <Button
+              data-testid={`allocation.builder.remove-p${index + 1}-${a.ticker}`}
               variant="ghost"
               size="icon-sm"
               aria-label={`Remove ${meta?.label ?? a.ticker}`}
@@ -136,6 +139,7 @@ function PortfolioEditor({
 
       {available.length > 0 && (
         <AssetClassPicker
+          testId={`allocation.builder.picker-p${index + 1}`}
           exclude={portfolio.allocations.map((a) => a.ticker)}
           onPick={(id) => {
             const remaining = Math.round((100 - sum) * 100) / 100
@@ -200,6 +204,7 @@ export function AllocationBuilder({
 
       {setup.portfolios.length < 3 && (
         <Button
+          data-testid="allocation.builder.add-portfolio"
           variant="ghost"
           className="text-muted-foreground"
           onClick={() =>
@@ -220,6 +225,7 @@ export function AllocationBuilder({
       <div className="flex items-center gap-3">
         <Switch
           id="real"
+          data-testid="allocation.builder.inflation-toggle"
           checked={setup.real}
           onCheckedChange={(v) => onChange({ ...setup, real: v })}
         />
@@ -284,6 +290,7 @@ export function AllocationBuilder({
                   </span>
                   <Input
                     id="alloc-amt"
+                    data-testid="allocation.builder.initial-amount"
                     type="number"
                     min={1}
                     step={1000}
@@ -306,6 +313,7 @@ export function AllocationBuilder({
                   </span>
                   <Input
                     id="alloc-contrib"
+                    data-testid="allocation.builder.monthly-contribution"
                     type="number"
                     step={100}
                     value={setup.config.monthlyContribution}
@@ -335,14 +343,14 @@ export function AllocationBuilder({
                   })
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" data-testid="allocation.builder.rebalance-trigger">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="annual">Annually</SelectItem>
-                  <SelectItem value="quarterly">Quarterly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="none" data-testid="allocation.builder.rebalance-none">None</SelectItem>
+                  <SelectItem value="annual" data-testid="allocation.builder.rebalance-annual">Annually</SelectItem>
+                  <SelectItem value="quarterly" data-testid="allocation.builder.rebalance-quarterly">Quarterly</SelectItem>
+                  <SelectItem value="monthly" data-testid="allocation.builder.rebalance-monthly">Monthly</SelectItem>
                 </SelectContent>
               </Select>
             </div>

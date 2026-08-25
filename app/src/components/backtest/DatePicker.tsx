@@ -110,6 +110,7 @@ export function DatePicker({ id, value, onChange, placeholder, fromYear = 1870 }
         <div className="relative">
           <Input
             id={id}
+            data-testid={`ui.date-picker.input-${id}`}
             type="text"
             inputMode="numeric"
             value={inputValue}
@@ -134,6 +135,7 @@ export function DatePicker({ id, value, onChange, placeholder, fromYear = 1870 }
           />
           {value ? (
             <Button
+              data-testid={`ui.date-picker.clear-${id}`}
               variant="ghost"
               size="icon-xs"
               aria-label="Clear date"
@@ -145,6 +147,7 @@ export function DatePicker({ id, value, onChange, placeholder, fromYear = 1870 }
             </Button>
           ) : (
             <Button
+              data-testid={`ui.date-picker.open-${id}`}
               variant="ghost"
               size="icon-xs"
               aria-label="Open calendar"

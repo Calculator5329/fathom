@@ -132,7 +132,7 @@ export function Landing() {
         className={`mt-8 grid auto-rows-fr gap-4 sm:grid-cols-2 ${tools.length > 4 ? 'xl:grid-cols-3' : ''}`}
       >
         {tools.map((t) => (
-          <Link key={t.to} to={t.to} className="group h-full">
+          <Link key={t.to} data-testid={`landing.tools.card-${t.to.replace(/\//g, '') || 'home'}`} to={t.to} className="group h-full">
             <Card className="h-full transition-colors group-hover:bg-surface-2">
               <CardContent>
                 <div className="flex items-center justify-between">

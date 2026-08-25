@@ -448,8 +448,8 @@ export function Xray() {
       {inputsOpen && (
       <Tabs defaultValue={tradesText ? 'activity' : 'positions'}>
         <TabsList>
-          <TabsTrigger value="positions">Positions</TabsTrigger>
-          <TabsTrigger value="activity">Activity history</TabsTrigger>
+          <TabsTrigger value="positions" data-testid="xray.inputs.tab-positions">Positions</TabsTrigger>
+          <TabsTrigger value="activity" data-testid="xray.inputs.tab-activity">Activity history</TabsTrigger>
         </TabsList>
 
         <TabsContent value="positions" className="animate-enter">
@@ -467,7 +467,7 @@ export function Xray() {
                 <Button data-testid="xray.inputs.analyze-positions" onClick={() => runPositions()} disabled={busy || !positionsText.trim()}>
                   {busy ? 'Analyzing…' : 'Analyze positions'}
                 </Button>
-                <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
+                <Button data-testid="xray.inputs.import-csvs" variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
                   <Upload /> Import CSVs
                 </Button>
               </div>
@@ -487,10 +487,10 @@ export function Xray() {
                 className="min-h-28 w-full resize-y rounded-md border bg-transparent px-3 py-2 font-mono text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               />
               <div className="flex items-center gap-2">
-                <Button onClick={() => runTrades()} disabled={busy || !tradesText.trim()}>
+                <Button data-testid="xray.inputs.reconstruct-history" onClick={() => runTrades()} disabled={busy || !tradesText.trim()}>
                   {busy ? 'Reconstructing…' : 'Reconstruct history'}
                 </Button>
-                <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
+                <Button data-testid="xray.inputs.import-csvs.activity" variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>
                   <Upload /> Import CSVs
                 </Button>
               </div>
@@ -739,7 +739,7 @@ export function Xray() {
                     ` · ${formatUsdCompact(insights.deposits.withdrawals)} withdrawn`}
                 </p>
                 {master && (
-                  <Button variant="outline" size="sm" onClick={() => downloadMasterFile(master)}>
+                  <Button data-testid="xray.insights.export-master" variant="outline" size="sm" onClick={() => downloadMasterFile(master)}>
                     <Download /> Export master file
                   </Button>
                 )}
@@ -766,7 +766,7 @@ export function Xray() {
           <Card>
             <CardHeader className="flex-row items-center justify-between">
               <CardTitle className="text-base font-medium">Holdings</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => backtestMix(blend)}>
+              <Button data-testid="xray.holdings.backtest-mix" variant="outline" size="sm" onClick={() => backtestMix(blend)}>
                 Backtest this mix <ArrowUpRight />
               </Button>
             </CardHeader>

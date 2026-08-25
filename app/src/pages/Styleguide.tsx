@@ -147,21 +147,21 @@ export function Styleguide() {
       {/* Buttons */}
       <SectionTitle>Buttons</SectionTitle>
       <div className="flex flex-wrap items-center gap-3">
-        <Button>
+        <Button data-testid="styleguide.buttons.primary">
           Run backtest
           <ArrowUpRight />
         </Button>
-        <Button variant="secondary">Compare portfolio</Button>
-        <Button variant="ghost">
+        <Button data-testid="styleguide.buttons.secondary" variant="secondary">Compare portfolio</Button>
+        <Button data-testid="styleguide.buttons.ghost" variant="ghost">
           <Plus />
           Add ticker
         </Button>
-        <Button variant="outline">
+        <Button data-testid="styleguide.buttons.outline" variant="outline">
           <Copy />
           Copy link
         </Button>
-        <Button variant="destructive">Remove</Button>
-        <Button disabled>Running&hellip;</Button>
+        <Button data-testid="styleguide.buttons.destructive" variant="destructive">Remove</Button>
+        <Button data-testid="styleguide.buttons.disabled" disabled>Running&hellip;</Button>
       </div>
 
       {/* Progressive disclosure */}
@@ -186,10 +186,10 @@ export function Styleguide() {
               <span className="flex-1 truncate text-muted-foreground">{row.n}</span>
               <span className="font-mono tnum">{row.w}</span>
               <span className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <Button variant="ghost" size="icon-sm" aria-label="Edit">
+                <Button data-testid={`styleguide.rows.edit-${row.t}`} variant="ghost" size="icon-sm" aria-label="Edit">
                   <Pencil />
                 </Button>
-                <Button variant="ghost" size="icon-sm" aria-label="Remove">
+                <Button data-testid={`styleguide.rows.remove-${row.t}`} variant="ghost" size="icon-sm" aria-label="Remove">
                   <Trash2 />
                 </Button>
               </span>
@@ -204,26 +204,26 @@ export function Styleguide() {
         <CardContent className="grid gap-6 sm:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="ticker">Add ticker</Label>
-            <Input id="ticker" placeholder="e.g. VTI, AAPL, VTSAX" />
+            <Input id="ticker" data-testid="styleguide.form.ticker" placeholder="e.g. VTI, AAPL, VTSAX" />
           </div>
           <div className="space-y-2">
             <Label>Rebalancing</Label>
             <Select defaultValue="annual">
-              <SelectTrigger>
+              <SelectTrigger data-testid="styleguide.form.rebalance-trigger">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                <SelectItem value="annual">Annually</SelectItem>
-                <SelectItem value="quarterly">Quarterly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
+                <SelectItem value="none" data-testid="styleguide.form.rebalance-none">None</SelectItem>
+                <SelectItem value="annual" data-testid="styleguide.form.rebalance-annual">Annually</SelectItem>
+                <SelectItem value="quarterly" data-testid="styleguide.form.rebalance-quarterly">Quarterly</SelectItem>
+                <SelectItem value="monthly" data-testid="styleguide.form.rebalance-monthly">Monthly</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="reinvest">Reinvest dividends</Label>
             <div className="flex h-9 items-center gap-3">
-              <Switch id="reinvest" checked={reinvest} onCheckedChange={setReinvest} />
+              <Switch id="reinvest" data-testid="styleguide.form.reinvest" checked={reinvest} onCheckedChange={setReinvest} />
               <span className="text-sm text-muted-foreground">
                 {reinvest ? 'On — total return' : 'Off — price return'}
               </span>
@@ -247,10 +247,10 @@ export function Styleguide() {
       <SectionTitle>Results depth tabs</SectionTitle>
       <Tabs defaultValue="annual">
         <TabsList className="max-w-full overflow-x-auto">
-          <TabsTrigger value="annual">Annual returns</TabsTrigger>
-          <TabsTrigger value="rolling">Rolling returns</TabsTrigger>
-          <TabsTrigger value="risk">Risk</TabsTrigger>
-          <TabsTrigger value="income">Income</TabsTrigger>
+          <TabsTrigger value="annual" data-testid="styleguide.tabs.annual">Annual returns</TabsTrigger>
+          <TabsTrigger value="rolling" data-testid="styleguide.tabs.rolling">Rolling returns</TabsTrigger>
+          <TabsTrigger value="risk" data-testid="styleguide.tabs.risk">Risk</TabsTrigger>
+          <TabsTrigger value="income" data-testid="styleguide.tabs.income">Income</TabsTrigger>
         </TabsList>
         <TabsContent value="annual" className="animate-enter">
           <Card>

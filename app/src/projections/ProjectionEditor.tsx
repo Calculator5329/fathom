@@ -68,6 +68,7 @@ function NumField({
       <Label>{label}</Label>
       <div className="relative">
         <Input
+          data-testid={`projections.editor.field-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
           type="number"
           step={step}
           value={Number.isFinite(value) ? value : ''}
@@ -161,12 +162,12 @@ export function ProjectionEditor({
         </div>
         <div className="flex items-center gap-2">
           {onDelete && (
-            <Button variant="ghost" size="sm" onClick={onDelete}>
+            <Button data-testid="projections.editor.delete" variant="ghost" size="sm" onClick={onDelete}>
               <Trash2 />
               Delete
             </Button>
           )}
-          <Button size="sm" onClick={onSave} disabled={!dirty || saving}>
+          <Button data-testid="projections.editor.save" size="sm" onClick={onSave} disabled={!dirty || saving}>
             <Save />
             {saving ? 'Saving…' : dirty ? 'Save' : 'Saved'}
           </Button>
@@ -197,6 +198,7 @@ export function ProjectionEditor({
             </Label>
             <Switch
               id="manual-price"
+              data-testid="projections.editor.manual-price-toggle"
               size="sm"
               checked={usingManualPrice}
               disabled={!hasLivePrice}
@@ -255,6 +257,7 @@ export function ProjectionEditor({
                         <td key={k} className="py-1.5 pl-3">
                           <div className="relative ml-auto w-28">
                             <Input
+                              data-testid={`projections.editor.scenario-${k}-${row.field}`}
                               type="number"
                               step={row.field === 'exitPe' ? 1 : 0.5}
                               value={shown}
@@ -333,7 +336,7 @@ export function ProjectionEditor({
             />
           </div>
         ) : (
-          <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => setShowNotes(true)}>
+          <Button data-testid="projections.editor.add-notes" variant="ghost" size="sm" className="text-muted-foreground" onClick={() => setShowNotes(true)}>
             + Add thesis notes
           </Button>
         )}

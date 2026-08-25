@@ -112,6 +112,7 @@ function Builder({
           <span className="font-mono text-muted-foreground">$</span>
           <Input
             id="income-total"
+            data-testid="income.setup.total-value"
             type="number"
             min={0}
             step={1000}
@@ -132,6 +133,7 @@ function Builder({
                 <span className="w-16 shrink-0 font-mono font-medium">{h.ticker}</span>
                 <div className="relative flex-1">
                   <Input
+                    data-testid={`income.setup.weight-${h.ticker}`}
                     type="number"
                     min={0}
                     max={100}
@@ -296,6 +298,7 @@ export function Income() {
           <CardContent>
             {builder}
             <Button
+              data-testid="income.setup.load-sample"
               variant="ghost"
               size="sm"
               className="mt-4 -ml-2 text-muted-foreground"

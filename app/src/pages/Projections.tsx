@@ -186,7 +186,7 @@ function ProjectionsInner() {
               backtesting and allocation stay free and account-free.
             </p>
           </div>
-          <Button onClick={doSignIn}>
+          <Button data-testid="projections.hero.sign-in" onClick={doSignIn}>
             <LogIn />
             Sign in with Google
           </Button>
@@ -208,7 +208,7 @@ function ProjectionsInner() {
       <aside className="border-b py-6 lg:w-72 lg:shrink-0 lg:border-r lg:border-b-0 lg:py-8 lg:pr-6">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="font-semibold tracking-tight">Projections</h1>
-          <Button variant="ghost" size="icon-sm" aria-label="New projection" onClick={() => setPickingNew(true)}>
+          <Button data-testid="projections.list.new" variant="ghost" size="icon-sm" aria-label="New projection" onClick={() => setPickingNew(true)}>
             <Plus />
           </Button>
         </div>

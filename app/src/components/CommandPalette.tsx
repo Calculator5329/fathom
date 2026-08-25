@@ -85,6 +85,7 @@ export function CommandPalette({ accountTools }: { accountTools: boolean }) {
       }}
     >
       <CommandInput
+        data-testid="app.palette.input"
         placeholder="Jump to a tool or type a ticker…"
         value={query}
         onValueChange={setQuery}
@@ -97,6 +98,7 @@ export function CommandPalette({ accountTools }: { accountTools: boolean }) {
               {tickerMatches.map((e) => (
                 <CommandItem
                   key={e.ticker}
+                  data-testid={`app.palette.ticker-${e.ticker}`}
                   value={`${e.ticker} ${e.name ?? ''}`}
                   onSelect={() => go(`/stock/${e.ticker}`)}
                 >
@@ -110,7 +112,7 @@ export function CommandPalette({ accountTools }: { accountTools: boolean }) {
         )}
         <CommandGroup heading="Tools">
           {tools.map((t) => (
-            <CommandItem key={t.to} value={t.label} onSelect={() => go(t.to)}>
+            <CommandItem key={t.to} data-testid={`app.palette.tool-${t.to.replace(/\//g, '') || 'home'}`} value={t.label} onSelect={() => go(t.to)}>
               <t.icon className="text-muted-foreground" />
               {t.label}
             </CommandItem>

@@ -8,6 +8,8 @@ interface AssetClassPickerProps {
   exclude: string[]
   onPick: (id: string) => void
   autoFocus?: boolean
+  /** Stable test id for this instance's search input (pages render several pickers). */
+  testId?: string
 }
 
 /**
@@ -15,7 +17,7 @@ interface AssetClassPickerProps {
  * picker (type to filter, arrow keys, click to add). Replaces the Radix
  * Select, which read as a confusing dropdown/plus hybrid.
  */
-export function AssetClassPicker({ exclude, onPick, autoFocus }: AssetClassPickerProps) {
+export function AssetClassPicker({ exclude, onPick, autoFocus, testId }: AssetClassPickerProps) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [highlight, setHighlight] = useState(0)
@@ -46,6 +48,7 @@ export function AssetClassPicker({ exclude, onPick, autoFocus }: AssetClassPicke
       <div className="relative">
         <Plus className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
+          data-testid={testId ?? 'allocation.asset-picker.search'}
           value={query}
           placeholder="Add asset class"
           autoFocus={autoFocus}

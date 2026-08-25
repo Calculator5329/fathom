@@ -299,6 +299,7 @@ function CalendarDayButton({
       ref={ref}
       variant="ghost"
       size="icon"
+      data-testid={`ui.calendar.day-${day.date.toISOString().slice(0, 10)}`}
       data-day={day.date.toLocaleDateString()}
       data-selected-single={
         modifiers.selected &&

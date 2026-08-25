@@ -275,10 +275,10 @@ export function Stock() {
           )}
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate(`/backtest?p1=${ticker}:100`)}>
+          <Button data-testid="stock.header.backtest" variant="outline" size="sm" onClick={() => navigate(`/backtest?p1=${ticker}:100`)}>
             Backtest <ArrowUpRight />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate(`/projections?ticker=${ticker}`)}>
+          <Button data-testid="stock.header.project" variant="outline" size="sm" onClick={() => navigate(`/projections?ticker=${ticker}`)}>
             <LineChart /> Project
           </Button>
         </div>
@@ -327,7 +327,7 @@ export function Stock() {
                 <span className="ml-2 font-normal text-muted-foreground">split-adjusted</span>
               </CardTitle>
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Switch checked={logScale} onCheckedChange={setLogScale} />
+                <Switch data-testid="stock.price-chart.log-scale" checked={logScale} onCheckedChange={setLogScale} />
                 Log scale
               </label>
             </CardHeader>

@@ -110,6 +110,7 @@ export function Montecarlo() {
               <span className="min-w-0 flex-1 truncate text-sm">{assetClass(a.assetId)?.label ?? a.assetId}</span>
               <div className="relative w-20 shrink-0">
                 <Input
+                  data-testid={`montecarlo.portfolio.weight-${a.assetId}`}
                   type="number"
                   min={0}
                   max={100}
@@ -125,6 +126,7 @@ export function Montecarlo() {
                 </span>
               </div>
               <Button
+                data-testid={`montecarlo.portfolio.remove-${a.assetId}`}
                 variant="ghost"
                 size="icon-sm"
                 aria-label={`Remove ${assetClass(a.assetId)?.label ?? a.assetId}`}
@@ -136,7 +138,7 @@ export function Montecarlo() {
             </div>
           ))}
           {config.allocation.length < ASSET_CLASSES.length && (
-            <AssetClassPicker exclude={config.allocation.map((a) => a.assetId)} onPick={addAsset} />
+            <AssetClassPicker testId="montecarlo.portfolio.picker" exclude={config.allocation.map((a) => a.assetId)} onPick={addAsset} />
           )}
           {!balanced && (
             <p className="text-sm text-loss">
@@ -153,6 +155,7 @@ export function Montecarlo() {
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">$</span>
               <Input
                 id="bal"
+                data-testid="montecarlo.plan.starting-balance"
                 type="number"
                 step={50000}
                 value={config.initialBalance}
@@ -166,6 +169,7 @@ export function Montecarlo() {
             <div className="relative">
               <Input
                 id="acc"
+                data-testid="montecarlo.plan.years-to-retire"
                 type="number"
                 min={0}
                 max={50}
@@ -184,6 +188,7 @@ export function Montecarlo() {
               <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">$</span>
               <Input
                 id="save"
+                data-testid="montecarlo.plan.annual-saving"
                 type="number"
                 step={1000}
                 min={0}
@@ -199,6 +204,7 @@ export function Montecarlo() {
             <div className="relative">
               <Input
                 id="yrs"
+                data-testid="montecarlo.plan.horizon"
                 type="number"
                 min={1}
                 max={60}
@@ -214,6 +220,7 @@ export function Montecarlo() {
             <div className="relative">
               <Input
                 id="wr"
+                data-testid="montecarlo.plan.withdrawal-rate"
                 type="number"
                 step={0.1}
                 value={config.withdrawalRate}
@@ -226,12 +233,12 @@ export function Montecarlo() {
           <div className="col-span-2 space-y-1.5">
             <Label>Strategy</Label>
             <Select value={config.strategy} onValueChange={(v) => update({ ...config, strategy: v as WithdrawalStrategy })}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" data-testid="montecarlo.plan.strategy-trigger">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {(Object.keys(STRATEGY_LABELS) as WithdrawalStrategy[]).map((s) => (
-                  <SelectItem key={s} value={s}>
+                  <SelectItem key={s} value={s} data-testid={`montecarlo.plan.strategy-${s}`}>
                     {STRATEGY_LABELS[s]}
                   </SelectItem>
                 ))}
@@ -248,6 +255,7 @@ export function Montecarlo() {
             <div className="relative">
               <Input
                 id="fee"
+                data-testid="montecarlo.plan.fee-rate"
                 type="number"
                 step={0.01}
                 value={config.feeRate}
@@ -260,12 +268,12 @@ export function Montecarlo() {
           <div className="space-y-1.5">
             <Label>Method</Label>
             <Select value={config.mode} onValueChange={(v) => update({ ...config, mode: v as 'historical' | 'bootstrap' })}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" data-testid="montecarlo.plan.method-trigger">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="historical">Historical</SelectItem>
-                <SelectItem value="bootstrap">Bootstrap</SelectItem>
+                <SelectItem value="historical" data-testid="montecarlo.plan.method-historical">Historical</SelectItem>
+                <SelectItem value="bootstrap" data-testid="montecarlo.plan.method-bootstrap">Bootstrap</SelectItem>
               </SelectContent>
             </Select>
           </div>

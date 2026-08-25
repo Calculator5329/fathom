@@ -19,6 +19,7 @@ export function Segmented<T extends string>({
       {options.map((o) => (
         <Button
           key={o.v}
+          data-testid={`ui.segmented.option-${o.v}`}
           variant={o.v === value ? 'secondary' : 'ghost'}
           size="xs"
           className="font-mono"

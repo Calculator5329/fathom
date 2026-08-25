@@ -93,6 +93,7 @@ export function Allocation() {
       <main className="min-w-0 flex-1 py-6 lg:py-8 lg:pl-8">
         <div className="mb-3 -ml-2 flex items-center justify-between">
           <Button
+            data-testid="allocation.layout.builder-toggle"
             variant="ghost"
             size="sm"
             className="text-muted-foreground"

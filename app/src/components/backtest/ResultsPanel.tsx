@@ -244,7 +244,7 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
             <Download />
             Export CSV
           </Button>
-          <Button variant="outline" size="sm" onClick={copyLink}>
+          <Button data-testid="backtest.results.copy-link" variant="outline" size="sm" onClick={copyLink}>
             {copied ? <Check className="text-gain" /> : <LinkIcon />}
             {copied ? 'Copied' : 'Copy link'}
           </Button>
@@ -257,7 +257,7 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle className="text-base font-medium">Portfolio value</CardTitle>
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Switch checked={logScale} onCheckedChange={setLogScale} />
+            <Switch data-testid="backtest.results.log-scale" checked={logScale} onCheckedChange={setLogScale} />
             Log scale
           </label>
         </CardHeader>
@@ -269,13 +269,13 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
 
       <Tabs defaultValue="annual">
         <TabsList className="max-w-full justify-start overflow-x-auto">
-          <TabsTrigger value="annual">Annual returns</TabsTrigger>
-          <TabsTrigger value="risk">Risk</TabsTrigger>
-          <TabsTrigger value="rolling" disabled={windows.length === 0}>
+          <TabsTrigger value="annual" data-testid="backtest.results.tab-annual">Annual returns</TabsTrigger>
+          <TabsTrigger value="risk" data-testid="backtest.results.tab-risk">Risk</TabsTrigger>
+          <TabsTrigger value="rolling" data-testid="backtest.results.tab-rolling" disabled={windows.length === 0}>
             Rolling
           </TabsTrigger>
-          {showIncome && <TabsTrigger value="income">Income</TabsTrigger>}
-          <TabsTrigger value="holdings">Holdings</TabsTrigger>
+          {showIncome && <TabsTrigger value="income" data-testid="backtest.results.tab-income">Income</TabsTrigger>}
+          <TabsTrigger value="holdings" data-testid="backtest.results.tab-holdings">Holdings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="annual" className="animate-enter space-y-4">
@@ -327,6 +327,7 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
                 {windows.map((w) => (
                   <Button
                     key={w}
+                    data-testid={`backtest.results.rolling-window-${w}`}
                     variant={w === activeWindow ? 'secondary' : 'ghost'}
                     size="xs"
                     className="font-mono"

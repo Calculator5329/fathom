@@ -32,7 +32,7 @@ function NotFound() {
       <p className="font-mono text-sm text-muted-foreground">404</p>
       <h1 className="mt-2 text-2xl font-semibold tracking-tight">This page doesn&rsquo;t exist.</h1>
       <p className="mt-3 text-muted-foreground">
-        <Link to="/" className="text-primary hover:underline">
+        <Link to="/" data-testid="app.not-found.home" className="text-primary hover:underline">
           Back to the tools
         </Link>
       </p>
@@ -121,6 +121,7 @@ function AccountNav() {
       <div className="ml-auto flex shrink-0 items-center">
         {status === 'out' && (
           <Button
+            data-testid="app.header.sign-in"
             variant="ghost"
             size="sm"
             className="text-muted-foreground"
@@ -149,6 +150,7 @@ function AccountNav() {
               </p>
               {import.meta.env.DEV && (
                 <Button
+                  data-testid="app.header.copy-owner-token"
                   variant="ghost"
                   size="sm"
                   className="mt-2 -ml-2 text-muted-foreground"
@@ -163,6 +165,7 @@ function AccountNav() {
                 </Button>
               )}
               <Button
+                data-testid="app.header.sign-out"
                 variant="ghost"
                 size="sm"
                 className="mt-2 -ml-2 text-muted-foreground"
