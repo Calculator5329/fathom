@@ -68,22 +68,22 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen">
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
         <nav className="mx-auto flex h-14 max-w-7xl items-center gap-4 overflow-x-auto px-6 sm:gap-6">
-          <Link to="/" className="font-mono text-base font-semibold tracking-tight">
+          <Link to="/" data-testid="app.nav.home" className="font-mono text-base font-semibold tracking-tight">
             fathom
           </Link>
-          <NavLink to="/backtest" className={navLinkClass}>
+          <NavLink to="/backtest" data-testid="app.nav.backtest" className={navLinkClass}>
             Backtest
           </NavLink>
-          <NavLink to="/allocation" className={navLinkClass}>
+          <NavLink to="/allocation" data-testid="app.nav.allocation" className={navLinkClass}>
             Asset allocation
           </NavLink>
-          <NavLink to="/income" className={navLinkClass}>
+          <NavLink to="/income" data-testid="app.nav.income" className={navLinkClass}>
             Income
           </NavLink>
-          <NavLink to="/montecarlo" className={navLinkClass}>
+          <NavLink to="/montecarlo" data-testid="app.nav.montecarlo" className={navLinkClass}>
             Monte Carlo
           </NavLink>
-          <NavLink to="/stock" className={navLinkClass}>
+          <NavLink to="/stock" data-testid="app.nav.stock" className={navLinkClass}>
             Research
           </NavLink>
           <AccountNav />
@@ -107,13 +107,13 @@ function AccountNav() {
       <CommandPalette accountTools={status === 'in'} />
       {status === 'in' && (
         <>
-          <NavLink to="/projections" className={navLinkClass}>
+          <NavLink to="/projections" data-testid="app.nav.projections" className={navLinkClass}>
             Projections
           </NavLink>
-          <NavLink to="/xray" className={navLinkClass}>
+          <NavLink to="/xray" data-testid="app.nav.xray" className={navLinkClass}>
             X-ray
           </NavLink>
-          <NavLink to="/links" className={navLinkClass}>
+          <NavLink to="/links" data-testid="app.nav.links" className={navLinkClass}>
             Links
           </NavLink>
         </>

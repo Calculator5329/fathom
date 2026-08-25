@@ -464,7 +464,7 @@ export function Xray() {
                 className="min-h-28 w-full resize-y rounded-md border bg-transparent px-3 py-2 font-mono text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               />
               <div className="flex items-center gap-2">
-                <Button onClick={() => runPositions()} disabled={busy || !positionsText.trim()}>
+                <Button data-testid="xray.inputs.analyze-positions" onClick={() => runPositions()} disabled={busy || !positionsText.trim()}>
                   {busy ? 'Analyzing…' : 'Analyze positions'}
                 </Button>
                 <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>

@@ -2,7 +2,7 @@
   "schema": "agent-handles/testid-registry/v1",
   "grammar": "area.component.element[.qualifier]",
   "generatedFrom": "src/**/*.tsx and journeys/manifest.json",
-  "sourceDigest": "sha256:ac0b3a027f5f0196e2f3a235f16a4a1715c848416f5e2386573edadab27642d2",
+  "sourceDigest": "sha256:e39f13ceded74bec940375df60aaf6c2419bd5a2d18eba1c784af54f71efb568",
   "coverage": {
     "interactiveElements": 19,
     "identifiedInteractive": 19,
@@ -26,6 +26,69 @@
       "id": "app.header.account",
       "file": "src/App.tsx",
       "line": 138,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.nav.allocation",
+      "file": "src/App.tsx",
+      "line": 77,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.nav.backtest",
+      "file": "src/App.tsx",
+      "line": 74,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.nav.home",
+      "file": "src/App.tsx",
+      "line": 71,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.nav.income",
+      "file": "src/App.tsx",
+      "line": 80,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.nav.links",
+      "file": "src/App.tsx",
+      "line": 116,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.nav.montecarlo",
+      "file": "src/App.tsx",
+      "line": 83,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.nav.projections",
+      "file": "src/App.tsx",
+      "line": 110,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.nav.stock",
+      "file": "src/App.tsx",
+      "line": 86,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.nav.xray",
+      "file": "src/App.tsx",
+      "line": 113,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },
@@ -65,9 +128,23 @@
       "attribute": "data-testid"
     },
     {
+      "id": "ui.ticker-picker.search",
+      "file": "src/components/backtest/TickerPicker.tsx",
+      "line": 66,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
       "id": "xray.inputs.activity",
       "file": "src/pages/Xray.tsx",
       "line": 482,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "xray.inputs.analyze-positions",
+      "file": "src/pages/Xray.tsx",
+      "line": 467,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },

@@ -63,6 +63,7 @@ export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: Ticker
     <div ref={rootRef} className="relative">
       <Input
         value={query}
+        data-testid="ui.ticker-picker.search"
         placeholder={placeholder ?? 'Add ticker — e.g. VTI, AAPL, VTSAX'}
         autoFocus={autoFocus}
         onChange={(e) => {
