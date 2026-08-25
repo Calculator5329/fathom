@@ -62,3 +62,88 @@ test("research-ticker-drill: Nav to Research, find TXRH letter by letter, open i
   await page.getByTestId("ui.ticker-picker.option-AAPL").click();
   await expect(page.getByTestId("stock.header.switch-ticker")).toContainText("AAPL", { timeout: 20000 });
 });
+
+test("landing-cards: The landing page's tool cards are real entrances: the Monte Carlo card lands on the plan inputs.", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByTestId("landing.tools.card-backtest")).toBeVisible({ timeout: 10000 });
+  await page.getByTestId("landing.tools.card-montecarlo").click();
+  await expect(page.getByTestId("montecarlo.plan.starting-balance")).toBeVisible({ timeout: 10000 });
+});
+
+test("montecarlo-plan-control-path: Retirement plan edited through the controls: balance, horizon, and the simulation method dropdown.", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("app.nav.montecarlo").click();
+  await page.getByTestId("montecarlo.plan.starting-balance").fill("750000");
+  await page.getByTestId("montecarlo.plan.years-to-retire").fill("10");
+  await page.getByTestId("montecarlo.plan.horizon").fill("40");
+  await page.getByTestId("montecarlo.plan.method-trigger").click();
+  await page.getByTestId("montecarlo.plan.method-bootstrap").click();
+  await expect(page.getByTestId("montecarlo.plan.method-trigger")).toContainText("Bootstrap", { timeout: 5000 });
+});
+
+test("allocation-builder-control-path: Allocation built through the controls: asset picked from the autocomplete, weights edited, a comparison portfolio added, dates set through the date picker, inflation toggled.", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("app.nav.allocation").click();
+  await page.getByTestId("allocation.builder.picker-p1").pressSequentially("small");
+  await expect(page.getByTestId("allocation.asset-picker.option-smallCap")).toBeVisible({ timeout: 5000 });
+  await page.getByTestId("allocation.asset-picker.option-smallCap").click();
+  await expect(page.getByTestId("allocation.builder.weight-p1-smallCap")).toBeVisible({ timeout: 10000 });
+  await page.getByTestId("allocation.builder.add-portfolio").click();
+  await page.getByTestId("ui.date-picker.input-alloc-start").fill("01/01/1990");
+  await expect(page.getByTestId("ui.date-picker.clear-alloc-start")).toBeVisible({ timeout: 5000 });
+  await page.getByTestId("allocation.builder.inflation-toggle").click();
+  await expect(page.getByTestId("allocation.builder.inflation-toggle")).toBeChecked({ timeout: 5000 });
+});
+
+test("income-sample-portfolio: The dividend planner's one-tap sample loads SCHD/VYM/JEPI; total value and per-holding weights stay editable.", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("app.nav.income").click();
+  await page.getByTestId("income.setup.load-sample").click();
+  await expect(page.getByTestId("income.setup.weight-SCHD")).toBeVisible({ timeout: 20000 });
+  await page.getByTestId("income.setup.total-value").fill("250000");
+  await page.getByTestId("income.setup.weight-SCHD").fill("50");
+  await expect(page.getByTestId("income.setup.weight-JEPI")).toBeVisible();
+});
+
+test("stock-to-backtest-crossover: Cross-page control path: research AAPL, then the stock header's Backtest button seeds the backtest builder with AAPL at 100.", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("app.nav.stock").click();
+  await page.getByTestId("ui.ticker-picker.search").pressSequentially("AAPL");
+  await expect(page.getByTestId("ui.ticker-picker.option-AAPL")).toBeVisible({ timeout: 5000 });
+  await page.getByTestId("ui.ticker-picker.option-AAPL").click();
+  await expect(page.getByTestId("stock.header.backtest")).toBeVisible({ timeout: 20000 });
+  await page.getByTestId("stock.header.backtest").click();
+  await expect(page.getByTestId("backtest.builder.weight-p1-AAPL")).toBeVisible({ timeout: 20000 });
+});
+
+test("backtest-results-depth: The results panel's depth controls: tabs, the rolling-window selector, and the log-scale switch, on a URL-seeded backtest.", async ({ page }) => {
+  await page.goto("/");
+  await page.goto("/backtest?p1=VTI:60,BND:40");
+  await expect(page.getByTestId("backtest.results.export-csv")).toBeVisible({ timeout: 20000 });
+  await page.getByTestId("backtest.results.tab-risk").click();
+  await page.getByTestId("backtest.results.tab-rolling").click();
+  await page.getByTestId("backtest.results.rolling-window-10").click();
+  await page.getByTestId("backtest.results.tab-annual").click();
+  await page.getByTestId("backtest.results.log-scale").click();
+  await expect(page.getByTestId("backtest.results.export-csv")).toBeVisible({ timeout: 10000 });
+});
+
+test("xray-analyze-positions: X-ray end to end without auth: paste positions, analyze, reach the holdings panel, then reopen the collapsed inputs and switch to the activity tab.", async ({ page }) => {
+  await page.goto("/xray");
+  await expect(page.getByTestId("xray.inputs.positions")).toBeVisible({ timeout: 10000 });
+  await page.getByTestId("xray.inputs.positions").fill("AAPL 12\nVTI 40");
+  await page.getByTestId("xray.inputs.analyze-positions").click();
+  await expect(page.getByTestId("xray.holdings.backtest-mix")).toBeVisible({ timeout: 30000 });
+  await expect(page.getByTestId("xray.inputs.toggle")).toBeVisible({ timeout: 5000 });
+  await page.getByTestId("xray.inputs.toggle").click();
+  await page.getByTestId("xray.inputs.tab-activity").click();
+  await expect(page.getByTestId("xray.inputs.activity")).toBeVisible({ timeout: 5000 });
+});
+
+test("not-found-recovery: A dead URL offers the way home, and home's tool cards render.", async ({ page }) => {
+  await page.goto("/");
+  await page.goto("/definitely-not-a-page");
+  await expect(page.getByTestId("app.not-found.home")).toBeVisible({ timeout: 10000 });
+  await page.getByTestId("app.not-found.home").click();
+  await expect(page.getByTestId("landing.tools.card-backtest")).toBeVisible({ timeout: 10000 });
+});

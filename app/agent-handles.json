@@ -1,4 +1,5 @@
 {
+  "appLabel": "fathom",
   "sourceRoot": "src",
   "registryPath": "testid-registry.json",
   "journeyManifestPath": "journeys/manifest.json",
