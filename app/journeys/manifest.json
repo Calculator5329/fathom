@@ -3,7 +3,8 @@
   "journeys": [
     {
       "name": "backtest-advanced-disclosure",
-      "description": "The backtest builder's Advanced toggle is present and enabled. (Click intentionally omitted: the ticker picker autofocuses on load and its open dropdown overlays the toggle; v1 journeys cannot reference the dropdown's dynamic option ids to dismiss it first.)",
+      "description": "The backtest builder's Advanced toggle is present and enabled.",
+      "kind": "url-path",
       "context": { "path": "/backtest" },
       "steps": [
         { "action": "expect", "testId": "backtest.builder.advanced-toggle", "predicate": "visible", "timeoutMs": 10000 },
@@ -13,6 +14,7 @@
     {
       "name": "allocation-advanced-disclosure",
       "description": "The allocation builder's Advanced section is reachable through its stable id.",
+      "kind": "url-path",
       "context": { "path": "/allocation" },
       "steps": [
         { "action": "expect", "testId": "allocation.builder.advanced-toggle", "predicate": "visible", "timeoutMs": 10000 },
@@ -22,11 +24,62 @@
     {
       "name": "xray-positions-entry",
       "description": "Portfolio X-ray accepts pasted positions through the identified inputs.",
+      "kind": "url-path",
       "context": { "path": "/xray" },
       "steps": [
         { "action": "expect", "testId": "xray.inputs.positions", "predicate": "visible", "timeoutMs": 10000 },
         { "action": "fill", "testId": "xray.inputs.positions", "value": "AAPL 12\nVTI 40" },
         { "action": "expect", "testId": "xray.inputs.positions", "predicate": "enabled" }
+      ]
+    },
+    {
+      "name": "backtest-builder-control-path",
+      "description": "Build AMZN/GOOGL 60/40 vs SPY/QQQ through the controls alone: letter-by-letter ticker entry, keyboard selection, weight edits, the Radix rebalance dropdown, and the reinvest switch, ending with results rendered. Recorded live 2026-08-25 (27/27 receipts ok); the predicate v2 acceptance journey.",
+      "kind": "control-path",
+      "context": { "path": "/" },
+      "steps": [
+        { "action": "click", "testId": "app.nav.backtest" },
+        { "action": "type", "testId": "backtest.builder.picker-p1", "value": "AMZN" },
+        { "action": "press", "testId": "backtest.builder.picker-p1", "key": "Enter" },
+        { "action": "type", "testId": "backtest.builder.picker-p1", "value": "GOOGL" },
+        { "action": "press", "testId": "backtest.builder.picker-p1", "key": "Enter" },
+        { "action": "fill", "testId": "backtest.builder.weight-p1-AMZN", "value": "60" },
+        { "action": "fill", "testId": "backtest.builder.weight-p1-GOOGL", "value": "40" },
+        { "action": "click", "testId": "backtest.builder.add-portfolio" },
+        { "action": "type", "testId": "backtest.builder.picker-p2", "value": "SPY" },
+        { "action": "press", "testId": "backtest.builder.picker-p2", "key": "Enter" },
+        { "action": "type", "testId": "backtest.builder.picker-p2", "value": "QQQ" },
+        { "action": "press", "testId": "backtest.builder.picker-p2", "key": "Enter" },
+        { "action": "expect", "testId": "backtest.results.export-csv", "predicate": "visible", "timeoutMs": 20000 },
+        { "action": "click", "testId": "backtest.builder.advanced-toggle" },
+        { "action": "click", "testId": "backtest.builder.rebalance-trigger" },
+        { "action": "click", "testId": "backtest.builder.rebalance-quarterly" },
+        { "action": "expect", "testId": "backtest.builder.rebalance-trigger", "predicate": "contains-text", "value": "Quarterly", "timeoutMs": 5000 },
+        { "action": "expect", "testId": "backtest.builder.reinvest-toggle", "predicate": "checked" },
+        { "action": "click", "testId": "backtest.builder.reinvest-toggle" },
+        { "action": "expect", "testId": "backtest.builder.reinvest-toggle", "predicate": "unchecked", "timeoutMs": 5000 },
+        { "action": "click", "testId": "backtest.builder.reinvest-toggle" },
+        { "action": "expect", "testId": "backtest.builder.reinvest-toggle", "predicate": "checked", "timeoutMs": 5000 },
+        { "action": "expect", "testId": "backtest.results.export-csv", "predicate": "visible", "timeoutMs": 20000 }
+      ]
+    },
+    {
+      "name": "research-ticker-drill",
+      "description": "Nav to Research, find TXRH letter by letter, open it, then switch to AAPL through the header control. Recorded live 2026-08-25 (10/10 receipts ok), the first zero-navigate journey.",
+      "kind": "control-path",
+      "context": { "path": "/" },
+      "steps": [
+        { "action": "click", "testId": "app.nav.stock" },
+        { "action": "type", "testId": "ui.ticker-picker.search", "value": "TXRH" },
+        { "action": "expect", "testId": "ui.ticker-picker.option-TXRH", "predicate": "visible", "timeoutMs": 5000 },
+        { "action": "click", "testId": "ui.ticker-picker.option-TXRH" },
+        { "action": "expect", "testId": "stock.header.switch-ticker", "predicate": "visible", "timeoutMs": 20000 },
+        { "action": "expect", "testId": "stock.header.switch-ticker", "predicate": "contains-text", "value": "TXRH" },
+        { "action": "click", "testId": "stock.header.switch-ticker" },
+        { "action": "type", "testId": "ui.ticker-picker.search", "value": "AAPL" },
+        { "action": "expect", "testId": "ui.ticker-picker.option-AAPL", "predicate": "visible", "timeoutMs": 5000 },
+        { "action": "click", "testId": "ui.ticker-picker.option-AAPL" },
+        { "action": "expect", "testId": "stock.header.switch-ticker", "predicate": "contains-text", "value": "AAPL", "timeoutMs": 20000 }
       ]
     }
   ]

@@ -2,7 +2,7 @@
 // edit the journey manifest and recompile (npx agent-handles journeys compile).
 import { test, expect } from "@playwright/test";
 
-test("backtest-advanced-disclosure: The backtest builder's Advanced toggle is present and enabled. (Click intentionally omitted: the ticker picker autofocuses on load and its open dropdown overlays the toggle; v1 journeys cannot reference the dropdown's dynamic option ids to dismiss it first.)", async ({ page }) => {
+test("backtest-advanced-disclosure: The backtest builder's Advanced toggle is present and enabled.", async ({ page }) => {
   await page.goto("/backtest");
   await expect(page.getByTestId("backtest.builder.advanced-toggle")).toBeVisible({ timeout: 10000 });
   await expect(page.getByTestId("backtest.builder.advanced-toggle")).toBeEnabled();
@@ -19,4 +19,46 @@ test("xray-positions-entry: Portfolio X-ray accepts pasted positions through the
   await expect(page.getByTestId("xray.inputs.positions")).toBeVisible({ timeout: 10000 });
   await page.getByTestId("xray.inputs.positions").fill("AAPL 12\nVTI 40");
   await expect(page.getByTestId("xray.inputs.positions")).toBeEnabled();
+});
+
+test("backtest-builder-control-path: Build AMZN/GOOGL 60/40 vs SPY/QQQ through the controls alone: letter-by-letter ticker entry, keyboard selection, weight edits, the Radix rebalance dropdown, and the reinvest switch, ending with results rendered. Recorded live 2026-08-25 (27/27 receipts ok); the predicate v2 acceptance journey.", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("app.nav.backtest").click();
+  await page.getByTestId("backtest.builder.picker-p1").pressSequentially("AMZN");
+  await page.getByTestId("backtest.builder.picker-p1").press("Enter");
+  await page.getByTestId("backtest.builder.picker-p1").pressSequentially("GOOGL");
+  await page.getByTestId("backtest.builder.picker-p1").press("Enter");
+  await page.getByTestId("backtest.builder.weight-p1-AMZN").fill("60");
+  await page.getByTestId("backtest.builder.weight-p1-GOOGL").fill("40");
+  await page.getByTestId("backtest.builder.add-portfolio").click();
+  await page.getByTestId("backtest.builder.picker-p2").pressSequentially("SPY");
+  await page.getByTestId("backtest.builder.picker-p2").press("Enter");
+  await page.getByTestId("backtest.builder.picker-p2").pressSequentially("QQQ");
+  await page.getByTestId("backtest.builder.picker-p2").press("Enter");
+  await expect(page.getByTestId("backtest.results.export-csv")).toBeVisible({ timeout: 20000 });
+  await page.getByTestId("backtest.builder.advanced-toggle").click();
+  await page.getByTestId("backtest.builder.rebalance-trigger").click();
+  await page.getByTestId("backtest.builder.rebalance-quarterly").click();
+  await expect(page.getByTestId("backtest.builder.rebalance-trigger")).toContainText("Quarterly", { timeout: 5000 });
+  await expect(page.getByTestId("backtest.builder.reinvest-toggle")).toBeChecked();
+  await page.getByTestId("backtest.builder.reinvest-toggle").click();
+  await expect(page.getByTestId("backtest.builder.reinvest-toggle")).not.toBeChecked({ timeout: 5000 });
+  await page.getByTestId("backtest.builder.reinvest-toggle").click();
+  await expect(page.getByTestId("backtest.builder.reinvest-toggle")).toBeChecked({ timeout: 5000 });
+  await expect(page.getByTestId("backtest.results.export-csv")).toBeVisible({ timeout: 20000 });
+});
+
+test("research-ticker-drill: Nav to Research, find TXRH letter by letter, open it, then switch to AAPL through the header control. Recorded live 2026-08-25 (10/10 receipts ok), the first zero-navigate journey.", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("app.nav.stock").click();
+  await page.getByTestId("ui.ticker-picker.search").pressSequentially("TXRH");
+  await expect(page.getByTestId("ui.ticker-picker.option-TXRH")).toBeVisible({ timeout: 5000 });
+  await page.getByTestId("ui.ticker-picker.option-TXRH").click();
+  await expect(page.getByTestId("stock.header.switch-ticker")).toBeVisible({ timeout: 20000 });
+  await expect(page.getByTestId("stock.header.switch-ticker")).toContainText("TXRH");
+  await page.getByTestId("stock.header.switch-ticker").click();
+  await page.getByTestId("ui.ticker-picker.search").pressSequentially("AAPL");
+  await expect(page.getByTestId("ui.ticker-picker.option-AAPL")).toBeVisible({ timeout: 5000 });
+  await page.getByTestId("ui.ticker-picker.option-AAPL").click();
+  await expect(page.getByTestId("stock.header.switch-ticker")).toContainText("AAPL", { timeout: 20000 });
 });

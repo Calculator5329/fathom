@@ -3,6 +3,10 @@
   "grammar": "area.component.element[.qualifier]",
   "generatedFrom": "src/**/*.tsx and journeys/manifest.json",
   "sourceDigest": "sha256:a9ea51b001c003e8ac7221ac74fe65072304fb4997f1408c29a2a35dda13e32c",
+  "journeyCoverage": {
+    "controlPath": 2,
+    "urlPath": 3
+  },
   "coverage": {
     "interactiveElements": 139,
     "identifiedInteractive": 47,
@@ -11,7 +15,22 @@
   },
   "journeyReferences": [
     "allocation.builder.advanced-toggle",
+    "app.nav.backtest",
+    "app.nav.stock",
+    "backtest.builder.add-portfolio",
     "backtest.builder.advanced-toggle",
+    "backtest.builder.picker-p1",
+    "backtest.builder.picker-p2",
+    "backtest.builder.rebalance-quarterly",
+    "backtest.builder.rebalance-trigger",
+    "backtest.builder.reinvest-toggle",
+    "backtest.builder.weight-p1-AMZN",
+    "backtest.builder.weight-p1-GOOGL",
+    "backtest.results.export-csv",
+    "stock.header.switch-ticker",
+    "ui.ticker-picker.option-AAPL",
+    "ui.ticker-picker.option-TXRH",
+    "ui.ticker-picker.search",
     "xray.inputs.positions"
   ],
   "entries": [
@@ -205,6 +224,13 @@
       "attribute": "data-testid"
     },
     {
+      "id": "ui.ticker-picker.search",
+      "file": "src/components/backtest/TickerPicker.tsx",
+      "line": 69,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
       "id": "xray.inputs.activity",
       "file": "src/pages/Xray.tsx",
       "line": 482,
@@ -237,6 +263,80 @@
       "file": "src/pages/Xray.tsx",
       "line": 438,
       "element": "jsx-prop",
+      "attribute": "data-testid"
+    }
+  ],
+  "patterns": [
+    {
+      "pattern": "allocation.asset-picker.option-*",
+      "file": "src/components/AssetClassPicker.tsx",
+      "line": 82,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "backtest.builder.balance-p*",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 82,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "backtest.builder.benchmark-*",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 375,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "backtest.builder.picker-p*",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 152,
+      "attribute": "testId"
+    },
+    {
+      "pattern": "backtest.builder.remove-p*",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 135,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "backtest.builder.weight-p*",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 122,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "income.holdings.remove-*",
+      "file": "src/pages/Income.tsx",
+      "line": 150,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "projections.list.row-*",
+      "file": "src/pages/Projections.tsx",
+      "line": 243,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "ui.calendar.dropdown-*",
+      "file": "src/components/ui/calendar.tsx",
+      "line": 256,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "ui.echart.export-*",
+      "file": "src/components/charts/EChart.tsx",
+      "line": 139,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "ui.ticker-picker.option-*",
+      "file": "src/components/backtest/TickerPicker.tsx",
+      "line": 100,
+      "attribute": "data-testid"
+    },
+    {
+      "pattern": "xray.holdings.ticker-*",
+      "file": "src/pages/Xray.tsx",
+      "line": 792,
       "attribute": "data-testid"
     }
   ],
