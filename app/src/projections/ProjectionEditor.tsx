@@ -325,6 +325,7 @@ export function ProjectionEditor({
             <Label htmlFor="notes">Thesis notes</Label>
             <textarea
               id="notes"
+              data-testid="projections.editor.notes"
               value={draft.notes}
               onChange={(e) => onChange({ ...draft, notes: e.target.value.slice(0, 5000) })}
               placeholder="Why this thesis? Key risks, catalysts, what would change your mind…"

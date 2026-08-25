@@ -79,6 +79,7 @@ export function AssetClassPicker({ exclude, onPick, autoFocus }: AssetClassPicke
             <li key={a.id}>
               <button
                 type="button"
+                data-testid={`allocation.asset-picker.option-${a.id}`}
                 className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left ${
                   i === highlight ? 'bg-surface-3' : ''
                 }`}

@@ -147,6 +147,7 @@ function Builder({
                 </div>
                 <button
                   type="button"
+                  data-testid={`income.holdings.remove-${h.ticker}`}
                   aria-label={`Remove ${h.ticker}`}
                   className="text-muted-foreground transition-colors hover:text-loss"
                   onClick={() => removeTicker(h.ticker)}

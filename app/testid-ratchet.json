@@ -1,0 +1,19 @@
+{
+  "schema": "agent-handles/ratchet/v1",
+  "predicateVersion": 1,
+  "floors": {
+    "src/App.tsx": 0,
+    "src/components/allocation/AllocationBuilder.tsx": 0,
+    "src/components/AssetClassPicker.tsx": 0,
+    "src/components/backtest/BuilderPanel.tsx": 0,
+    "src/components/backtest/TickerPicker.tsx": 0,
+    "src/components/charts/EChart.tsx": 0,
+    "src/components/ui/calendar.tsx": 0,
+    "src/components/ui/input.tsx": 0,
+    "src/pages/Income.tsx": 0,
+    "src/pages/Projections.tsx": 0,
+    "src/pages/Stock.tsx": 0,
+    "src/pages/Xray.tsx": 0,
+    "src/projections/ProjectionEditor.tsx": 0
+  }
+}

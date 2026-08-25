@@ -263,6 +263,7 @@ export function AllocationBuilder({
       <div>
         <button
           type="button"
+          data-testid="allocation.builder.advanced-toggle"
           className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           onClick={() => setShowAdvanced((v) => !v)}
         >

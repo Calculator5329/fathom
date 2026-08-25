@@ -1,0 +1,90 @@
+{
+  "schema": "agent-handles/testid-registry/v1",
+  "grammar": "area.component.element[.qualifier]",
+  "generatedFrom": "src/**/*.tsx and journeys/manifest.json",
+  "sourceDigest": "sha256:26413e8a4bae4bddded460696d9ca85433763027efbc15f8e5a9f9c1f223430b",
+  "coverage": {
+    "interactiveElements": 19,
+    "identifiedInteractive": 19,
+    "unidentifiedInteractive": 0,
+    "maximumUnidentifiedInteractive": 0
+  },
+  "journeyReferences": [
+    "allocation.builder.advanced-toggle",
+    "backtest.builder.advanced-toggle",
+    "xray.inputs.positions"
+  ],
+  "entries": [
+    {
+      "id": "allocation.builder.advanced-toggle",
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 266,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "app.header.account",
+      "file": "src/App.tsx",
+      "line": 138,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.advanced-toggle",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 262,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "projections.editor.notes",
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 328,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "stock.header.projection-peek",
+      "file": "src/pages/Stock.tsx",
+      "line": 264,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "stock.header.switch-ticker",
+      "file": "src/pages/Stock.tsx",
+      "line": 251,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "xray.inputs.activity",
+      "file": "src/pages/Xray.tsx",
+      "line": 482,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "xray.inputs.file",
+      "file": "src/pages/Xray.tsx",
+      "line": 507,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "xray.inputs.positions",
+      "file": "src/pages/Xray.tsx",
+      "line": 459,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "xray.inputs.toggle",
+      "file": "src/pages/Xray.tsx",
+      "line": 438,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    }
+  ],
+  "unidentifiedInteractive": []
+}

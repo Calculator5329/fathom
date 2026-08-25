@@ -1,0 +1,7 @@
+{
+  "sourceRoot": "src",
+  "registryPath": "testid-registry.json",
+  "journeyManifestPath": "journeys/manifest.json",
+  "ratchetPath": "testid-ratchet.json",
+  "playwrightSpecPath": "tests/journeys.generated.spec.ts"
+}

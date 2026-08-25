@@ -222,11 +222,13 @@ function CaptionDropdown({
   }, [open])
 
   const selected = options?.find((o) => String(o.value) === String(value))
+  const idSlug = (ariaLabel ?? "select").toLowerCase().replace(/[^a-z0-9]+/gu, "-")
 
   return (
     <div ref={rootRef} className={cn("relative", className)}>
       <button
         type="button"
+        data-testid={`ui.calendar.dropdown-${idSlug}`}
         aria-label={ariaLabel}
         aria-expanded={open}
         aria-haspopup="listbox"
@@ -251,6 +253,7 @@ function CaptionDropdown({
               <li key={opt.value}>
                 <button
                   type="button"
+                  data-testid={`ui.calendar.dropdown-${idSlug}-option-${opt.value}`}
                   role="option"
                   aria-selected={isSelected}
                   data-selected={isSelected}

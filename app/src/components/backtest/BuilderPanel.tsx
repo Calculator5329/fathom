@@ -259,6 +259,7 @@ export function BuilderPanel({ setup, onChange, effectiveStart, limitingTicker }
       <div>
         <button
           type="button"
+          data-testid="backtest.builder.advanced-toggle"
           className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           onClick={() => setShowAdvanced((v) => !v)}
         >

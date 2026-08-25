@@ -136,6 +136,7 @@ export function EChart({ option, group, className, exportName }: EChartProps) {
       <div ref={ref} className={className} />
       <button
         type="button"
+        data-testid={`ui.echart.export-${exportName}`}
         aria-label="Download chart as PNG"
         onClick={exportPng}
         className="absolute top-0 right-0 rounded-md border bg-surface-2 p-1.5 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover/chart:opacity-100"

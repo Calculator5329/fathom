@@ -135,6 +135,7 @@ function AccountNav() {
             <PopoverTrigger asChild>
               <button
                 type="button"
+                data-testid="app.header.account"
                 aria-label="Account"
                 title={user?.email ?? 'Account'}
                 className="flex size-7 items-center justify-center rounded-full border bg-surface-2 font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"

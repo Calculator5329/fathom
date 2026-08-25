@@ -248,6 +248,7 @@ export function Stock() {
           ) : (
             <button
               type="button"
+              data-testid="stock.header.switch-ticker"
               onClick={() => setSwitching(true)}
               className="group flex items-center gap-1.5 font-mono text-3xl font-semibold tracking-tight transition-colors hover:text-primary"
               title="Click to switch ticker"
@@ -260,6 +261,7 @@ export function Stock() {
           {basePeek && (
             <button
               type="button"
+              data-testid="stock.header.projection-peek"
               onClick={() => navigate(`/projections?ticker=${ticker}`)}
               className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-chart-2/40 px-2 py-0.5 text-sm text-chart-2 transition-colors hover:bg-surface-2"
               title="Open your projection"

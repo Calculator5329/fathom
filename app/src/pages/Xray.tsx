@@ -435,6 +435,7 @@ export function Xray() {
       {!inputsOpen && (
         <button
           type="button"
+          data-testid="xray.inputs.toggle"
           onClick={() => setInputsOpen(true)}
           className="flex items-center gap-2 rounded-md border bg-surface-1 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
         >
@@ -455,6 +456,7 @@ export function Xray() {
           <Card>
             <CardContent className="space-y-3">
               <textarea
+                data-testid="xray.inputs.positions"
                 aria-label="Positions — one ticker per line"
                 value={positionsText}
                 onChange={(e) => setPositionsText(e.target.value)}
@@ -477,6 +479,7 @@ export function Xray() {
           <Card>
             <CardContent className="space-y-3">
               <textarea
+                data-testid="xray.inputs.activity"
                 aria-label="Activity history — broker trade CSV"
                 value={tradesText}
                 onChange={(e) => setTradesText(e.target.value)}
@@ -501,6 +504,7 @@ export function Xray() {
           (positions + activity) and everything merges automatically. */}
       <input
         ref={fileRef}
+        data-testid="xray.inputs.file"
         type="file"
         accept=".csv,text/csv"
         multiple
@@ -785,6 +789,7 @@ export function Xray() {
                       <TableCell>
                         <button
                           type="button"
+                          data-testid={`xray.holdings.ticker-${h.ticker}`}
                           className="font-mono font-medium transition-colors hover:text-primary"
                           onClick={() => navigate(`/stock/${h.ticker}`)}
                           title={h.name}

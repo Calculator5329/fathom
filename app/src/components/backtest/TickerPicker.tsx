@@ -93,6 +93,7 @@ export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: Ticker
             <li key={e.ticker}>
               <button
                 type="button"
+                data-testid={`ui.ticker-picker.option-${e.ticker}`}
                 className={`flex w-full items-center gap-3 px-3 py-2 text-left ${
                   i === highlight ? 'bg-surface-3' : ''
                 }`}

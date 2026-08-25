@@ -240,6 +240,7 @@ function ProjectionsInner() {
               <li key={p.ticker}>
                 <button
                   type="button"
+                  data-testid={`projections.list.row-${p.ticker}`}
                   onClick={() => openDraft(p)}
                   className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left transition-colors hover:bg-surface-2 ${
                     draft?.ticker === p.ticker ? 'bg-surface-2' : ''

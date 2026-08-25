@@ -1,0 +1,33 @@
+{
+  "schema": "agent-handles/journey/v1",
+  "journeys": [
+    {
+      "name": "backtest-advanced-disclosure",
+      "description": "The backtest builder's Advanced toggle is present and enabled. (Click intentionally omitted: the ticker picker autofocuses on load and its open dropdown overlays the toggle; v1 journeys cannot reference the dropdown's dynamic option ids to dismiss it first.)",
+      "context": { "path": "/backtest" },
+      "steps": [
+        { "action": "expect", "testId": "backtest.builder.advanced-toggle", "predicate": "visible", "timeoutMs": 10000 },
+        { "action": "expect", "testId": "backtest.builder.advanced-toggle", "predicate": "enabled" }
+      ]
+    },
+    {
+      "name": "allocation-advanced-disclosure",
+      "description": "The allocation builder's Advanced section is reachable through its stable id.",
+      "context": { "path": "/allocation" },
+      "steps": [
+        { "action": "expect", "testId": "allocation.builder.advanced-toggle", "predicate": "visible", "timeoutMs": 10000 },
+        { "action": "click", "testId": "allocation.builder.advanced-toggle" }
+      ]
+    },
+    {
+      "name": "xray-positions-entry",
+      "description": "Portfolio X-ray accepts pasted positions through the identified inputs.",
+      "context": { "path": "/xray" },
+      "steps": [
+        { "action": "expect", "testId": "xray.inputs.positions", "predicate": "visible", "timeoutMs": 10000 },
+        { "action": "fill", "testId": "xray.inputs.positions", "value": "AAPL 12\nVTI 40" },
+        { "action": "expect", "testId": "xray.inputs.positions", "predicate": "enabled" }
+      ]
+    }
+  ]
+}
