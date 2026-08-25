@@ -3,5 +3,10 @@
   "registryPath": "testid-registry.json",
   "journeyManifestPath": "journeys/manifest.json",
   "ratchetPath": "testid-ratchet.json",
-  "playwrightSpecPath": "tests/journeys.generated.spec.ts"
+  "playwrightSpecPath": "tests/journeys.generated.spec.ts",
+  "unreachableSurfaces": {
+    "note": "Ethan's 2026-08-25 ruling: auth stays a wall. These surfaces sit behind real Google sign-in; journeys never automate credentials, so no journey can reach them and coverage claims must not count them as coverable.",
+    "testIds": ["app.nav.projections", "app.nav.xray", "app.nav.links"],
+    "routes": ["/projections", "/links"]
+  }
 }
