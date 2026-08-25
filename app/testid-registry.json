@@ -2,7 +2,7 @@
   "schema": "agent-handles/testid-registry/v1",
   "grammar": "area.component.element[.qualifier]",
   "generatedFrom": "src/**/*.tsx and journeys/manifest.json",
-  "sourceDigest": "sha256:26413e8a4bae4bddded460696d9ca85433763027efbc15f8e5a9f9c1f223430b",
+  "sourceDigest": "sha256:ac0b3a027f5f0196e2f3a235f16a4a1715c848416f5e2386573edadab27642d2",
   "coverage": {
     "interactiveElements": 19,
     "identifiedInteractive": 19,
@@ -33,6 +33,13 @@
       "id": "backtest.builder.advanced-toggle",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 262,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.results.export-csv",
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 236,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },

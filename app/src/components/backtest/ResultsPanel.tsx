@@ -233,6 +233,7 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
           <Button
             variant="outline"
             size="sm"
+            data-testid="backtest.results.export-csv"
             onClick={() =>
               downloadCsv(
                 `fathom-backtest-${dates[dates.length - 1]}.csv`,
