@@ -8,6 +8,9 @@ interface TickerPickerProps {
   exclude: string[]
   onPick: (entry: CatalogEntry) => void
   autoFocus?: boolean
+  /** Stable id for THIS instance's input; pages rendering several pickers at
+   *  once (the backtest builder) must pass one each or the ids collide. */
+  testId?: string
 }
 
 /**
@@ -15,7 +18,7 @@ interface TickerPickerProps {
  * Local catalog answers instantly; the API extends results to Tiingo's full
  * universe (marked "new" — their first load fetches and caches the history).
  */
-export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: TickerPickerProps) {
+export function TickerPicker({ placeholder, exclude, onPick, autoFocus, testId }: TickerPickerProps) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [highlight, setHighlight] = useState(0)
@@ -63,7 +66,7 @@ export function TickerPicker({ placeholder, exclude, onPick, autoFocus }: Ticker
     <div ref={rootRef} className="relative">
       <Input
         value={query}
-        data-testid="ui.ticker-picker.search"
+        data-testid={testId ?? 'ui.ticker-picker.search'}
         placeholder={placeholder ?? 'Add ticker — e.g. VTI, AAPL, VTSAX'}
         autoFocus={autoFocus}
         onChange={(e) => {

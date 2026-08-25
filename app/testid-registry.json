@@ -2,12 +2,12 @@
   "schema": "agent-handles/testid-registry/v1",
   "grammar": "area.component.element[.qualifier]",
   "generatedFrom": "src/**/*.tsx and journeys/manifest.json",
-  "sourceDigest": "sha256:e39f13ceded74bec940375df60aaf6c2419bd5a2d18eba1c784af54f71efb568",
+  "sourceDigest": "sha256:a9ea51b001c003e8ac7221ac74fe65072304fb4997f1408c29a2a35dda13e32c",
   "coverage": {
-    "interactiveElements": 19,
-    "identifiedInteractive": 19,
-    "unidentifiedInteractive": 0,
-    "maximumUnidentifiedInteractive": 0
+    "interactiveElements": 139,
+    "identifiedInteractive": 47,
+    "unidentifiedInteractive": 92,
+    "maximumUnidentifiedInteractive": 92
   },
   "journeyReferences": [
     "allocation.builder.advanced-toggle",
@@ -93,9 +93,86 @@
       "attribute": "data-testid"
     },
     {
+      "id": "backtest.builder.add-portfolio",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 228,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
       "id": "backtest.builder.advanced-toggle",
       "file": "src/components/backtest/BuilderPanel.tsx",
-      "line": 262,
+      "line": 277,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.benchmark-none",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 373,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.benchmark-trigger",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 369,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.initial-amount",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 301,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.monthly-contribution",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 323,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.rebalance-annual",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 357,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.rebalance-monthly",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 359,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.rebalance-none",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 356,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.rebalance-quarterly",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 358,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.rebalance-trigger",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 352,
+      "element": "jsx-prop",
+      "attribute": "data-testid"
+    },
+    {
+      "id": "backtest.builder.reinvest-toggle",
+      "file": "src/components/backtest/BuilderPanel.tsx",
+      "line": 387,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },
@@ -124,13 +201,6 @@
       "id": "stock.header.switch-ticker",
       "file": "src/pages/Stock.tsx",
       "line": 251,
-      "element": "jsx-prop",
-      "attribute": "data-testid"
-    },
-    {
-      "id": "ui.ticker-picker.search",
-      "file": "src/components/backtest/TickerPicker.tsx",
-      "line": 66,
       "element": "jsx-prop",
       "attribute": "data-testid"
     },
@@ -170,5 +240,466 @@
       "attribute": "data-testid"
     }
   ],
-  "unidentifiedInteractive": []
+  "unidentifiedInteractive": [
+    {
+      "file": "src/App.tsx",
+      "line": 35,
+      "element": "Link"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 123,
+      "element": "Button"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 135,
+      "element": "PopoverTrigger"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 151,
+      "element": "Button"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 165,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 73,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 83,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 99,
+      "element": "Input"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 119,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 202,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 221,
+      "element": "Switch"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 285,
+      "element": "Input"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 307,
+      "element": "Input"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 338,
+      "element": "SelectTrigger"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 342,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 343,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 344,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/components/allocation/AllocationBuilder.tsx",
+      "line": 345,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/components/AssetClassPicker.tsx",
+      "line": 48,
+      "element": "Input"
+    },
+    {
+      "file": "src/components/backtest/DatePicker.tsx",
+      "line": 111,
+      "element": "Input"
+    },
+    {
+      "file": "src/components/backtest/DatePicker.tsx",
+      "line": 136,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/backtest/DatePicker.tsx",
+      "line": 147,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 247,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 260,
+      "element": "Switch"
+    },
+    {
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 272,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 273,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 274,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 277,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 278,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/components/backtest/ResultsPanel.tsx",
+      "line": 328,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/CommandPalette.tsx",
+      "line": 87,
+      "element": "CommandInput"
+    },
+    {
+      "file": "src/components/CommandPalette.tsx",
+      "line": 98,
+      "element": "CommandItem"
+    },
+    {
+      "file": "src/components/CommandPalette.tsx",
+      "line": 113,
+      "element": "CommandItem"
+    },
+    {
+      "file": "src/components/ui/calendar.tsx",
+      "line": 298,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/ui/dialog.tsx",
+      "line": 112,
+      "element": "Button"
+    },
+    {
+      "file": "src/components/ui/segmented.tsx",
+      "line": 20,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Allocation.tsx",
+      "line": 95,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Backtest.tsx",
+      "line": 107,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Income.tsx",
+      "line": 113,
+      "element": "Input"
+    },
+    {
+      "file": "src/pages/Income.tsx",
+      "line": 134,
+      "element": "Input"
+    },
+    {
+      "file": "src/pages/Income.tsx",
+      "line": 298,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Landing.tsx",
+      "line": 135,
+      "element": "Link"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 112,
+      "element": "Input"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 127,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 154,
+      "element": "Input"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 167,
+      "element": "Input"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 185,
+      "element": "Input"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 200,
+      "element": "Input"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 215,
+      "element": "Input"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 229,
+      "element": "SelectTrigger"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 234,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 249,
+      "element": "Input"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 263,
+      "element": "SelectTrigger"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 267,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/pages/Montecarlo.tsx",
+      "line": 268,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/pages/Projections.tsx",
+      "line": 189,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Projections.tsx",
+      "line": 211,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Stock.tsx",
+      "line": 278,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Stock.tsx",
+      "line": 281,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Stock.tsx",
+      "line": 330,
+      "element": "Switch"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 150,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 154,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 155,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 159,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 163,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 164,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 189,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 192,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 207,
+      "element": "Input"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 212,
+      "element": "SelectTrigger"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 216,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 217,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 218,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 219,
+      "element": "SelectItem"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 226,
+      "element": "Switch"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 250,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 251,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 252,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/pages/Styleguide.tsx",
+      "line": 253,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/pages/Xray.tsx",
+      "line": 451,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/pages/Xray.tsx",
+      "line": 452,
+      "element": "TabsTrigger"
+    },
+    {
+      "file": "src/pages/Xray.tsx",
+      "line": 470,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Xray.tsx",
+      "line": 490,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Xray.tsx",
+      "line": 493,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Xray.tsx",
+      "line": 742,
+      "element": "Button"
+    },
+    {
+      "file": "src/pages/Xray.tsx",
+      "line": 769,
+      "element": "Button"
+    },
+    {
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 70,
+      "element": "Input"
+    },
+    {
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 164,
+      "element": "Button"
+    },
+    {
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 169,
+      "element": "Button"
+    },
+    {
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 198,
+      "element": "Switch"
+    },
+    {
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 257,
+      "element": "Input"
+    },
+    {
+      "file": "src/projections/ProjectionEditor.tsx",
+      "line": 336,
+      "element": "Button"
+    }
+  ]
 }

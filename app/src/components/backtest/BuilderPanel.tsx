@@ -76,13 +76,24 @@ function PortfolioEditor({
         </h3>
         <div className="flex items-center gap-1">
           {!balanced && portfolio.allocations.length > 0 && (
-            <Button variant="ghost" size="xs" onClick={equalize}>
+            <Button
+              variant="ghost"
+              size="xs"
+              data-testid={`backtest.builder.balance-p${index + 1}`}
+              onClick={equalize}
+            >
               <Scale />
               Balance
             </Button>
           )}
           {onRemove && (
-            <Button variant="ghost" size="icon-xs" aria-label={`Remove ${portfolio.name}`} onClick={onRemove}>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              aria-label={`Remove ${portfolio.name}`}
+              data-testid={`backtest.builder.remove-p${index + 1}`}
+              onClick={onRemove}
+            >
               <X />
             </Button>
           )}
@@ -108,6 +119,7 @@ function PortfolioEditor({
                 min={0}
                 max={100}
                 step={5}
+                data-testid={`backtest.builder.weight-p${index + 1}-${a.ticker}`}
                 value={Number.isFinite(a.weight) ? a.weight : ''}
                 onChange={(e) => setWeight(i, Number(e.target.value))}
                 className="pr-7 text-right font-mono tnum"
@@ -120,6 +132,7 @@ function PortfolioEditor({
               variant="ghost"
               size="icon-sm"
               aria-label={`Remove ${a.ticker}`}
+              data-testid={`backtest.builder.remove-p${index + 1}-${a.ticker}`}
               className="opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
               onClick={() =>
                 onChange({
@@ -136,6 +149,7 @@ function PortfolioEditor({
 
       <TickerPicker
         exclude={portfolio.allocations.map((a) => a.ticker)}
+        testId={`backtest.builder.picker-p${index + 1}`}
         autoFocus={index === 0 && portfolio.allocations.length === 0}
         onPick={(entry) => {
           const remaining = Math.round((100 - sum) * 100) / 100
@@ -211,6 +225,7 @@ export function BuilderPanel({ setup, onChange, effectiveStart, limitingTicker }
         <Button
           variant="ghost"
           className="text-muted-foreground"
+          data-testid="backtest.builder.add-portfolio"
           onClick={() =>
             onChange({
               ...setup,
@@ -283,6 +298,7 @@ export function BuilderPanel({ setup, onChange, effectiveStart, limitingTicker }
                     type="number"
                     min={1}
                     step={1000}
+                    data-testid="backtest.builder.initial-amount"
                     value={setup.config.initialAmount}
                     onChange={(e) =>
                       onChange({
@@ -304,6 +320,7 @@ export function BuilderPanel({ setup, onChange, effectiveStart, limitingTicker }
                     id="contrib"
                     type="number"
                     step={100}
+                    data-testid="backtest.builder.monthly-contribution"
                     value={setup.config.monthlyContribution}
                     onChange={(e) =>
                       onChange({
@@ -332,14 +349,14 @@ export function BuilderPanel({ setup, onChange, effectiveStart, limitingTicker }
                     })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="backtest.builder.rebalance-trigger">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="annual">Annually</SelectItem>
-                    <SelectItem value="quarterly">Quarterly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="none" data-testid="backtest.builder.rebalance-none">None</SelectItem>
+                    <SelectItem value="annual" data-testid="backtest.builder.rebalance-annual">Annually</SelectItem>
+                    <SelectItem value="quarterly" data-testid="backtest.builder.rebalance-quarterly">Quarterly</SelectItem>
+                    <SelectItem value="monthly" data-testid="backtest.builder.rebalance-monthly">Monthly</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -349,13 +366,13 @@ export function BuilderPanel({ setup, onChange, effectiveStart, limitingTicker }
                   value={setup.benchmark ?? 'none'}
                   onValueChange={(v) => onChange({ ...setup, benchmark: v === 'none' ? null : v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="backtest.builder.benchmark-trigger">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="none" data-testid="backtest.builder.benchmark-none">None</SelectItem>
                     {getCatalog().map((e) => (
-                      <SelectItem key={e.ticker} value={e.ticker}>
+                      <SelectItem key={e.ticker} value={e.ticker} data-testid={`backtest.builder.benchmark-${e.ticker}`}>
                         {e.ticker}
                       </SelectItem>
                     ))}
@@ -367,6 +384,7 @@ export function BuilderPanel({ setup, onChange, effectiveStart, limitingTicker }
             <div className="flex items-center gap-3">
               <Switch
                 id="reinvest"
+                data-testid="backtest.builder.reinvest-toggle"
                 checked={setup.config.reinvestDividends}
                 onCheckedChange={(v) =>
                   onChange({ ...setup, config: { ...setup.config, reinvestDividends: v } })
