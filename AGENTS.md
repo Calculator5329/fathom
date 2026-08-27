@@ -35,5 +35,5 @@ scripts, sweeps, QA). The orchestrating session (Claude) reviews and commits you
 ## Context documents
 
 - `CLAUDE.md` — architecture map, invariants, environment gotchas (applies to you too).
-- `docs/VISION.md` — roadmap; `docs/PLAN.md` — original spec; `docs/data-notes.md` — data
+- `docs/VISION.md` — roadmap; `docs/internal/PLAN.md` — original spec; `docs/data-notes.md` — data
   provenance and adjustment-semantics evidence (read before any price-data task).

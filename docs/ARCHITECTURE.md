@@ -68,16 +68,21 @@ scripts/                data pipeline (see below)
 data/                   asset-class JSONs committed; data/tickers/ + data/fundamentals/
                         gitignored — source of truth is the GCS bucket
 docs/                   VISION.md (living roadmap + decisions), HANDOFF_ROADMAP.md,
-                        IDEAS.md, data-notes.md, PLAN.md (original spec), HANDOFF.md
+                        data-notes.md, DATA_SOURCES_*.md, notes/ (engineering
+                        write-ups), screenshots/
+docs/internal/          process files: HANDOFF.md, PLAN.md (original spec),
+                        IDEAS.md, plans/, reports/, archive/
 context/                Ethan's reference datasets — read-only, uncommitted
-stock-analysis/         dead starter — ignore, never touch
 ```
 
-Ethan's pre-existing, deliberately-uncommitted files (never edit or commit): root
-`README.md` is his but committed; `docs/DATA_SOURCES_*.md`, `docs/SOURCE_PROJECTS.md`,
-`docs/{changelog,roadmap,tech_spec}.md`, `context/`, `stock-analysis/`, root
-`package-lock.json` are untracked on purpose. `docs/roadmap.md` is his stale
-pre-project draft — the living roadmap is `docs/VISION.md` + `docs/HANDOFF_ROADMAP.md`.
+The vanilla Vite starter that used to sit at `stock-analysis/` was removed on
+2026-08-26 (superseded by `app/` since 2026-07; it stays in git history).
+
+Ethan's pre-existing files (never edit or commit): root `README.md` is his but
+committed; `docs/DATA_SOURCES_*.md`, `docs/internal/SOURCE_PROJECTS.md`,
+`docs/{changelog,roadmap,tech_spec}.md`, `context/`, root `package-lock.json`.
+`docs/roadmap.md` is his stale pre-project draft — the living roadmap is
+`docs/VISION.md` + `docs/HANDOFF_ROADMAP.md`.
 
 ## Data pipelines
 

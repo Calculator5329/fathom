@@ -5,7 +5,7 @@ Companion app to the personal-finance project at `~/projects/finance/finance-mas
 (that one owns budgets/net-worth/personal money; THIS one owns markets. Keep the boundary clean:
 Fathom never stores personal account balances; finance-master never re-implements market analysis).
 
-Read [docs/VISION.md](docs/VISION.md) for the roadmap, [docs/PLAN.md](docs/PLAN.md) for the original
+Read [docs/VISION.md](docs/VISION.md) for the roadmap, [docs/internal/PLAN.md](docs/internal/PLAN.md) for the original
 product spec, [docs/data-notes.md](docs/data-notes.md) before touching data.
 
 ## Docs map (handoff suite, 2026-07-05)
@@ -15,7 +15,10 @@ product spec, [docs/data-notes.md](docs/data-notes.md) before touching data.
 - [docs/HANDOFF_ROADMAP.md](docs/HANDOFF_ROADMAP.md) — Now/Next/Later task list with acceptance
   criteria. (Named to avoid case-colliding with `docs/roadmap.md`, which is Ethan's untracked
   pre-project draft — don't touch that one.) [docs/VISION.md](docs/VISION.md) holds decision history.
-- [docs/IDEAS.md](docs/IDEAS.md) — ranked expansion backlog with first steps.
+- [docs/internal/IDEAS.md](docs/internal/IDEAS.md) — ranked expansion backlog with first steps.
+- [docs/internal/](docs/internal/) — process files (handoff notes, original plan, agent plans,
+  one-off reports). Moved out of `docs/` on 2026-08-26 so the public docs directory reads as
+  project documentation. [docs/notes/](docs/notes/) holds standalone engineering write-ups.
 
 ## Definition of done (every change)
 
@@ -122,6 +125,8 @@ Global covers git hygiene (never `git add -A`), the Codex delegation recipe, ver
   untracked files (they are untracked on purpose).
 - Cloud mutations (gcloud IAM, buckets, deploys) stay with Claude directly, never inside Codex
   (the permission classifier blocks them there anyway).
-- Leave Ethan's files alone: root `README.md`, `docs/DATA_SOURCES_*.md`, `docs/SOURCE_PROJECTS.md`,
-  `docs/{changelog,roadmap,tech_spec}.md`, `stock-analysis/` (dead starter), `context/`,
-  root `package-lock.json`.
+- Leave Ethan's files alone: root `README.md`, `docs/DATA_SOURCES_*.md`,
+  `docs/internal/SOURCE_PROJECTS.md`, `docs/{changelog,roadmap,tech_spec}.md`, `context/`,
+  root `package-lock.json`. (`stock-analysis/`, the dead Vite starter, was on this list until
+  it was deleted on 2026-08-26 under an explicit portfolio-presentation lease; it lives on in
+  git history.)

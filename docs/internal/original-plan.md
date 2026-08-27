@@ -1,5 +1,10 @@
 # Stock Analysis Project
 
+> Historical document. This is the pre-build plan from 2026-07. The vanilla Vite
+> starter it describes (`stock-analysis/`) was replaced by `app/` and deleted from
+> the working tree on 2026-08-26; it remains in git history. Current state is in
+> [ARCHITECTURE.md](../ARCHITECTURE.md).
+
 Portfolio allocation backtesting website — similar in spirit to PortfolioVisualizer, but built as a dedicated product.
 
 ## Architecture (planned)
@@ -10,7 +15,7 @@ Portfolio allocation backtesting website — similar in spirit to PortfolioVisua
 | Backend | Google Cloud Run service (stateless API) |
 | Data | Historical ticker prices (stocks, ETFs, mutual funds) + long-horizon asset-class series |
 
-The Vite app lives in [`stock-analysis/`](../stock-analysis/). Backend scaffolding is not started yet.
+The Vite app lived in `stock-analysis/` (removed; see the note above). Backend scaffolding is not started yet.
 
 ## Two backtest modes
 
@@ -23,12 +28,12 @@ This repo collects **documentation and small reference datasets** from prior fin
 
 | Doc | Purpose |
 |-----|---------|
-| [DATA_SOURCES_TICKERS.md](./DATA_SOURCES_TICKERS.md) | Where ticker price/dividend/split data lives and how it was fetched |
-| [DATA_SOURCES_ASSET_CLASSES.md](./DATA_SOURCES_ASSET_CLASSES.md) | Long-horizon asset-class datasets (1871+) |
+| [DATA_SOURCES_TICKERS.md](../DATA_SOURCES_TICKERS.md) | Where ticker price/dividend/split data lives and how it was fetched |
+| [DATA_SOURCES_ASSET_CLASSES.md](../DATA_SOURCES_ASSET_CLASSES.md) | Long-horizon asset-class datasets (1871+) |
 | [SOURCE_PROJECTS.md](./SOURCE_PROJECTS.md) | Index of all related repos and what to reuse from each |
-| [docs/roadmap.md](./roadmap.md) | Feature roadmap |
-| [docs/tech_spec.md](./tech_spec.md) | Architecture and data contracts |
-| [context/README.md](../context/README.md) | Local copies vs external paths |
+| [docs/roadmap.md](../roadmap.md) | Feature roadmap |
+| [docs/tech_spec.md](../tech_spec.md) | Architecture and data contracts |
+| [context/README.md](../../context/README.md) | Local copies vs external paths |
 
 ## Quick start (frontend only)
 

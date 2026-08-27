@@ -4,7 +4,7 @@ _Written 2026-07-05. Ranked by impact-per-effort for Ethan's portfolio goals
 (finance × AI agents × local-first, solo dev). Items marked `[ETHAN]` need his
 sign-off before starting; `[CLOUD]` needs gcloud/deploy/secret access.
 None of these override the hard rules in root `CLAUDE.md` or the standing
-rejections in [HANDOFF_ROADMAP.md](HANDOFF_ROADMAP.md)._
+rejections in [HANDOFF_ROADMAP.md](../HANDOFF_ROADMAP.md)._
 
 | # | Idea | Impact | Effort | One-line rationale |
 |---|---|---|---|---|

@@ -57,7 +57,8 @@ data/         long-horizon asset-class series (1871+), committed
   filings while its year-end price is pre-split — a naive market cap is 20×
   off). Valuation charts resolve each year's share basis by log-proximity
   chaining across every later split basis, repair magnitude errors via
-  net-income/EPS, and synthesize missing counts.
+  net-income/EPS, and synthesize missing counts. Full write-up:
+  [docs/notes/edgar-share-basis.md](docs/notes/edgar-share-basis.md).
 - **Broker CSVs are hostile input.** The X-ray parser handles Fidelity's
   formats end-to-end: preamble/disclaimer rows, `MM-DD-YYYY` dates, money-market
   sweep noise, negative-quantity sells, dividends and EFTs as first-class data.
