@@ -1,4 +1,5 @@
 import type { DailyRecord, TickerSeries } from '@/engine'
+import { fetchRetry } from '@/lib/fetchRetry'
 
 /**
  * Asset-class data for the allocation backtester: long-history monthly
@@ -40,11 +41,11 @@ let loaded: Promise<{ returns: Map<string, Map<string, number>>; cpi: Map<string
 export function loadAssetClassData() {
   if (!loaded) {
     loaded = Promise.all([
-      fetch(`${DATA_BASE}asset-classes/us-monthly.json`).then((r) => {
+      fetchRetry(`${DATA_BASE}asset-classes/us-monthly.json`).then((r) => {
         if (!r.ok) throw new Error(`asset data unavailable (${r.status})`)
         return r.json() as Promise<MonthlyDataset>
       }),
-      fetch(`${DATA_BASE}asset-classes/us-size-premia.json`).then((r) => {
+      fetchRetry(`${DATA_BASE}asset-classes/us-size-premia.json`).then((r) => {
         if (!r.ok) throw new Error(`asset data unavailable (${r.status})`)
         return r.json() as Promise<MonthlyDataset>
       }),

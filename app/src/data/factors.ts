@@ -1,4 +1,5 @@
 /** Fama-French monthly factor data (built by scripts/build-ff-factors.mjs). */
+import { fetchRetry } from '@/lib/fetchRetry'
 
 export interface FactorData {
   dates: string[] // yyyy-mm
@@ -18,7 +19,7 @@ let cached: Promise<FactorData | null> | null = null
 
 export function loadFactors(): Promise<FactorData | null> {
   if (!cached) {
-    cached = fetch(`${DATA_BASE}asset-classes/ff-factors.json`)
+    cached = fetchRetry(`${DATA_BASE}asset-classes/ff-factors.json`)
       .then((res) => (res.ok && res.headers.get('content-type')?.includes('json') ? res.json() : null))
       .then((raw): FactorData | null => {
         if (!raw?.dates?.length) return null

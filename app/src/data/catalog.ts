@@ -1,4 +1,5 @@
 import type { TickerSeries } from '@/engine'
+import { fetchRetry } from '@/lib/fetchRetry'
 
 export type AssetType = 'Stock' | 'ETF' | 'Mutual fund' | 'Leveraged'
 
@@ -535,7 +536,7 @@ let catalogLoaded: Promise<CatalogEntry[]> | null = null
  */
 export function loadCatalog(): Promise<CatalogEntry[]> {
   if (!catalogLoaded) {
-    catalogLoaded = fetch(`${DATA_BASE}tickers/catalog.json`)
+    catalogLoaded = fetchRetry(`${DATA_BASE}tickers/catalog.json`)
       .then((res) => (res.ok ? res.json() : FALLBACK))
       .then((entries: CatalogEntry[]) => {
         catalog = entries
@@ -709,7 +710,7 @@ export function loadSeries(ticker: string): Promise<TickerSeries> {
   const key = ticker.toUpperCase()
   let promise = seriesCache.get(key)
   if (!promise) {
-    promise = fetch(`${DATA_BASE}tickers/${key}.json`)
+    promise = fetchRetry(`${DATA_BASE}tickers/${key}.json`)
       .then(async (res) => {
         // Dev static hosting answers unknown paths with index.html (200 text/html)
         // — treat anything non-JSON as a miss so users see a clean message
@@ -718,7 +719,7 @@ export function loadSeries(ticker: string): Promise<TickerSeries> {
         // Not in the cache — ask the API to admit it (fetches from Tiingo,
         // stores to the bucket, returns the series).
         if (API_BASE) {
-          const admitted = await fetch(`${API_BASE}/api/ticker/${key}`)
+          const admitted = await fetchRetry(`${API_BASE}/api/ticker/${key}`)
           if (admitted.status === 429) throw new Error(providerLimitMessage())
           if (!admitted.ok) {
             const body = await admitted.json().catch(() => null)
