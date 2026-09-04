@@ -1,0 +1,90 @@
+{
+  "ticker": "DEMO",
+  "name": "Synthetic valuation demonstration",
+  "records": [
+    {
+      "date": "2014-12-31",
+      "close": 10,
+      "adjClose": 10,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2015-12-31",
+      "close": 11,
+      "adjClose": 11,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2016-12-31",
+      "close": 12,
+      "adjClose": 12,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2017-12-31",
+      "close": 13,
+      "adjClose": 13,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2018-12-31",
+      "close": 14,
+      "adjClose": 14,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2019-12-31",
+      "close": 15,
+      "adjClose": 15,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2020-12-31",
+      "close": 16,
+      "adjClose": 16,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2021-12-31",
+      "close": 17,
+      "adjClose": 17,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2022-12-31",
+      "close": 18,
+      "adjClose": 18,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2023-12-31",
+      "close": 19,
+      "adjClose": 19,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2024-12-31",
+      "close": 20,
+      "adjClose": 20,
+      "divCash": 0,
+      "splitFactor": 1
+    },
+    {
+      "date": "2025-12-31",
+      "close": 21,
+      "adjClose": 21,
+      "divCash": 0,
+      "splitFactor": 1
+    }
+  ]
+}

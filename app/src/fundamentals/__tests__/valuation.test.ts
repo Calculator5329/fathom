@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import type { DailyRecord } from '@/engine'
 import { resolveShares, valuationSeries } from '../charts'
 import type { FiscalYear, Fundamentals } from '../load'
+import { computeValuationBandSummary } from '@/data/valuationBands'
 
 // AMZN-shaped fixture: 20:1 split mid-2022. EDGAR restates FY2020/21 share
 // counts to the post-split basis (they come from later filings' comparatives)
@@ -125,6 +126,34 @@ describe('resolveShares edge cases', () => {
 })
 
 describe('valuationSeries', () => {
+  it('keeps full ratio precision until display formatting', () => {
+    const data = valuationSeries([rec('2024-12-31', 10)], [fy(2024, 3, 7, 7)], 'pe')
+    expect(data[0][1]).toBe(30 / 7)
+  })
+
+  it('rejects unusable prices and share counts without contaminating history', () => {
+    for (const invalid of [NaN, Infinity, -Infinity, -1, 0]) {
+      expect(valuationSeries([rec('2024-12-31', invalid)], [fy(2024, 3, 7, 7)], 'ps')[0][1]).toBeNull()
+      expect(resolveShares([rec('2024-12-31', 10)], [fy(2024, invalid, 7, 7)]).size).toBe(0)
+    }
+    expect(valuationSeries([rec('2024-12-31', 10)], [fy(2024, 3, NaN, 7)], 'pe')[0][1]).toBeNull()
+  })
+
+  it('represents nonfinite denominators as unavailable for every metric', () => {
+    const input = { ...fy(2024, 3, Infinity, Infinity), revenue: Infinity, fcf: Infinity, stockholdersEquity: Infinity }
+    for (const metric of ['pe', 'ps', 'pfcf', 'pocf', 'pb'] as const) {
+      expect(valuationSeries([rec('2024-12-31', 10)], [input], metric)[0][1]).toBeNull()
+    }
+  })
+
+  it('retains losses in P/E history and leaves nonpositive cash-flow/book periods unavailable', () => {
+    const input = { ...fy(2024, 3, -7, -7), fcf: -7, stockholdersEquity: -7 }
+    expect(valuationSeries([rec('2024-12-31', 10)], [input], 'pe')[0][1]).toBe(30 / -7)
+    for (const metric of ['pfcf', 'pocf', 'pb'] as const) {
+      expect(valuationSeries([rec('2024-12-31', 10)], [input], metric)[0][1]).toBeNull()
+    }
+  })
+
   it('P/OCF stays in a sane band through the split (no 20x spike)', () => {
     const data = valuationSeries(records, years, 'pocf')
     const byYear = new Map(data)
@@ -174,5 +203,21 @@ describe.skipIf(!hasAmzn)('valuationSeries on real AMZN data', () => {
       expect(v).toBeGreaterThan(0.3)
       expect(v).toBeLessThan(10)
     }
+  })
+})
+
+
+describe('valuation browser fixture', () => {
+  it('matches the hand-computed complete workflow, including latest-year loss and missing revenue', () => {
+    const prices = JSON.parse(readFileSync(path.join(import.meta.dirname, 'fixtures/valuation-demo-prices.json'), 'utf8')) as { records: DailyRecord[] }
+    const fundamentals = JSON.parse(readFileSync(path.join(import.meta.dirname, 'fixtures/valuation-demo-fundamentals.json'), 'utf8')) as Fundamentals
+    const data = valuationSeries(prices.records, fundamentals.fiscalYears, 'pe')
+    const summary = computeValuationBandSummary(data, 'pe')
+    expect(new Map(data).get('2020')).toBe(16)
+    expect(summary.sampleCount).toBe(10)
+    expect(summary.latest).toEqual({ fiscalYear: '2024', value: 20, percentile: 95 })
+    expect(summary.boundaries).toEqual({ p10: 10.9, p25: 12.25, p50: 14.5, p75: 16.75, p90: 19.1 })
+    expect(summary.excluded).toEqual({ missing: 1, nonfinite: 0, nonpositive: 1 })
+    expect(computeValuationBandSummary(data.slice(-5), 'pe')).toMatchObject({ sampleCount: 3, boundaries: null })
   })
 })

@@ -187,15 +187,17 @@ export function resolveShares(records: DailyRecord[], years: FiscalYear[]): Map<
     let s =
       fy.sharesDiluted ??
       (fy.netIncome && fy.epsDiluted ? Math.abs(fy.netIncome / fy.epsDiluted) : null)
-    if (!s) continue
+    if (s == null || !Number.isFinite(s) || s <= 0) continue
 
     // Magnitude repair: some filings state the raw fact in thousands or
     // millions (e.g. MCD "752"). net income / EPS from the same fact set
     // implies the true order of magnitude.
     if (fy.sharesDiluted && fy.netIncome && fy.epsDiluted) {
       const implied = Math.abs(fy.netIncome / fy.epsDiluted)
-      while (s < implied / 30) s *= 1000
-      while (s > implied * 30) s /= 1000
+      if (Number.isFinite(implied) && implied > 0) {
+        while (s < implied / 30) s *= 1000
+        while (s > implied * 30) s /= 1000
+      }
     }
 
     // Candidate bases: the count may be as-reported (era basis) or restated
@@ -235,27 +237,30 @@ export function valuationSeries(
   // year-end price × basis-resolved shares (see resolveShares). P/E uses
   // mktCap / net income for the same reason — reported EPS has the same
   // mixed-basis problem as reported share counts.
+  const divide = (numerator: number, denominator: number): number | null =>
+    Number.isFinite(denominator) && denominator !== 0 ? numerator / denominator : null
   const ratio = (fy: FiscalYear): number | null => {
     const st = stats.get(fy.year)
-    if (!st) return null
+    if (!st || !Number.isFinite(st.adjClose) || st.adjClose <= 0) return null
     const sh = shares.get(fy.year)
     if (metric === 'pe') {
-      if (sh && fy.netIncome) return (st.adjClose * sh) / fy.netIncome
+      if (sh && fy.netIncome) return divide(st.adjClose * sh, fy.netIncome)
       // No share count to normalize with: raw close over reported EPS
       // (consistent when both are as-reported, which is the common case).
-      return fy.epsDiluted ? st.adjClose * st.splitSince / fy.epsDiluted : null
+      return fy.epsDiluted ? divide(st.adjClose * st.splitSince, fy.epsDiluted) : null
     }
     if (!sh) return null
     const mktCap = st.adjClose * sh
-    if (metric === 'ps') return fy.revenue ? mktCap / fy.revenue : null
-    if (metric === 'pfcf') return fy.fcf && fy.fcf > 0 ? mktCap / fy.fcf : null
-    if (metric === 'pocf') return fy.operatingCashFlow && fy.operatingCashFlow > 0 ? mktCap / fy.operatingCashFlow : null
-    return fy.stockholdersEquity && fy.stockholdersEquity > 0 ? mktCap / fy.stockholdersEquity : null
+    if (metric === 'ps') return fy.revenue ? divide(mktCap, fy.revenue) : null
+    if (metric === 'pfcf') return fy.fcf && fy.fcf > 0 ? divide(mktCap, fy.fcf) : null
+    if (metric === 'pocf') return fy.operatingCashFlow && fy.operatingCashFlow > 0 ? divide(mktCap, fy.operatingCashFlow) : null
+    return fy.stockholdersEquity && fy.stockholdersEquity > 0 ? divide(mktCap, fy.stockholdersEquity) : null
   }
 
   return years.map((fy) => {
     const v = ratio(fy)
-    return [String(fy.year), v == null ? null : Math.round(v * 10) / 10]
+    // Preserve precision for percentile calculations; round only in the UI.
+    return [String(fy.year), v == null || !Number.isFinite(v) ? null : v]
   })
 }
 
