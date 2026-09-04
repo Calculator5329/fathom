@@ -230,6 +230,7 @@ export function Stock() {
         <div className="min-w-0">
           {switching ? (
             <div
+              data-testid="stock.header.ticker-switcher"
               className="w-64"
               onKeyDown={(e) => {
                 if (e.key === 'Escape') setSwitching(false)
@@ -349,7 +350,7 @@ export function Stock() {
                   {incomePeriod.endsWith('q') ? 'by quarter' : 'by fiscal year'}
                 </span>
               </CardTitle>
-              <Segmented options={PERIOD_OPTS} value={incomePeriod} onChange={setIncomePeriod} />
+              <Segmented scope="income-period" options={PERIOD_OPTS} value={incomePeriod} onChange={setIncomePeriod} />
             </CardHeader>
             <CardContent>
               <EChart option={revenueIncomeOption(incomeRows)} className="h-72 w-full" />
@@ -364,7 +365,7 @@ export function Stock() {
                   {incomePeriod.endsWith('q') ? 'by quarter' : 'by fiscal year'}
                 </span>
               </CardTitle>
-              <Segmented options={PERIOD_OPTS} value={incomePeriod} onChange={setIncomePeriod} />
+              <Segmented scope="margin-period" options={PERIOD_OPTS} value={incomePeriod} onChange={setIncomePeriod} />
             </CardHeader>
             <CardContent>
               <EChart option={marginsOption(incomeRows)} className="h-64 w-full" />
@@ -376,7 +377,7 @@ export function Stock() {
               <CardHeader className="flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base font-medium">Balance sheet</CardTitle>
                 <div className="flex flex-wrap items-center gap-3">
-                  <Segmented
+                  <Segmented scope="balance-mode"
                     options={[
                       { v: 'simple', label: 'Simple' },
                       { v: 'advanced', label: 'Advanced' },
@@ -384,7 +385,7 @@ export function Stock() {
                     value={bsAdvanced ? 'advanced' : 'simple'}
                     onChange={(v) => setBsAdvanced(v === 'advanced')}
                   />
-                  <Segmented options={RANGE_OPTS} value={bsRange} onChange={setBsRange} />
+                  <Segmented scope="balance-range" options={RANGE_OPTS} value={bsRange} onChange={setBsRange} />
                 </div>
               </CardHeader>
               <CardContent>
@@ -404,7 +405,7 @@ export function Stock() {
                   <span className="ml-2 font-normal text-muted-foreground">vs its own history</span>
                 </CardTitle>
                 <div className="flex flex-wrap items-center gap-3">
-                  <Segmented
+                  <Segmented scope="valuation-metric"
                     options={[
                       { v: 'pe' as ValuationMetric, label: 'P/E' },
                       { v: 'ps' as ValuationMetric, label: 'P/S' },
@@ -415,7 +416,7 @@ export function Stock() {
                     value={valMetric}
                     onChange={setValMetric}
                   />
-                  <Segmented options={RANGE_OPTS} value={valRange} onChange={setValRange} />
+                  <Segmented scope="valuation-range" options={RANGE_OPTS} value={valRange} onChange={setValRange} />
                 </div>
               </CardHeader>
               <CardContent>

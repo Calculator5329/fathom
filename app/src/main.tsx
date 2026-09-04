@@ -8,3 +8,8 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+// The opt-in prototype is absent from production bundles and never starts a mic.
+if (import.meta.env.DEV && ['localhost', '127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).has('voice-demo')) {
+  void import('./dev/VoiceNavigation').then(module => module.mountVoiceNavigation())
+}

@@ -7,10 +7,13 @@ import { Button } from '@/components/ui/button'
  */
 export function Segmented<T extends string>({
   options,
+  scope,
   value,
   onChange,
 }: {
   options: Array<{ v: T; label: string }>
+  /** Stable owner scope when several instances render the same option values. */
+  scope?: string
   value: T
   onChange: (v: T) => void
 }) {
@@ -19,7 +22,7 @@ export function Segmented<T extends string>({
       {options.map((o) => (
         <Button
           key={o.v}
-          data-testid={`ui.segmented.option-${o.v}`}
+          data-testid={scope ? `ui.segmented.option-${scope}-${o.v}` : `ui.segmented.option-${o.v}`}
           variant={o.v === value ? 'secondary' : 'ghost'}
           size="xs"
           className="font-mono"
