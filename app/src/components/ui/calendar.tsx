@@ -155,6 +155,8 @@ function Calendar({
             <ChevronDownIcon className={cn("size-4", className)} {...props} />
           )
         },
+        PreviousMonthButton: (props) => <button {...props} data-testid="ui.calendar.previous-month" />,
+        NextMonthButton: (props) => <button {...props} data-testid="ui.calendar.next-month" />,
         DayButton: CalendarDayButton,
         Dropdown: ({ value, onChange, options, className, ...props }) => (
           <CaptionDropdown

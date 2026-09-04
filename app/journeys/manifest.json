@@ -5,198 +5,604 @@
       "name": "backtest-advanced-disclosure",
       "description": "The backtest builder's Advanced toggle is present and enabled.",
       "kind": "url-path",
-      "context": { "path": "/backtest" },
+      "context": {
+        "path": "/backtest"
+      },
       "steps": [
-        { "action": "expect", "testId": "backtest.builder.advanced-toggle", "predicate": "visible", "timeoutMs": 10000 },
-        { "action": "expect", "testId": "backtest.builder.advanced-toggle", "predicate": "enabled" }
+        {
+          "action": "expect",
+          "testId": "backtest.builder.advanced-toggle",
+          "predicate": "visible",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "expect",
+          "testId": "backtest.builder.advanced-toggle",
+          "predicate": "enabled"
+        }
       ]
     },
     {
       "name": "allocation-advanced-disclosure",
       "description": "The allocation builder's Advanced section is reachable through its stable id.",
       "kind": "url-path",
-      "context": { "path": "/allocation" },
+      "context": {
+        "path": "/allocation"
+      },
       "steps": [
-        { "action": "expect", "testId": "allocation.builder.advanced-toggle", "predicate": "visible", "timeoutMs": 10000 },
-        { "action": "click", "testId": "allocation.builder.advanced-toggle" }
+        {
+          "action": "expect",
+          "testId": "allocation.builder.advanced-toggle",
+          "predicate": "visible",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "click",
+          "testId": "allocation.builder.advanced-toggle"
+        }
       ]
     },
     {
       "name": "xray-positions-entry",
       "description": "Portfolio X-ray accepts pasted positions through the identified inputs.",
       "kind": "url-path",
-      "context": { "path": "/xray" },
+      "context": {
+        "path": "/xray"
+      },
       "steps": [
-        { "action": "expect", "testId": "xray.inputs.positions", "predicate": "visible", "timeoutMs": 10000 },
-        { "action": "fill", "testId": "xray.inputs.positions", "value": "AAPL 12\nVTI 40" },
-        { "action": "expect", "testId": "xray.inputs.positions", "predicate": "enabled" }
+        {
+          "action": "expect",
+          "testId": "xray.inputs.positions",
+          "predicate": "visible",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "fill",
+          "testId": "xray.inputs.positions",
+          "value": "AAPL 12\nVTI 40"
+        },
+        {
+          "action": "expect",
+          "testId": "xray.inputs.positions",
+          "predicate": "enabled"
+        }
       ]
     },
     {
       "name": "backtest-builder-control-path",
       "description": "Build AMZN/GOOGL 60/40 vs SPY/QQQ through the controls alone: letter-by-letter ticker entry, keyboard selection, weight edits, the Radix rebalance dropdown, and the reinvest switch, ending with results rendered. Recorded live 2026-08-25 (27/27 receipts ok); the predicate v2 acceptance journey.",
       "kind": "control-path",
-      "context": { "path": "/" },
+      "context": {
+        "path": "/"
+      },
       "steps": [
-        { "action": "click", "testId": "app.nav.backtest" },
-        { "action": "type", "testId": "backtest.builder.picker-p1", "value": "AMZN" },
-        { "action": "press", "testId": "backtest.builder.picker-p1", "key": "Enter" },
-        { "action": "type", "testId": "backtest.builder.picker-p1", "value": "GOOGL" },
-        { "action": "press", "testId": "backtest.builder.picker-p1", "key": "Enter" },
-        { "action": "fill", "testId": "backtest.builder.weight-p1-AMZN", "value": "60" },
-        { "action": "fill", "testId": "backtest.builder.weight-p1-GOOGL", "value": "40" },
-        { "action": "click", "testId": "backtest.builder.add-portfolio" },
-        { "action": "type", "testId": "backtest.builder.picker-p2", "value": "SPY" },
-        { "action": "press", "testId": "backtest.builder.picker-p2", "key": "Enter" },
-        { "action": "type", "testId": "backtest.builder.picker-p2", "value": "QQQ" },
-        { "action": "press", "testId": "backtest.builder.picker-p2", "key": "Enter" },
-        { "action": "expect", "testId": "backtest.results.export-csv", "predicate": "visible", "timeoutMs": 20000 },
-        { "action": "click", "testId": "backtest.builder.advanced-toggle" },
-        { "action": "click", "testId": "backtest.builder.rebalance-trigger" },
-        { "action": "click", "testId": "backtest.builder.rebalance-quarterly" },
-        { "action": "expect", "testId": "backtest.builder.rebalance-trigger", "predicate": "contains-text", "value": "Quarterly", "timeoutMs": 5000 },
-        { "action": "expect", "testId": "backtest.builder.reinvest-toggle", "predicate": "checked" },
-        { "action": "click", "testId": "backtest.builder.reinvest-toggle" },
-        { "action": "expect", "testId": "backtest.builder.reinvest-toggle", "predicate": "unchecked", "timeoutMs": 5000 },
-        { "action": "click", "testId": "backtest.builder.reinvest-toggle" },
-        { "action": "expect", "testId": "backtest.builder.reinvest-toggle", "predicate": "checked", "timeoutMs": 5000 },
-        { "action": "expect", "testId": "backtest.results.export-csv", "predicate": "visible", "timeoutMs": 20000 }
+        {
+          "action": "click",
+          "testId": "app.nav.backtest"
+        },
+        {
+          "action": "type",
+          "testId": "backtest.builder.picker-p1",
+          "value": "AMZN"
+        },
+        {
+          "action": "press",
+          "testId": "backtest.builder.picker-p1",
+          "key": "Enter"
+        },
+        {
+          "action": "type",
+          "testId": "backtest.builder.picker-p1",
+          "value": "GOOGL"
+        },
+        {
+          "action": "press",
+          "testId": "backtest.builder.picker-p1",
+          "key": "Enter"
+        },
+        {
+          "action": "fill",
+          "testId": "backtest.builder.weight-p1-AMZN",
+          "value": "60"
+        },
+        {
+          "action": "fill",
+          "testId": "backtest.builder.weight-p1-GOOGL",
+          "value": "40"
+        },
+        {
+          "action": "click",
+          "testId": "backtest.builder.add-portfolio"
+        },
+        {
+          "action": "type",
+          "testId": "backtest.builder.picker-p2",
+          "value": "SPY"
+        },
+        {
+          "action": "press",
+          "testId": "backtest.builder.picker-p2",
+          "key": "Enter"
+        },
+        {
+          "action": "type",
+          "testId": "backtest.builder.picker-p2",
+          "value": "QQQ"
+        },
+        {
+          "action": "press",
+          "testId": "backtest.builder.picker-p2",
+          "key": "Enter"
+        },
+        {
+          "action": "expect",
+          "testId": "backtest.results.export-csv",
+          "predicate": "visible",
+          "timeoutMs": 20000
+        },
+        {
+          "action": "click",
+          "testId": "backtest.builder.advanced-toggle"
+        },
+        {
+          "action": "click",
+          "testId": "backtest.builder.rebalance-trigger"
+        },
+        {
+          "action": "click",
+          "testId": "backtest.builder.rebalance-quarterly"
+        },
+        {
+          "action": "expect",
+          "testId": "backtest.builder.rebalance-trigger",
+          "predicate": "contains-text",
+          "value": "Quarterly",
+          "timeoutMs": 5000
+        },
+        {
+          "action": "expect",
+          "testId": "backtest.builder.reinvest-toggle",
+          "predicate": "checked"
+        },
+        {
+          "action": "click",
+          "testId": "backtest.builder.reinvest-toggle"
+        },
+        {
+          "action": "expect",
+          "testId": "backtest.builder.reinvest-toggle",
+          "predicate": "unchecked",
+          "timeoutMs": 5000
+        },
+        {
+          "action": "click",
+          "testId": "backtest.builder.reinvest-toggle"
+        },
+        {
+          "action": "expect",
+          "testId": "backtest.builder.reinvest-toggle",
+          "predicate": "checked",
+          "timeoutMs": 5000
+        },
+        {
+          "action": "expect",
+          "testId": "backtest.results.export-csv",
+          "predicate": "visible",
+          "timeoutMs": 20000
+        }
       ]
     },
     {
       "name": "research-ticker-drill",
       "description": "Nav to Research, find TXRH letter by letter, open it, then switch to AAPL through the header control. Recorded live 2026-08-25 (10/10 receipts ok), the first zero-navigate journey.",
       "kind": "control-path",
-      "context": { "path": "/" },
+      "context": {
+        "path": "/"
+      },
       "steps": [
-        { "action": "click", "testId": "app.nav.stock" },
-        { "action": "type", "testId": "ui.ticker-picker.search", "value": "TXRH" },
-        { "action": "expect", "testId": "ui.ticker-picker.option-TXRH", "predicate": "visible", "timeoutMs": 5000 },
-        { "action": "click", "testId": "ui.ticker-picker.option-TXRH" },
-        { "action": "expect", "testId": "stock.header.switch-ticker", "predicate": "visible", "timeoutMs": 20000 },
-        { "action": "expect", "testId": "stock.header.switch-ticker", "predicate": "contains-text", "value": "TXRH" },
-        { "action": "click", "testId": "stock.header.switch-ticker" },
-        { "action": "type", "testId": "ui.ticker-picker.search", "value": "AAPL" },
-        { "action": "expect", "testId": "ui.ticker-picker.option-AAPL", "predicate": "visible", "timeoutMs": 5000 },
-        { "action": "click", "testId": "ui.ticker-picker.option-AAPL" },
-        { "action": "expect", "testId": "stock.header.switch-ticker", "predicate": "contains-text", "value": "AAPL", "timeoutMs": 20000 }
+        {
+          "action": "click",
+          "testId": "app.nav.stock"
+        },
+        {
+          "action": "type",
+          "testId": "ui.ticker-picker.search",
+          "value": "TXRH"
+        },
+        {
+          "action": "expect",
+          "testId": "ui.ticker-picker.option-TXRH",
+          "predicate": "visible",
+          "timeoutMs": 5000
+        },
+        {
+          "action": "click",
+          "testId": "ui.ticker-picker.option-TXRH"
+        },
+        {
+          "action": "expect",
+          "testId": "stock.header.switch-ticker",
+          "predicate": "visible",
+          "timeoutMs": 20000
+        },
+        {
+          "action": "expect",
+          "testId": "stock.header.switch-ticker",
+          "predicate": "contains-text",
+          "value": "TXRH"
+        },
+        {
+          "action": "click",
+          "testId": "stock.header.switch-ticker"
+        },
+        {
+          "action": "type",
+          "testId": "ui.ticker-picker.search",
+          "value": "AAPL"
+        },
+        {
+          "action": "expect",
+          "testId": "ui.ticker-picker.option-AAPL",
+          "predicate": "visible",
+          "timeoutMs": 5000
+        },
+        {
+          "action": "click",
+          "testId": "ui.ticker-picker.option-AAPL"
+        },
+        {
+          "action": "expect",
+          "testId": "stock.header.switch-ticker",
+          "predicate": "contains-text",
+          "value": "AAPL",
+          "timeoutMs": 20000
+        }
       ]
     },
     {
       "name": "landing-cards",
       "description": "The landing page's tool cards are real entrances: the Monte Carlo card lands on the plan inputs.",
       "kind": "control-path",
-      "context": { "path": "/" },
+      "context": {
+        "path": "/"
+      },
       "steps": [
-        { "action": "expect", "testId": "landing.tools.card-backtest", "predicate": "visible", "timeoutMs": 10000 },
-        { "action": "click", "testId": "landing.tools.card-montecarlo" },
-        { "action": "expect", "testId": "montecarlo.plan.starting-balance", "predicate": "visible", "timeoutMs": 10000 }
+        {
+          "action": "expect",
+          "testId": "landing.tools.card-backtest",
+          "predicate": "visible",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "click",
+          "testId": "landing.tools.card-montecarlo"
+        },
+        {
+          "action": "expect",
+          "testId": "montecarlo.plan.starting-balance",
+          "predicate": "visible",
+          "timeoutMs": 10000
+        }
       ]
     },
     {
       "name": "montecarlo-plan-control-path",
       "description": "Retirement plan edited through the controls: balance, horizon, and the simulation method dropdown.",
       "kind": "control-path",
-      "context": { "path": "/" },
+      "context": {
+        "path": "/"
+      },
       "steps": [
-        { "action": "click", "testId": "app.nav.montecarlo" },
-        { "action": "fill", "testId": "montecarlo.plan.starting-balance", "value": "750000" },
-        { "action": "fill", "testId": "montecarlo.plan.years-to-retire", "value": "10" },
-        { "action": "fill", "testId": "montecarlo.plan.horizon", "value": "40" },
-        { "action": "click", "testId": "montecarlo.plan.method-trigger" },
-        { "action": "click", "testId": "montecarlo.plan.method-bootstrap" },
-        { "action": "expect", "testId": "montecarlo.plan.method-trigger", "predicate": "contains-text", "value": "Bootstrap", "timeoutMs": 5000 }
+        {
+          "action": "click",
+          "testId": "app.nav.montecarlo"
+        },
+        {
+          "action": "fill",
+          "testId": "montecarlo.plan.starting-balance",
+          "value": "750000"
+        },
+        {
+          "action": "fill",
+          "testId": "montecarlo.plan.years-to-retire",
+          "value": "10"
+        },
+        {
+          "action": "fill",
+          "testId": "montecarlo.plan.horizon",
+          "value": "40"
+        },
+        {
+          "action": "click",
+          "testId": "montecarlo.plan.method-trigger"
+        },
+        {
+          "action": "click",
+          "testId": "montecarlo.plan.method-bootstrap"
+        },
+        {
+          "action": "expect",
+          "testId": "montecarlo.plan.method-trigger",
+          "predicate": "contains-text",
+          "value": "Bootstrap",
+          "timeoutMs": 5000
+        }
       ]
     },
     {
       "name": "allocation-builder-control-path",
       "description": "Allocation built through the controls: asset picked from the autocomplete, weights edited, a comparison portfolio added, dates set through the date picker, inflation toggled.",
       "kind": "control-path",
-      "context": { "path": "/" },
+      "context": {
+        "path": "/"
+      },
       "steps": [
-        { "action": "click", "testId": "app.nav.allocation" },
-        { "action": "type", "testId": "allocation.builder.picker-p1", "value": "small" },
-        { "action": "expect", "testId": "allocation.asset-picker.option-smallCap", "predicate": "visible", "timeoutMs": 5000 },
-        { "action": "click", "testId": "allocation.asset-picker.option-smallCap" },
-        { "action": "expect", "testId": "allocation.builder.weight-p1-smallCap", "predicate": "visible", "timeoutMs": 10000 },
-        { "action": "click", "testId": "allocation.builder.add-portfolio" },
-        { "action": "fill", "testId": "ui.date-picker.input-alloc-start", "value": "01/01/1990" },
-        { "action": "expect", "testId": "ui.date-picker.clear-alloc-start", "predicate": "visible", "timeoutMs": 5000 },
-        { "action": "click", "testId": "allocation.builder.inflation-toggle" },
-        { "action": "expect", "testId": "allocation.builder.inflation-toggle", "predicate": "checked", "timeoutMs": 5000 }
+        {
+          "action": "click",
+          "testId": "app.nav.allocation"
+        },
+        {
+          "action": "type",
+          "testId": "allocation.builder.picker-p1",
+          "value": "small"
+        },
+        {
+          "action": "expect",
+          "testId": "allocation.asset-picker.option-smallCap",
+          "predicate": "visible",
+          "timeoutMs": 5000
+        },
+        {
+          "action": "click",
+          "testId": "allocation.asset-picker.option-smallCap"
+        },
+        {
+          "action": "expect",
+          "testId": "allocation.builder.weight-p1-smallCap",
+          "predicate": "visible",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "click",
+          "testId": "allocation.builder.add-portfolio"
+        },
+        {
+          "action": "fill",
+          "testId": "ui.date-picker.input-alloc-start",
+          "value": "01/01/1990"
+        },
+        {
+          "action": "press",
+          "testId": "ui.date-picker.input-alloc-start",
+          "key": "Enter"
+        },
+        {
+          "action": "expect",
+          "testId": "ui.date-picker.clear-alloc-start",
+          "predicate": "visible",
+          "timeoutMs": 5000
+        },
+        {
+          "action": "click",
+          "testId": "allocation.builder.inflation-toggle"
+        },
+        {
+          "action": "expect",
+          "testId": "allocation.builder.inflation-toggle",
+          "predicate": "checked",
+          "timeoutMs": 5000
+        }
       ]
     },
     {
       "name": "income-sample-portfolio",
       "description": "The dividend planner's one-tap sample loads SCHD/VYM/JEPI; total value and per-holding weights stay editable.",
       "kind": "control-path",
-      "context": { "path": "/" },
+      "context": {
+        "path": "/"
+      },
       "steps": [
-        { "action": "click", "testId": "app.nav.income" },
-        { "action": "click", "testId": "income.setup.load-sample" },
-        { "action": "expect", "testId": "income.setup.weight-SCHD", "predicate": "visible", "timeoutMs": 20000 },
-        { "action": "fill", "testId": "income.setup.total-value", "value": "250000" },
-        { "action": "fill", "testId": "income.setup.weight-SCHD", "value": "50" },
-        { "action": "expect", "testId": "income.setup.weight-JEPI", "predicate": "visible" }
+        {
+          "action": "click",
+          "testId": "app.nav.income"
+        },
+        {
+          "action": "click",
+          "testId": "income.setup.load-sample"
+        },
+        {
+          "action": "expect",
+          "testId": "income.setup.weight-SCHD",
+          "predicate": "visible",
+          "timeoutMs": 20000
+        },
+        {
+          "action": "fill",
+          "testId": "income.setup.total-value",
+          "value": "250000"
+        },
+        {
+          "action": "fill",
+          "testId": "income.setup.weight-SCHD",
+          "value": "50"
+        },
+        {
+          "action": "expect",
+          "testId": "income.setup.weight-JEPI",
+          "predicate": "visible"
+        }
       ]
     },
     {
       "name": "stock-to-backtest-crossover",
       "description": "Cross-page control path: research AAPL, then the stock header's Backtest button seeds the backtest builder with AAPL at 100.",
       "kind": "control-path",
-      "context": { "path": "/" },
+      "context": {
+        "path": "/"
+      },
       "steps": [
-        { "action": "click", "testId": "app.nav.stock" },
-        { "action": "type", "testId": "ui.ticker-picker.search", "value": "AAPL" },
-        { "action": "expect", "testId": "ui.ticker-picker.option-AAPL", "predicate": "visible", "timeoutMs": 5000 },
-        { "action": "click", "testId": "ui.ticker-picker.option-AAPL" },
-        { "action": "expect", "testId": "stock.header.backtest", "predicate": "visible", "timeoutMs": 20000 },
-        { "action": "click", "testId": "stock.header.backtest" },
-        { "action": "expect", "testId": "backtest.builder.weight-p1-AAPL", "predicate": "visible", "timeoutMs": 20000 }
+        {
+          "action": "click",
+          "testId": "app.nav.stock"
+        },
+        {
+          "action": "type",
+          "testId": "ui.ticker-picker.search",
+          "value": "AAPL"
+        },
+        {
+          "action": "expect",
+          "testId": "ui.ticker-picker.option-AAPL",
+          "predicate": "visible",
+          "timeoutMs": 5000
+        },
+        {
+          "action": "click",
+          "testId": "ui.ticker-picker.option-AAPL"
+        },
+        {
+          "action": "expect",
+          "testId": "stock.header.backtest",
+          "predicate": "visible",
+          "timeoutMs": 20000
+        },
+        {
+          "action": "click",
+          "testId": "stock.header.backtest"
+        },
+        {
+          "action": "expect",
+          "testId": "backtest.builder.weight-p1-AAPL",
+          "predicate": "visible",
+          "timeoutMs": 20000
+        }
       ]
     },
     {
       "name": "backtest-results-depth",
       "description": "The results panel's depth controls: tabs, the rolling-window selector, and the log-scale switch, on a URL-seeded backtest.",
       "kind": "url-path",
-      "context": { "path": "/" },
+      "context": {
+        "path": "/"
+      },
       "steps": [
-        { "action": "navigate", "path": "/backtest?p1=VTI:60,BND:40" },
-        { "action": "expect", "testId": "backtest.results.export-csv", "predicate": "visible", "timeoutMs": 20000 },
-        { "action": "click", "testId": "backtest.results.tab-risk" },
-        { "action": "click", "testId": "backtest.results.tab-rolling" },
-        { "action": "click", "testId": "backtest.results.rolling-window-10" },
-        { "action": "click", "testId": "backtest.results.tab-annual" },
-        { "action": "click", "testId": "backtest.results.log-scale" },
-        { "action": "expect", "testId": "backtest.results.export-csv", "predicate": "visible", "timeoutMs": 10000 }
+        {
+          "action": "navigate",
+          "path": "/backtest?p1=VTI:60,BND:40"
+        },
+        {
+          "action": "expect",
+          "testId": "backtest.results.export-csv",
+          "predicate": "visible",
+          "timeoutMs": 20000
+        },
+        {
+          "action": "click",
+          "testId": "backtest.results.tab-risk"
+        },
+        {
+          "action": "click",
+          "testId": "backtest.results.tab-rolling"
+        },
+        {
+          "action": "click",
+          "testId": "backtest.results.rolling-window-10"
+        },
+        {
+          "action": "click",
+          "testId": "backtest.results.tab-annual"
+        },
+        {
+          "action": "click",
+          "testId": "backtest.results.log-scale"
+        },
+        {
+          "action": "expect",
+          "testId": "backtest.results.export-csv",
+          "predicate": "visible",
+          "timeoutMs": 10000
+        }
       ]
     },
     {
       "name": "xray-analyze-positions",
       "description": "X-ray end to end without auth: paste positions, analyze, reach the holdings panel, then reopen the collapsed inputs and switch to the activity tab.",
       "kind": "url-path",
-      "context": { "path": "/xray" },
+      "context": {
+        "path": "/xray"
+      },
       "steps": [
-        { "action": "expect", "testId": "xray.inputs.positions", "predicate": "visible", "timeoutMs": 10000 },
-        { "action": "fill", "testId": "xray.inputs.positions", "value": "AAPL 12\nVTI 40" },
-        { "action": "click", "testId": "xray.inputs.analyze-positions" },
-        { "action": "expect", "testId": "xray.holdings.backtest-mix", "predicate": "visible", "timeoutMs": 30000 },
-        { "action": "expect", "testId": "xray.inputs.toggle", "predicate": "visible", "timeoutMs": 5000 },
-        { "action": "click", "testId": "xray.inputs.toggle" },
-        { "action": "click", "testId": "xray.inputs.tab-activity" },
-        { "action": "expect", "testId": "xray.inputs.activity", "predicate": "visible", "timeoutMs": 5000 }
+        {
+          "action": "expect",
+          "testId": "xray.inputs.positions",
+          "predicate": "visible",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "fill",
+          "testId": "xray.inputs.positions",
+          "value": "AAPL 12\nVTI 40"
+        },
+        {
+          "action": "click",
+          "testId": "xray.inputs.analyze-positions"
+        },
+        {
+          "action": "expect",
+          "testId": "xray.holdings.backtest-mix",
+          "predicate": "visible",
+          "timeoutMs": 30000
+        },
+        {
+          "action": "expect",
+          "testId": "xray.inputs.toggle",
+          "predicate": "visible",
+          "timeoutMs": 5000
+        },
+        {
+          "action": "click",
+          "testId": "xray.inputs.toggle"
+        },
+        {
+          "action": "click",
+          "testId": "xray.inputs.tab-activity"
+        },
+        {
+          "action": "expect",
+          "testId": "xray.inputs.activity",
+          "predicate": "visible",
+          "timeoutMs": 5000
+        }
       ]
     },
     {
       "name": "not-found-recovery",
       "description": "A dead URL offers the way home, and home's tool cards render.",
       "kind": "url-path",
-      "context": { "path": "/" },
+      "context": {
+        "path": "/"
+      },
       "steps": [
-        { "action": "navigate", "path": "/definitely-not-a-page" },
-        { "action": "expect", "testId": "app.not-found.home", "predicate": "visible", "timeoutMs": 10000 },
-        { "action": "click", "testId": "app.not-found.home" },
-        { "action": "expect", "testId": "landing.tools.card-backtest", "predicate": "visible", "timeoutMs": 10000 }
+        {
+          "action": "navigate",
+          "path": "/definitely-not-a-page"
+        },
+        {
+          "action": "expect",
+          "testId": "app.not-found.home",
+          "predicate": "visible",
+          "timeoutMs": 10000
+        },
+        {
+          "action": "click",
+          "testId": "app.not-found.home"
+        },
+        {
+          "action": "expect",
+          "testId": "landing.tools.card-backtest",
+          "predicate": "visible",
+          "timeoutMs": 10000
+        }
       ]
     }
   ]

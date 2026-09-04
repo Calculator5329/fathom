@@ -22,6 +22,16 @@ committed with focused staging (never `git add -A`), then pushed.
 
 ## Now
 
+- [x] **Handles: public control journeys and bounded voice navigation.** _(verified
+  locally 2026-09-04; parent owns integration)_ Existing 13 journeys now reconcile
+  Research scopes, native calendar buttons and semantic tab containers correctly.
+  The isolated synthetic acceptance suite runs each of 20 checks twice, including
+  saved-state reopening, paced replay, refusal and explicit voice confirmation.
+  The opt-in localhost prototype uses existing browser dictation and public
+  navigation handles; it is absent from production JavaScript. Real-auth pages,
+  physical-microphone accuracy and one conservative source-forwarding attribution
+  remain outside this completion claim. [Evidence and scope](internal/intent-p08-handles.md).
+
 - [ ] **Freshness catch-up pass for late-publishing EOD data.** First live
   full cycle (2026-07-16, 4 batches, 88/88, 0 failures, HTTP 200) surfaced a
   currency lag: freshThrough reported the PRIOR market date because the

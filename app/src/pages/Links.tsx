@@ -108,6 +108,7 @@ export function Links() {
             {section.links.map((link) => (
               <a
                 key={link.url}
+                data-testid={`links.resources.open-${link.url.replace(/[^a-z0-9]+/gi, "-").toLowerCase().replace(/^-|-$/g, "")}`}
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
