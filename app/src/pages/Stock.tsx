@@ -182,7 +182,7 @@ export function Stock() {
   const allYears = fundamentals?.fiscalYears.filter((y) => y.revenue != null) ?? []
   const incomeRows = periodRows(incomePeriod, allYears, fundamentals)
   const hasBalanceSheet = allYears.some((y) => y.totalAssets != null)
-  const valuationRows = sliceRange(allYears, valRange)
+  const valuationRows = sliceRange(fundamentals?.fiscalYears ?? [], valRange)
   const valuationPoints = useMemo<ValuationBandPoint[]>(() => {
     if (!series) return []
     return valuationSeries(series.records, valuationRows, valMetric).map(([fiscalYear, value]) => [fiscalYear, value])
@@ -194,7 +194,7 @@ export function Stock() {
   )
   const valuationSummaryStrip = valuationSummary.boundaries == null ? null : [
     {
-      label: 'Latest FY',
+      label: 'Latest comparable FY',
       value: valuationSummary.latest
         ? `${valuationSummary.latest.value.toFixed(1)}×`
         : '—',
@@ -202,7 +202,7 @@ export function Stock() {
     },
     {
       label: 'Percentile',
-      value: valuationSummary.latest ? `${valuationSummary.latest.percentile}th` : '—',
+      value: valuationSummary.latest ? `${valuationSummary.latest.percentile}%` : '—',
     },
     {
       label: '10–90%',
@@ -420,6 +420,11 @@ export function Stock() {
               </CardHeader>
               <CardContent>
                 <p className="mb-2 text-sm text-muted-foreground">{VALUATION_LABELS[valMetric]}</p>
+                <p className="mb-2 text-sm text-muted-foreground tnum" data-testid="stock.valuation.sample">
+                  {valuationSummary.window ? `FY ${valuationSummary.window.first}–${valuationSummary.window.last}` : 'No fiscal-year history'}
+                  {' · '}{valuationSummary.sampleCount} comparable years
+                  {' · '}{valuationPoints.length - valuationSummary.sampleCount} excluded
+                </p>
                 {valuationPoints.length > 0 && valuationChartOption && (
                   <EChart option={valuationChartOption} className="h-64 w-full" />
                 )}
@@ -441,10 +446,34 @@ export function Stock() {
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      Not enough comparable history for bands ({valuationSummary.sampleCount} valid years). Try a longer range.
+                      Not enough comparable history for bands ({valuationSummary.sampleCount} valid years; 8 required). Try a longer range.
                     </p>
                   )}
                 </div>
+                <details className="mt-3 text-sm text-muted-foreground">
+                  <summary data-testid="stock.valuation.details" className="cursor-pointer">Sample and calculation details</summary>
+                  <div className="mt-2 space-y-2">
+                    {valuationSummary.boundaries && (
+                      <p className="font-mono tnum" data-testid="stock.valuation.quantiles">
+                        {Object.entries(valuationSummary.boundaries).map(([key, value]) => `${key.toUpperCase()} ${value.toFixed(2)}×`).join(' · ')}
+                      </p>
+                    )}
+                    <p className="tnum">
+                      Excluded: {valuationSummary.excluded.missing} missing or unavailable,
+                      {' '}{valuationSummary.excluded.nonfinite} nonfinite,
+                      {' '}{valuationSummary.excluded.nonpositive} zero or negative ratios.
+                      Loss years remain visible for P/E but do not enter the positive comparison sample.
+                      Nonpositive cash flow or book value has no comparable ratio.
+                    </p>
+                    <p>
+                      Annual fundamentals and the last available price in each calendar year;
+                      the newest year may be partial. Latest comparable FY is historical, not a live quote.
+                      The selected range includes its latest comparable observation.
+                      Bands use linear interpolation at (n − 1) × p (type 7), with unrounded ratios.
+                      Percentile rank splits tied observations equally above and below.
+                    </p>
+                  </div>
+                </details>
               </CardContent>
             </Card>
           )}

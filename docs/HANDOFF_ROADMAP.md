@@ -122,10 +122,12 @@ committed with focused staging (never `git add -A`), then pushed.
   byte-identical (existing parser tests untouched and green). Needs sample CSVs —
   synthesize fixtures from the brokers' documented export formats if no real files.
   _Accept: new-format fixture tests pass; Fidelity regression tests unchanged._
-- [ ] **Research: valuation ratios vs their own history (percentile bands).** VISION
+- [x] **Research: valuation ratios vs their own history (percentile bands).** _(completed and rendered locally 2026-09-04; parent session owns integration, no deployment)_ VISION
   Tool-5 follow-up. Data already computed per year; render P/E, P/S, etc. vs their own
   10/25/50/75/90th percentiles. _Accept: bands on /stock/:symbol valuation charts;
-  chart colors via cssVar tokens; no hover emphasis on bars._
+  chart colors via cssVar tokens; no hover emphasis on bars._ Existing July bands
+  now preserve ratio precision and disclose window, samples, exclusions and latest
+  comparable FY. [Implementation and verification](internal/intent-wave1-valuation.md).
 - [ ] **Expand pre-built fundamentals coverage.** `[CLOUD]` Run
   `scripts/build-fundamentals.mjs` across the full ~75-ticker price universe and sync
   to the bucket. Script run is local; the `gcloud storage cp` sync is the parked cloud

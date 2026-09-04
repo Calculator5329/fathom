@@ -6,6 +6,35 @@ function points(input: number[]): ValuationBandPoint[] {
 }
 
 describe('computeValuationBandSummary', () => {
+  it('reports the selected window separately from the latest comparable year', () => {
+    const rows: ValuationBandPoint[] = [['2018', null], ['2019', 10], ['2020', -2], ['2021', Infinity], ['2022', 20], ['2023', null]]
+    const result = computeValuationBandSummary(rows, 'pe')
+    expect(result.window).toEqual({ first: '2018', last: '2023' })
+    expect(result.excluded).toEqual({ missing: 2, nonfinite: 1, nonpositive: 1 })
+    expect(result.sampleCount).toBe(2)
+    expect(result.latest?.fiscalYear).toBe('2022')
+    expect(computeValuationBandSummary([], 'pe')).toMatchObject({ window: null, latest: null, sampleCount: 0, boundaries: null })
+  })
+
+  it('does not turn small but different ratios into artificial ties', () => {
+    // h = .7, 1.75, 3.5, 5.25, 6.3 in this evenly spaced eight-point sample.
+    const input = [1.001, 1.002, 1.003, 1.004, 1.005, 1.006, 1.007, 1.008]
+    const result = computePercentiles(input)
+    expect(result.p10).toBeCloseTo(1.0017, 12)
+    expect(result.p25).toBeCloseTo(1.00275, 12)
+    expect(result.p50).toBeCloseTo(1.0045, 12)
+    expect(result.p75).toBeCloseTo(1.00625, 12)
+    expect(result.p90).toBeCloseTo(1.0073, 12)
+    expect(computeValuationBandSummary(points(input), 'pe').latest?.percentile).toBe(94)
+  })
+
+  it('refuses direct quantile calculation with invalid or nonpositive inputs', () => {
+    for (const invalid of [NaN, Infinity, -Infinity, -1, 0]) {
+      expect(() => computePercentiles([10, invalid])).toThrow('finite positive')
+    }
+    expect(() => computePercentiles([10])).toThrow('at least two')
+  })
+
   it('calculates Hyndman–Fan type-7 percentiles for a hand-computed sample', () => {
     expect(computePercentiles([10, 20, 30, 40, 50])).toEqual({ p10: 14, p25: 20, p50: 30, p75: 40, p90: 46 })
   })
