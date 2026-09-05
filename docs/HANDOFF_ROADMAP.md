@@ -176,6 +176,8 @@ committed with focused staging (never `git add -A`), then pushed.
 - Login walls on Backtest/Allocation — never.
 - Personal budgets/net-worth features — those belong to finance-master.
 
+## Verified recovery work — 2026-09-05
+
 - [x] A35 transient ticker-search recovery (2026-09-05): failed HTTP, network,
   JSON and rate-limit responses no longer remain cached for the page session.
   Only successful remote results persist; pending requests still deduplicate.
