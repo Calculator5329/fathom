@@ -1,0 +1,32 @@
+{
+  "devServer": {
+    "command": "npm run dev -- --port {port} --strictPort",
+    "port": 5321
+  },
+  "exclude": {
+    "testIds": [
+      "app.header.sign-in",
+      "app.header.sign-out"
+    ],
+    "testIdPrefixes": [
+      "dev."
+    ]
+  },
+  "budget": {
+    "maxDepth": 2,
+    "maxStates": 40,
+    "maxActionsPerState": 30,
+    "maxSteps": 120,
+    "settleMs": 400,
+    "maxRuntimeMs": 1200000
+  },
+  "fix": {
+    "enabled": true,
+    "setupCmd": "npm --prefix app ci --prefer-offline --no-audit --no-fund",
+    "buildCmd": "npm --prefix app run build",
+    "testCmd": "npm --prefix app test",
+    "modelTier": "big",
+    "maxRuntimeMinutes": 40,
+    "port": 5322
+  }
+}

@@ -14,3 +14,6 @@ app/public/data/
 .DS_Store
 # agent-orchestrator local state
 .orc/
+
+# app-explorer runs and findings (evidence lives in ai/app-explorer/docs/evidence)
+.explorer/
