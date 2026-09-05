@@ -2,6 +2,19 @@
 
 _Planned 2026-07-03 by the orchestrating session; implementation handed to Opus + Codex._
 
+## 2026-09-05 — Monte Carlo chart contract verification
+
+The parametric chart tests now call the production `fanChartOption` instead
+of duplicating its transformation. Synthetic seeded results cover both bands,
+axes, median and the accumulation marker with and without a saving phase.
+Fixtures use consistent three-year spans (2+1 and0+3). No production simulation,
+math, data or UI behavior changed. This is a focused improvement, not a claim
+that the revised assertions cover every assertion from earlier test versions.
+
+Parent verified the original candidate9517232 with171 tests passing,9 skipped,
+and TypeScript exit0; independent second review also passed14 focused cases.
+Delivery basef015ac0 was independently verified on2026-09-05:171tests passed,9skipped, TypeScript exit0. Raw command logs are retained under `/home/ethan/.cache/tmp/claude-expiry-chart-delivery-tests-20260905/`; no production code changed.
+
 ## 2026-07-15 — Numeric-control polish
 
 - Removed browser-native up/down spinner chrome from number inputs across the
