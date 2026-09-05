@@ -2,6 +2,40 @@
 
 _Planned 2026-07-03 by the orchestrating session; implementation handed to Opus + Codex._
 
+## 2026-09-05 — Correlated simulation lifecycle (A27)
+
+Technical repair within the existing stale-while-revalidate interface. Every
+configuration invalidates prior work immediately; debounce/data loading precede
+worker creation so rapid edits do not start throwaway workers. Cleanup terminates
+posted computation. Requests and all responses carry one request id; only the
+current request can publish completion. Loading, worker startup and worker errors
+retain the last good result, stop running and expose a recoverable error. Stale
+results remain dimmed and labelled until a matching successful result arrives.
+
+Design review: a queue of old worker jobs would fail under rapid edits even with
+response filtering. The simpler alternative is one worker per debounced request,
+terminated when obsolete; adopt that existing effect-lifecycle seam rather than
+adding a scheduler or test-only controller. Vocabulary stays request/result/running.
+No engine, simulation math, market datasets, credentials or cloud mutations change.
+Acceptance uses synthetic worker responses plus the actual React hook in a browser,
+worker protocol probes, the existing Vitest suite and TypeScript build.
+
+Review correction: status/error copy added by this repair uses an explicit 15px
+minimum, matching the repo readability contract; existing unrelated typography
+is outside this change.
+
+Verification (2026-09-05): the pre-fix browser reproduced an obsolete response
+replacing result 1 with 99. The repaired browser probes pass seven scenarios:
+late response, invalid allocation, worker failure/recovery, asset-load rejection,
+unmount/debounce, obsolete pending data load, and real results-panel retention.
+`npx vitest run` passes 168 tests (nine existing skips); `npx tsc -b` succeeds.
+Worker protocol tests exercise actual worker handlers with synthetic inputs.
+Browser fixtures use the real React hook/page and a controllable worker adapter;
+they do not benchmark production worker performance. Local dependency symlinks
+cause font-serving warnings in the preview; DOM assertions still pass. No
+financial API/data, cloud, or deployment calls are part of this verification.
+
+
 ## 2026-07-15 — Numeric-control polish
 
 - Removed browser-native up/down spinner chrome from number inputs across the

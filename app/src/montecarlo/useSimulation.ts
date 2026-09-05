@@ -11,6 +11,8 @@ export interface SimOutput {
   result: SimResult | null
   maxSwr: number
   running: boolean
+  /** Last good result belongs to an earlier configuration. */
+  stale: boolean
   error: string | null
 }
 
@@ -56,85 +58,83 @@ function buildParametricInput(
  * result visible while recomputing (dim, don't unmount).
  */
 export function useSimulation(config: RunConfig): SimOutput {
-  const [output, setOutput] = useState<SimOutput>({
+  const [output, setOutput] = useState<Omit<SimOutput, 'stale'>>({
     result: null,
     maxSwr: 0,
     running: true,
     error: null,
   })
-  const workerRef = useRef<Worker | null>(null)
-
-  useEffect(() => {
-    const worker = new Worker(new URL('./simulate.worker.ts', import.meta.url), {
-      type: 'module',
-    })
-    workerRef.current = worker
-    worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
-      setOutput({
-        result: e.data.result,
-        maxSwr: e.data.maxSwr,
-        running: false,
-        error: e.data.error ?? null,
-      })
-    }
-    return () => {
-      worker.terminate()
-      workerRef.current = null
-    }
-  }, [])
+  const requestIdRef = useRef(0)
+  const resultKeyRef = useRef<string | null>(null)
 
   const validAlloc = config.allocation.filter((a) => a.weight > 0)
   const weightSum = validAlloc.reduce((s, a) => s + a.weight, 0)
   const key = JSON.stringify({ ...config, allocation: validAlloc })
 
   useEffect(() => {
-    const worker = workerRef.current
-    if (!worker) return
-    if (validAlloc.length === 0 || Math.abs(weightSum - 100) > 0.5) {
-      setOutput((o) => ({ ...o, running: false }))
-      return
-    }
-    setOutput((o) => ({ ...o, running: true, error: null }))
+    const requestId = ++requestIdRef.current
     let cancelled = false
-    const t = setTimeout(() => {
-      // Parametric mode draws from the user's distribution — no history needed,
-      // so post straight to the worker without loading the asset-class series.
-      if (config.mode === 'parametric') {
-        if (!workerRef.current) return
-        const req: WorkerRequest = {
-          allocation: validAlloc,
-          returns: [],
-          cpi: [],
-          params: config.params,
-          mode: 'parametric',
-          trials: config.trials,
-          seed: 0x9e3779b9,
-          parametric: buildParametricInput(validAlloc, weightSum, config.parametric),
+    let settled = false
+    let worker: Worker | null = null
+    const current = () => !cancelled && !settled && requestIdRef.current === requestId
+    const fail = (message: string) => {
+      if (!current()) return
+      settled = true
+      worker?.terminate()
+      setOutput(previous => ({ ...previous, running: false, error: message }))
+    }
+    if (validAlloc.length === 0 || Math.abs(weightSum - 100) > 0.5) {
+      setOutput(previous => ({ ...previous, running: false, error: null }))
+      return () => { cancelled = true }
+    }
+    setOutput(previous => ({ ...previous, running: true, error: null }))
+    const timer = setTimeout(async () => {
+      try {
+        // Data and debounce resolve before allocating a worker. Obsolete loads
+        // cannot enqueue computation, and cleanup stops already-posted work.
+        const data = config.mode === 'parametric' ? null : await loadAssetClassData()
+        if (!current()) return
+        worker = new Worker(new URL('./simulate.worker.ts', import.meta.url), { type: 'module' })
+        worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+          if (!current() || event.data.requestId !== requestId) return
+          if (event.data.error || !event.data.result) {
+            fail(event.data.error ?? 'Simulation returned no result. Change the inputs to try again.')
+            return
+          }
+          settled = true
+          resultKeyRef.current = key
+          worker?.terminate()
+          setOutput({ result: event.data.result, maxSwr: event.data.maxSwr, running: false, error: null })
         }
-        workerRef.current.postMessage(req)
-        return
-      }
-      loadAssetClassData().then((data) => {
-        if (cancelled || !workerRef.current) return
-        const req: WorkerRequest = {
+        worker.onerror = event => {
+          event.preventDefault()
+          fail('Simulation could not finish. Change the inputs to try again.')
+        }
+        worker.onmessageerror = () => fail('Simulation result could not be read. Change the inputs to try again.')
+        const request: WorkerRequest = {
+          requestId,
           allocation: validAlloc,
-          returns: [...data.returns.entries()].map(([id, m]) => [id, [...m.entries()]]),
-          cpi: [...data.cpi.entries()],
+          returns: data ? [...data.returns.entries()].map(([id, values]) => [id, [...values.entries()]]) : [],
+          cpi: data ? [...data.cpi.entries()] : [],
           params: config.params,
           mode: config.mode,
           trials: config.trials,
           seed: 0x9e3779b9,
+          ...(config.mode === 'parametric' ? { parametric: buildParametricInput(validAlloc, weightSum, config.parametric) } : {}),
         }
-        workerRef.current.postMessage(req)
-      })
+        worker.postMessage(request)
+      } catch {
+        fail('Simulation data or worker could not be loaded. Change the inputs to try again.')
+      }
     }, 150)
     return () => {
       cancelled = true
-      clearTimeout(t)
+      clearTimeout(timer)
+      worker?.terminate()
     }
   }, [key]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return output
+  return { ...output, stale: output.result !== null && resultKeyRef.current !== key }
 }
 
 /**

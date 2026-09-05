@@ -22,6 +22,15 @@ committed with focused staging (never `git add -A`), then pushed.
 
 ## Now
 
+- [x] **Correlate simulation work and recover from worker/data failure (A27).**
+  _(verified locally 2026-09-05; parent owns integration)_ Cancel obsolete
+  computation on edit/unmount, correlate every response, and create workers only
+  after debounce/data loading. Keep last-good results visible and labeled stale;
+  failures stop running and allow the next edit to retry. Seven browser lifecycle
+  and real-panel checks pass, plus 168 unit tests (nine existing skips) and
+  TypeScript build. Engine math and market datasets are unchanged. See the dated
+  entry in [VISION.md](VISION.md) for design and verification limits.
+
 - [x] **Handles: public control journeys and bounded voice navigation.** _(verified
   locally 2026-09-04; parent owns integration)_ Existing 13 journeys now reconcile
   Research scopes, native calendar buttons and semantic tab containers correctly.
