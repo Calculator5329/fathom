@@ -62,6 +62,21 @@ they do not benchmark production worker performance. Local dependency symlinks
 cause font-serving warnings in the preview; DOM assertions still pass. No
 financial API/data, cloud, or deployment calls are part of this verification.
 
+## 2026-09-05 — Retain journey evidence per verification run (A30)
+
+Regenerated `app/tests/journeys.generated.spec.ts` using delivered Handles core
+`bf64ba9f75227f94c95090be67603bcab79fd50e`. Fathom's existing sibling file dependency
+resolves that compiler; emitted specs remain standalone Node/Playwright code, with
+no additional runtime dependency. Ordinary runs retain per-test observations,
+screenshots and receipts as Playwright attachments. Existing historical observations
+and manual-review baselines remain separate. No journey definitions or financial
+calculation behavior changed.
+
+Verification: 13/13 public generated journeys, 165 unit tests (nine existing skips),
+and TypeScript build passed. The isolated lane's symlinked dependencies cause
+preview font-serving warnings; DOM assertions pass. Test output is retained under
+`/home/ethan/.cache/tmp/astra-a30-fathom-artifacts/`. Canonical owner edits and
+protected roadmap/changelog files were not touched. Parent owns Git integration.
 
 ## 2026-07-15 — Numeric-control polish
 
