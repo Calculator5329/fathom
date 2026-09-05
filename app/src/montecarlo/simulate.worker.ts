@@ -12,6 +12,7 @@ import {
 } from './simulate'
 
 export interface WorkerRequest {
+  requestId: number
   allocation: AllocationWeight[]
   /** Serialized AssetData (Maps become entry arrays for structured clone). */
   returns: Array<[string, Array<[string, number]>]>
@@ -25,6 +26,7 @@ export interface WorkerRequest {
 }
 
 export interface WorkerResponse {
+  requestId: number
   result: SimResult | null
   maxSwr: number
   error?: string
@@ -38,7 +40,7 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
     // rate-driven strategies, which is the honest reading with no history).
     if (e.data.mode === 'parametric') {
       if (!e.data.parametric || e.data.parametric.assets.length === 0) {
-        postMessage({
+        postMessage({ requestId: e.data.requestId,
           result: null,
           maxSwr: 0,
           error: 'Set expected return and volatility to run the parametric model.',
@@ -49,7 +51,7 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
         trials: e.data.trials,
         seed: e.data.seed,
       })
-      postMessage({ result, maxSwr: NaN } satisfies WorkerResponse)
+      postMessage({ requestId: e.data.requestId, result, maxSwr: NaN } satisfies WorkerResponse)
       return
     }
 
@@ -59,7 +61,7 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
     }
     const series = buildRealReturns(e.data.allocation, data)
     if (series.returns.length < trialMonths(e.data.params)) {
-      postMessage({
+      postMessage({ requestId: e.data.requestId,
         result: null,
         maxSwr: 0,
         error: 'Not enough shared history for this allocation and horizon.',
@@ -77,9 +79,9 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
     // there (the solver would just return its search ceiling).
     const rateDriven = params.strategy === 'fixedReal' || params.strategy === 'guardrails'
     const maxSwr = rateDriven ? maxSafeWithdrawal(series, params, 0.95) : NaN
-    postMessage({ result, maxSwr } satisfies WorkerResponse)
+    postMessage({ requestId: e.data.requestId, result, maxSwr } satisfies WorkerResponse)
   } catch (err) {
-    postMessage({
+    postMessage({ requestId: e.data.requestId,
       result: null,
       maxSwr: 0,
       error: err instanceof Error ? err.message : String(err),

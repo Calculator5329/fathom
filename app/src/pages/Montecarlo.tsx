@@ -290,10 +290,10 @@ export function Montecarlo() {
       </aside>
 
       {/* Results */}
-      <main className={`min-w-0 flex-1 py-6 transition-opacity duration-200 lg:py-8 lg:pl-8 ${sim.running ? 'opacity-60' : ''}`}>
-        {sim.error ? (
-          <p className="text-sm text-loss">{sim.error}</p>
-        ) : !sim.result ? (
+      <main className={`min-w-0 flex-1 py-6 transition-opacity duration-200 lg:py-8 lg:pl-8 ${sim.running || sim.stale ? 'opacity-60' : ''}`}>
+        {sim.error && <p role="alert" className="text-[15px] text-loss">{sim.error}</p>}
+        {sim.stale && <p className="text-[15px] text-muted-foreground">Showing results from previous inputs.</p>}
+        {!sim.result ? (
           sim.running ? (
             <ResultsSkeleton />
           ) : (
