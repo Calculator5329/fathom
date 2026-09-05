@@ -6,7 +6,8 @@ import {
   makeNormal,
   runParametric,
 } from '../parametric'
-import { mulberry32, type SimParams } from '../simulate'
+import { fanChartOption } from '../chart'
+import { mulberry32, type SimParams, type SimResult } from '../simulate'
 
 /** Sample mean / population standard deviation of an array. */
 function stats(xs: number[]): { mean: number; std: number } {
@@ -104,24 +105,24 @@ describe('generateParametricPool', () => {
   })
 })
 
-describe('runParametric', () => {
-  const params: SimParams = {
-    initialBalance: 1_000_000,
-    withdrawalRate: 0.04,
-    strategy: 'fixedReal',
-    horizonYears: 30,
-    feeRate: 0.001,
-    accumulationYears: 0,
-    annualContribution: 0,
-  }
-  const input: ParametricInput = {
-    assets: [
-      { weight: 0.6, mean: 0.07, vol: 0.16 },
-      { weight: 0.4, mean: 0.02, vol: 0.06 },
-    ],
-    correlation: 0.15,
-  }
+const params: SimParams = {
+  initialBalance: 1_000_000,
+  withdrawalRate: 0.04,
+  strategy: 'fixedReal',
+  horizonYears: 30,
+  feeRate: 0.001,
+  accumulationYears: 0,
+  annualContribution: 0,
+}
+const input: ParametricInput = {
+  assets: [
+    { weight: 0.6, mean: 0.07, vol: 0.16 },
+    { weight: 0.4, mean: 0.02, vol: 0.06 },
+  ],
+  correlation: 0.15,
+}
 
+describe('runParametric', () => {
   it('produces a well-formed, monotonic percentile fan', () => {
     const r = runParametric(input, params, { trials: 4000, seed: 0x9e3779b9 })
     const total = params.horizonYears + (params.accumulationYears ?? 0)
@@ -161,26 +162,141 @@ describe('runParametric', () => {
     )
     expect(poor.medianEnding).toBeLessThan(rich.medianEnding)
   })
+})
 
-  it('produces fan-chart-ready bands (the exact shape fanChartOption consumes)', () => {
-    // fanChartOption (../chart) reads result.percentiles + accumulation/horizon
-    // years and builds stacked-area bands as `upper[i] - lower[i]`. Reproduce
-    // that transform here (DOM-free, since the chart module touches `document`)
-    // to prove a parametric result renders a valid fan: every band delta is
-    // non-negative and the x-axis spans year 0..(acc+horizon).
-    const r = runParametric(input, params, { trials: 2000, seed: 11 })
-    const total = r.accumulationYears + r.horizonYears
-    const years = Array.from({ length: total + 1 }, (_, i) => String(i))
-    expect(years).toHaveLength(params.horizonYears + 1)
-    const { p5, p25, p50, p75, p95 } = r.percentiles
-    for (const [lo, hi] of [
-      [p5, p95],
-      [p25, p75],
-    ] as const) {
-      expect(lo).toHaveLength(total + 1)
-      expect(hi).toHaveLength(total + 1)
-      for (let i = 0; i <= total; i++) expect(hi[i] - lo[i]).toBeGreaterThanOrEqual(0)
+// ---------------------------------------------------------------------------
+// fanChartOption — the real chart builder, real seeded results.
+// ---------------------------------------------------------------------------
+
+/** The part of the option object these assertions read. */
+type FanOption = {
+  xAxis: { type: string; data: string[]; boundaryGap: boolean; name: string }
+  yAxis: { type: string; axisLabel: { formatter: (v: number) => string } }
+  series: {
+    name: string
+    data: number[]
+    stack?: string
+    lineStyle?: Record<string, unknown>
+    areaStyle?: { color: string; opacity: number }
+    markArea?: {
+      itemStyle: { color: string; opacity: number }
+      data: [{ name: string; xAxis: string }, { xAxis: string }][]
     }
-    expect(p50.every((v) => Number.isFinite(v))).toBe(true)
+    markLine?: {
+      lineStyle: { color: string; type: string }
+      label: { formatter: string }
+      data: { xAxis: string }[]
+    }
+  }[]
+}
+
+/**
+ * The chart module's only environment dependency is `cssVar`, which reads
+ * computed styles off `document.documentElement`. Stub that seam (the same
+ * shape valuationBands.test.ts uses) and echo the token name back, so an
+ * assertion can tell a resolved token from a raw `var(--x)` string. The chart
+ * function itself is never mocked.
+ */
+function withCssStub<T>(fn: () => T): T {
+  const originalStyle = globalThis.getComputedStyle
+  const originalDocument = globalThis.document
+  globalThis.document = { documentElement: {} } as unknown as Document
+  globalThis.getComputedStyle = (() =>
+    ({ getPropertyValue: (name: string) => `resolved(${name})` }) as unknown as CSSStyleDeclaration) as unknown as typeof globalThis.getComputedStyle
+  try {
+    return fn()
+  } finally {
+    globalThis.document = originalDocument
+    globalThis.getComputedStyle = originalStyle
+  }
+}
+
+describe('fanChartOption', () => {
+  /** A complete, seeded SimResult spanning `accumulation + horizon` years. */
+  const seeded = (accumulationYears: number, horizonYears: number): SimResult =>
+    runParametric(
+      input,
+      { ...params, accumulationYears, horizonYears },
+      { trials: 200, seed: 77 },
+    )
+
+  // Both fixtures span 3 years, so the same hand-picked bands fit either one.
+  // Small integers make every stacked band delta checkable by eye.
+  const percentiles = {
+    p5: [100, 80, 60, 40],
+    p25: [100, 90, 85, 70],
+    p50: [100, 110, 120, 130],
+    p75: [100, 130, 160, 200],
+    p95: [100, 150, 210, 300],
+  }
+  const accumulating: SimResult = { ...seeded(2, 1), percentiles }
+  const retiredNow: SimResult = { ...seeded(0, 3), percentiles }
+
+  it('builds the year axis, both bands and the median from the result', () => {
+    const option = withCssStub(() => fanChartOption(accumulating)) as unknown as FanOption
+
+    // Year range is accumulation + horizon, inclusive of year 0.
+    expect(option.xAxis).toMatchObject({
+      type: 'category',
+      data: ['0', '1', '2', '3'],
+      boundaryGap: false,
+      name: 'Year',
+    })
+    expect(option.yAxis.type).toBe('value')
+    expect(option.yAxis.axisLabel.formatter(1_250_000)).toBe('$1.25M')
+
+    const [lowBase, lowBand, midBase, midBand, median] = option.series
+    expect(option.series.map((s) => s.name)).toEqual([
+      '5–95-base',
+      '5–95',
+      '25–75-base',
+      '25–75',
+      'Median',
+    ])
+
+    // Each band is an invisible base line plus a filled delta stacked on it.
+    expect(lowBase.data).toEqual(percentiles.p5)
+    expect(lowBand.data).toEqual([0, 70, 150, 260]) // p95 − p5
+    expect(midBase.data).toEqual(percentiles.p25)
+    expect(midBand.data).toEqual([0, 40, 75, 130]) // p75 − p25
+    expect([lowBase.stack, lowBand.stack, midBase.stack, midBand.stack]).toEqual([
+      '5–95',
+      '5–95',
+      '25–75',
+      '25–75',
+    ])
+    expect(lowBand.areaStyle).toEqual({ color: 'resolved(--primary)', opacity: 0.08 })
+    expect(midBand.areaStyle).toEqual({ color: 'resolved(--primary)', opacity: 0.16 })
+
+    expect(median.data).toEqual(percentiles.p50)
+    expect(median.lineStyle).toEqual({ width: 2.5, color: 'resolved(--primary)' })
+    // Colors must be resolved tokens: canvas ECharts cannot parse `var(--x)`.
+    expect(JSON.stringify(option)).not.toContain('var(--')
+  })
+
+  it('shades the saving years and marks retirement when accumulating', () => {
+    const option = withCssStub(() => fanChartOption(accumulating)) as unknown as FanOption
+    const median = option.series[4]
+
+    expect(median.markArea?.data).toEqual([[{ name: 'saving', xAxis: '0' }, { xAxis: '2' }]])
+    expect(median.markArea?.itemStyle).toEqual({ color: 'resolved(--chart-2)', opacity: 0.05 })
+    // The retirement line lands on the accumulation/withdrawal boundary.
+    expect(median.markLine?.data).toEqual([{ xAxis: '2' }])
+    expect(median.markLine?.lineStyle).toMatchObject({
+      type: 'dashed',
+      color: 'resolved(--muted-foreground)',
+    })
+    expect(median.markLine?.label.formatter).toBe('retire')
+  })
+
+  it('omits the saving markers when retirement starts immediately', () => {
+    const option = withCssStub(() => fanChartOption(retiredNow)) as unknown as FanOption
+    const median = option.series[4]
+
+    // Same 3-year span, reached through horizon alone: no saving phase to mark.
+    expect(option.xAxis.data).toEqual(['0', '1', '2', '3'])
+    expect(median.data).toEqual(percentiles.p50)
+    expect(median.markArea).toBeUndefined()
+    expect(median.markLine).toBeUndefined()
   })
 })
