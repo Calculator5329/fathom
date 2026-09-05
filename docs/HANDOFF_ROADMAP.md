@@ -22,6 +22,14 @@ committed with focused staging (never `git add -A`), then pushed.
 
 ## Now
 
+- [x] **A30: keep compiled journey output in test artifacts.** _(verified locally
+  2026-09-05; parent owns integration)_ Regenerated all 13 journeys through the
+  delivered Handles compiler. Observations, final screenshots and receipts now
+  attach to each Playwright test instead of overwriting repository evidence.
+  All 13 journeys pass; 165 unit tests pass (nine existing skips), and TypeScript
+  builds. Existing owner documentation/.gitignore and manual baselines in the
+  canonical checkout were not edited by this lane.
+
 - [x] **Handles: public control journeys and bounded voice navigation.** _(verified
   locally 2026-09-04; parent owns integration)_ Existing 13 journeys now reconcile
   Research scopes, native calendar buttons and semantic tab containers correctly.
