@@ -1,0 +1,60 @@
+{
+  "schema": "agent-handles/runtime-observations/v1",
+  "measuredAt": "2026-09-04T03:16:48.520Z",
+  "journeys": 1,
+  "journeyNames": [
+    "backtest-builder-control-path"
+  ],
+  "interactiveElementsObserved": 31,
+  "observedTestIds": [
+    "app.header.sign-in",
+    "app.nav.allocation",
+    "app.nav.backtest",
+    "app.nav.home",
+    "app.nav.income",
+    "app.nav.montecarlo",
+    "app.nav.stock",
+    "backtest.builder.add-portfolio",
+    "backtest.builder.advanced-toggle",
+    "backtest.builder.picker-p1",
+    "backtest.builder.remove-p1-AMZN",
+    "backtest.builder.weight-p1-AMZN",
+    "backtest.layout.builder-toggle",
+    "backtest.results.copy-link",
+    "backtest.results.export-csv",
+    "backtest.results.log-scale",
+    "backtest.results.tab-annual",
+    "backtest.results.tab-holdings",
+    "backtest.results.tab-income",
+    "backtest.results.tab-risk",
+    "backtest.results.tab-rolling",
+    "landing.tools.card-allocation",
+    "landing.tools.card-backtest",
+    "landing.tools.card-montecarlo",
+    "landing.tools.card-stock",
+    "ui.date-picker.input-end",
+    "ui.date-picker.input-start",
+    "ui.date-picker.open-end",
+    "ui.date-picker.open-start",
+    "ui.echart.export-fathom-portfolio-value",
+    "ui.ticker-picker.option-AMZN"
+  ],
+  "unidentifiedObserved": 2,
+  "unidentified": [
+    {
+      "testId": null,
+      "tag": "div",
+      "role": "tablist",
+      "text": "Annual returnsRiskRollingIncomeHoldings"
+    },
+    {
+      "testId": null,
+      "tag": "div",
+      "role": "tabpanel",
+      "text": "YearPortfolio 12026+12.2%2025+5.2%2024+44.4%2023+80.9%2022−49.6%2021+2.4%2020+76"
+    }
+  ],
+  "unknownTestIds": [],
+  "duplicateTestIds": [],
+  "statement": "31 controls observed during 1 journey(s); 2 unidentified and 0 unknown to the registry. Unvisited states are uncovered, not green."
+}
