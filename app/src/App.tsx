@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { KeyRound, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
@@ -22,9 +22,18 @@ const Links = lazy(() => import('./pages/Links').then((m) => ({ default: m.Links
 const Xray = lazy(() => import('./pages/Xray').then((m) => ({ default: m.Xray })))
 const Styleguide = lazy(() => import('./pages/Styleguide').then((m) => ({ default: m.Styleguide })))
 
-// Warm the ticker catalog at boot so the first picker interaction is instant.
+// Warm the ticker catalog so the first picker interaction is instant — on
+// entering a route that can use it, rather than once at module scope. The
+// asset-class tools run entirely off the committed asset-class series and
+// never look a ticker up, so warming there buys the page nothing and can only
+// cost it: ticker data lives in Cloud Storage rather than in git, so a tree
+// without a local copy answers the request with an error the page logs.
+// Warming on navigation also covers routes reached without a reload, which the
+// boot-time call missed. `loadCatalog` caches, so repeat calls are free.
 import { loadCatalog } from './data/catalog'
-loadCatalog()
+const ASSET_CLASS_TOOLS = ['/montecarlo', '/allocation']
+const usesTickerCatalog = (pathname: string) =>
+  !ASSET_CLASS_TOOLS.some((route) => pathname === route || pathname.startsWith(`${route}/`))
 
 function NotFound() {
   return (
@@ -46,6 +55,11 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   }`
 
 function Shell({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    if (usesTickerCatalog(pathname)) loadCatalog()
+  }, [pathname])
+
   // "/" focuses the nearest ticker/asset search input (Linear-style).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
