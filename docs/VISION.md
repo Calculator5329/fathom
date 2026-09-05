@@ -243,3 +243,15 @@ this repo (`app/src/engine/__tests__/realdata.test.ts`, 8 tests against
 math changes now happen in finance-kit first (same fixture rules), then a
 repacked tarball / version bump lands here. Consumers of the package:
 retirement-sim (migrated same day), Fathom, finance-master (planned).
+
+### 2026-09-05 — Retry transient ticker searches
+
+Remote search had retained local fallback promises after provider/network/JSON
+failures, so the same query could never recover until reload, even after the
+429 cooldown. Retain successful cached results and in-flight deduplication;
+remove only the failed promise still owned by that cache key in final cleanup.
+The cooldown remains global and exactly 15 minutes; rankings, response shapes,
+local search and portfolio math are unchanged. No provider calls or account/env
+access were needed. Synthetic production-path reproduction is retained at
+`~/.cache/tmp/astra-fathom-search/proof.json`; full Vitest (170 pass, nine existing
+skips) and TypeScript checks pass. Parent review supplies independent acceptance.
