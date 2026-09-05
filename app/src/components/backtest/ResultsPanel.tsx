@@ -138,9 +138,41 @@ function correlationMatrix(runs: NamedResult[]): number[][] {
 
 const ROLLING_WINDOWS = [1, 3, 5, 10]
 
+/**
+ * Copy text to the clipboard without ever rejecting: the async Clipboard API is
+ * denied in insecure contexts, unfocused documents and automated browsers, so
+ * fall back to a selection copy and report failure as a value.
+ */
+async function copyText(text: string): Promise<boolean> {
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch {
+      // Permission denied or no transient activation — try the legacy path.
+    }
+  }
+  if (typeof document === 'undefined') return false
+  const area = document.createElement('textarea')
+  area.value = text
+  area.setAttribute('readonly', '')
+  area.style.position = 'fixed'
+  area.style.top = '0'
+  area.style.opacity = '0'
+  document.body.appendChild(area)
+  try {
+    area.select()
+    return document.execCommand('copy')
+  } catch {
+    return false
+  } finally {
+    area.remove()
+  }
+}
+
 export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
   const [logScale, setLogScale] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const [rollingWindow, setRollingWindow] = useState(3)
 
   const growth = useMemo(() => growthOption(runs, logScale), [runs, logScale])
@@ -215,11 +247,10 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
   )
 
   const dates = runs[0].result.dates
-  const copyLink = () => {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    })
+  const copyLink = async () => {
+    const ok = await copyText(window.location.href)
+    setCopyState(ok ? 'copied' : 'failed')
+    window.setTimeout(() => setCopyState('idle'), 1500)
   }
 
   return (
@@ -244,9 +275,16 @@ export function ResultsPanel({ runs, showIncome = true }: ResultsPanelProps) {
             <Download />
             Export CSV
           </Button>
-          <Button data-testid="backtest.results.copy-link" variant="outline" size="sm" onClick={copyLink}>
-            {copied ? <Check className="text-gain" /> : <LinkIcon />}
-            {copied ? 'Copied' : 'Copy link'}
+          <Button
+            data-testid="backtest.results.copy-link"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              void copyLink()
+            }}
+          >
+            {copyState === 'copied' ? <Check className="text-gain" /> : <LinkIcon />}
+            {copyState === 'copied' ? 'Copied' : copyState === 'failed' ? 'Copy failed' : 'Copy link'}
           </Button>
         </div>
       </div>
