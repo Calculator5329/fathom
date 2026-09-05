@@ -193,3 +193,6 @@ committed with focused staging (never `git add -A`), then pushed.
 - `useUrlSyncedState` hook (judged unnecessary — PUSH/REPLACE semantics are page logic).
 - Login walls on Backtest/Allocation — never.
 - Personal budgets/net-worth features — those belong to finance-master.
+# 2026-09-05 — Private finance research bridge
+
+Saved projections can be explicitly exported as JSON from the signed-in projection list. The export contains assumptions, notes, source timestamps and outcomes from the existing projection engine. Finance Master imports these into private versioned review storage; holdings and balances never flow into Fathom. This implements Ethan's approved connected-finance direction. Hosted deployment remains separate.

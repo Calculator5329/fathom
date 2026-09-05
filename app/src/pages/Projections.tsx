@@ -18,6 +18,7 @@ import {
   subscribeProjections,
 } from '@/projections/store'
 import { usePrice } from '@/projections/usePrice'
+import { downloadProjections } from '@/projections/export'
 
 /**
  * Tool 3 — Stock Projections. The first authenticated feature.
@@ -226,6 +227,10 @@ function ProjectionsInner() {
             />
           </div>
         )}
+
+        <Button data-testid="projections.list.export" className="mb-4 w-full" variant="outline" disabled={!savedLoaded || !saved.length} onClick={() => downloadProjections(saved)}>
+          Export saved research
+        </Button>
 
         {ranked.length === 0 && !pickingNew && (
           <p className="text-sm text-muted-foreground">
