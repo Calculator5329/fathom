@@ -22,6 +22,17 @@ committed with focused staging (never `git add -A`), then pushed.
 
 ## Now
 
+- [x] **app-explorer first pass (2026-09-05).** `ai/app-explorer` crawled the
+  app through agent-handles (40 states, 121 steps) and filed findings under
+  `app/.explorer/findings/`. One is fixed and merged: `/montecarlo` threw a
+  pageerror when an asset-class dataset was missing because the dev server
+  answered the `.json` request with the SPA HTML; `assetClasses.ts` now
+  validates the response, `useSimulation.ts` catches it and reports worker
+  errors, and catalog warm-up skips `/montecarlo` and `/allocation`. A second
+  finding (clipboard `writeText` permission denied on
+  `backtest.results.copy-link`) is in a lane. `app/explorer.config.json` holds
+  the crawl knobs; `app/.explorer/` runs are gitignored, findings are not.
+
 - [x] **Handles: public control journeys and bounded voice navigation.** _(verified
   locally 2026-09-04; parent owns integration)_ Existing 13 journeys now reconcile
   Research scopes, native calendar buttons and semantic tab containers correctly.
@@ -109,6 +120,12 @@ committed with focused staging (never `git add -A`), then pushed.
   private? Either way, update CLAUDE.md's working-style section if the answer changes
   anything. _Accept: Ethan's decision recorded in VISION.md; every local commit is
   pushed (local and origin `main` identical)._
+  *(2026-08-13: the visibility half is DONE. Ethan ruled `keep` on
+  `repo-visibility-packet-20260810` D2 and the decision is recorded in
+  `docs/VISION.md`. The item stays open for the push half: measured today,
+  local `main` is 2 commits ahead of `origin/main` (local `95d9459`, origin
+  `9c59d70`), so local and origin are not identical. Nothing in CLAUDE.md
+  needed changing, since the answer kept the existing state.)*
 - [x] **CI: GitHub Actions for vitest + tsc.** *(done 2026-07-10)* No cloud secrets
   needed — tests run on committed data. Workflow: checkout, Node 22, `npm ci` in
   `app/`, `npx vitest run`,
