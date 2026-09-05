@@ -2,6 +2,34 @@
 
 _Planned 2026-07-03 by the orchestrating session; implementation handed to Opus + Codex._
 
+## 2026-08-13: repo visibility ratified, Fathom stays PUBLIC
+
+Ethan ruled `keep` on `repo-visibility-packet-20260810` D2. The GitHub repo
+`Calculator5329/fathom` is public, and that is now the approved state rather
+than an unratified accident. No note was attached to the ruling.
+
+Measured 2026-08-13 with `gh api repos/Calculator5329/fathom`: `private:
+false`, `visibility: "public"`, license AGPL-3.0, default branch `main`. That
+matches the AGPL license and the recruiter-facing README, which is why the
+state was assumed intentional all along.
+
+Why this is consistent with the workspace rule that financial data never
+enters a public repo: Fathom is the markets and securities app, and the
+personal-money app is `finance/finance-master`, which is private by nature
+(see Positioning below). Fathom stores no account balances by design; a
+signed-in user's saved work lives in Firestore, not in the repository.
+
+What was NOT done: no audit of the repository or its history for real
+financial figures was run. The packet offered that as an option and Ethan
+chose `keep` instead, so this record rests on the design boundary above, not
+on a scan. The only thing measured here is the current visibility. If an audit
+is ever wanted, it is separate work.
+
+Standing rule this repo now falls under: the workspace visibility policy in
+`~/projects/planning/decisions/2026-08-13-repo-visibility-policy.md`. Fathom is
+a named override there: the `finance` category defaults to private, and this
+ruling outranks the category default.
+
 ## 2026-07-15 — Numeric-control polish
 
 - Removed browser-native up/down spinner chrome from number inputs across the
