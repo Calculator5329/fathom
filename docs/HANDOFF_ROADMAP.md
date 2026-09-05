@@ -31,7 +31,8 @@ committed with focused staging (never `git add -A`), then pushed.
   errors, and catalog warm-up skips `/montecarlo` and `/allocation`. A second
   finding (clipboard `writeText` permission denied on
   `backtest.results.copy-link`) is in a lane. `app/explorer.config.json` holds
-  the crawl knobs; `app/.explorer/` runs are gitignored, findings are not.
+  the crawl knobs; all of `app/.explorer/` (runs and findings) is gitignored,
+  the durable evidence is `ai/app-explorer/docs/evidence/2026-09.md`.
 
 - [x] **Handles: public control journeys and bounded voice navigation.** _(verified
   locally 2026-09-04; parent owns integration)_ Existing 13 journeys now reconcile
