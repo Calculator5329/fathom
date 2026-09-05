@@ -37,39 +37,75 @@ const DATA_BASE: string =
 let loaded: Promise<{ returns: Map<string, Map<string, number>>; cpi: Map<string, number> }> | null =
   null
 
+const isMonthlyDataset = (v: unknown): v is MonthlyDataset => {
+  if (typeof v !== 'object' || v === null) return false
+  const { dates, series } = v as { dates?: unknown; series?: unknown }
+  return (
+    Array.isArray(dates) &&
+    dates.every((d) => typeof d === 'string') &&
+    typeof series === 'object' &&
+    series !== null
+  )
+}
+
+/**
+ * Fetch one monthly dataset, failing with a readable Error rather than a raw
+ * parse throw.
+ *
+ * A server that does not know the path answers a `.json` request with the SPA
+ * index page — 200, `text/html` — and `Response.json()` then rejects with
+ * `Unexpected token '<', "<!doctype "... is not valid JSON`, which says
+ * nothing about which file is missing. Same for a JSON body of the wrong
+ * shape: the old code indexed `series[id]` straight away and threw a
+ * TypeError deep in the mapping loop.
+ */
+async function fetchDataset(url: string): Promise<MonthlyDataset> {
+  const r = await fetchRetry(url)
+  if (!r.ok) throw new Error(`asset data unavailable (${r.status})`)
+  let parsed: unknown
+  try {
+    parsed = await r.json()
+  } catch {
+    throw new Error(`asset data unavailable (${url} did not return JSON)`)
+  }
+  if (!isMonthlyDataset(parsed)) throw new Error(`asset data malformed (${url})`)
+  return parsed
+}
+
+const column = (dataset: MonthlyDataset, id: string, url: string): Array<number | null> => {
+  const col = dataset.series[id]
+  if (!Array.isArray(col)) throw new Error(`asset data malformed (${url} has no "${id}" series)`)
+  return col
+}
+
 /** Load both monthly datasets once; index returns and CPI growth by month. */
 export function loadAssetClassData() {
   if (!loaded) {
-    loaded = Promise.all([
-      fetchRetry(`${DATA_BASE}asset-classes/us-monthly.json`).then((r) => {
-        if (!r.ok) throw new Error(`asset data unavailable (${r.status})`)
-        return r.json() as Promise<MonthlyDataset>
-      }),
-      fetchRetry(`${DATA_BASE}asset-classes/us-size-premia.json`).then((r) => {
-        if (!r.ok) throw new Error(`asset data unavailable (${r.status})`)
-        return r.json() as Promise<MonthlyDataset>
-      }),
-    ]).then(([us, size]) => {
+    const usUrl = `${DATA_BASE}asset-classes/us-monthly.json`
+    const sizeUrl = `${DATA_BASE}asset-classes/us-size-premia.json`
+    loaded = Promise.all([fetchDataset(usUrl), fetchDataset(sizeUrl)]).then(([us, size]) => {
       const returns = new Map<string, Map<string, number>>()
-      const put = (id: string, dataset: MonthlyDataset) => {
+      const put = (id: string, dataset: MonthlyDataset, url: string) => {
+        const col = column(dataset, id, url)
         const m = new Map<string, number>()
         dataset.dates.forEach((d, i) => {
-          const v = dataset.series[id][i]
+          const v = col[i]
           if (v !== null && Number.isFinite(v)) m.set(d, v)
         })
         returns.set(id, m)
       }
-      put('usStocks', us)
-      put('usBonds', us)
-      put('cash', us)
-      put('smallCap', size)
-      put('midCap', size)
-      put('largeCap', size)
+      put('usStocks', us, usUrl)
+      put('usBonds', us, usUrl)
+      put('cash', us, usUrl)
+      put('smallCap', size, sizeUrl)
+      put('midCap', size, sizeUrl)
+      put('largeCap', size, sizeUrl)
 
       // CPI index level by month -> used for real-return conversion.
+      const cpiCol = column(us, 'cpi', usUrl)
       const cpi = new Map<string, number>()
       us.dates.forEach((d, i) => {
-        const v = us.series.cpi[i]
+        const v = cpiCol[i]
         if (v !== null && Number.isFinite(v)) cpi.set(d, v)
       })
       return { returns, cpi }

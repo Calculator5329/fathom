@@ -77,6 +77,13 @@ export function useSimulation(config: RunConfig): SimOutput {
         error: e.data.error ?? null,
       })
     }
+    // The worker reports its own failures over `postMessage`, but a failure to
+    // load or start it never gets that far: without a handler the ErrorEvent
+    // reaches the window as an uncaught error.
+    worker.onerror = (e) => {
+      e.preventDefault()
+      setOutput((o) => ({ ...o, running: false, error: 'Simulation engine failed to start.' }))
+    }
     return () => {
       worker.terminate()
       workerRef.current = null
@@ -114,19 +121,31 @@ export function useSimulation(config: RunConfig): SimOutput {
         workerRef.current.postMessage(req)
         return
       }
-      loadAssetClassData().then((data) => {
-        if (cancelled || !workerRef.current) return
-        const req: WorkerRequest = {
-          allocation: validAlloc,
-          returns: [...data.returns.entries()].map(([id, m]) => [id, [...m.entries()]]),
-          cpi: [...data.cpi.entries()],
-          params: config.params,
-          mode: config.mode,
-          trials: config.trials,
-          seed: 0x9e3779b9,
-        }
-        workerRef.current.postMessage(req)
-      })
+      loadAssetClassData()
+        .then((data) => {
+          if (cancelled || !workerRef.current) return
+          const req: WorkerRequest = {
+            allocation: validAlloc,
+            returns: [...data.returns.entries()].map(([id, m]) => [id, [...m.entries()]]),
+            cpi: [...data.cpi.entries()],
+            params: config.params,
+            mode: config.mode,
+            trials: config.trials,
+            seed: 0x9e3779b9,
+          }
+          workerRef.current.postMessage(req)
+        })
+        .catch((err: unknown) => {
+          // A failed history load is a state this page can show (the results
+          // panel renders `error`), not an unhandled rejection: leaving it
+          // unhandled surfaced the loader's raw throw as a page error.
+          if (cancelled) return
+          setOutput((o) => ({
+            ...o,
+            running: false,
+            error: err instanceof Error ? err.message : String(err),
+          }))
+        })
     }, 150)
     return () => {
       cancelled = true
