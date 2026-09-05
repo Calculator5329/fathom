@@ -675,6 +675,7 @@ export async function searchTickers(query: string, limit = 8): Promise<TickerSea
   const cacheKey = `${trimmed.toUpperCase()}:${limit}`
   let pending = remoteSearchCache.get(cacheKey)
   if (!pending) {
+    let succeeded = false
     pending = (async () => {
       const res = await fetch(
         `${API_BASE}/api/search?q=${encodeURIComponent(trimmed)}&limit=${limit}`,
@@ -686,11 +687,17 @@ export async function searchTickers(query: string, limit = 8): Promise<TickerSea
       if (!res.ok) return { entries: local, warning: null }
       const remote: CatalogEntry[] = await res.json()
       const seen = new Set(local.map((e) => e.ticker))
-      return {
+      const result = {
         entries: [...local, ...remote.filter((e) => !seen.has(e.ticker))].slice(0, limit),
         warning: null,
       }
-    })().catch(() => ({ entries: local, warning: null }))
+      succeeded = true
+      return result
+    })().catch(() => ({ entries: local, warning: null })).finally(() => {
+      if (!succeeded && remoteSearchCache.get(cacheKey) === pending) {
+        remoteSearchCache.delete(cacheKey)
+      }
+    })
     remoteSearchCache.set(cacheKey, pending)
   }
   return pending

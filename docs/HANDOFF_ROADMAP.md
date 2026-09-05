@@ -201,6 +201,16 @@ committed with focused staging (never `git add -A`), then pushed.
 - `useUrlSyncedState` hook (judged unnecessary — PUSH/REPLACE semantics are page logic).
 - Login walls on Backtest/Allocation — never.
 - Personal budgets/net-worth features — those belong to finance-master.
+
+## Verified recovery work — 2026-09-05
+
+- [x] A35 transient ticker-search recovery (2026-09-05): failed HTTP, network,
+  JSON and rate-limit responses no longer remain cached for the page session.
+  Only successful remote results persist; pending requests still deduplicate.
+  The global 15-minute 429 cooldown and local fallback remain unchanged.
+  Full verification: 170 Vitest tests pass, nine existing skips; `npx tsc -b`
+  passes. Four failure-recovery probes failed before repair; all five probes
+  now pass with intercepted synthetic.invalid requests and controlled time.
 # 2026-09-05 — Private finance research bridge
 
 Saved projections can be explicitly exported as JSON from the signed-in projection list. The export contains assumptions, notes, source timestamps and outcomes from the existing projection engine. Finance Master imports these into private versioned review storage; holdings and balances never flow into Fathom. This implements Ethan's approved connected-finance direction. Hosted deployment remains separate.
