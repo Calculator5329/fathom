@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { Component, lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { KeyRound, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
