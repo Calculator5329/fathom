@@ -1,6 +1,6 @@
 import { Component, lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
-import { KeyRound, LogIn } from 'lucide-react'
+import { KeyRound, LogIn, RotateCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
 import { Button } from '@/components/ui/button'
@@ -47,6 +47,75 @@ function NotFound() {
       </p>
     </div>
   )
+}
+
+interface RouteErrorBoundaryProps {
+  /** Changing this clears a previous failure — the pathname, so navigating away recovers. */
+  resetKey: string
+  children: React.ReactNode
+}
+
+interface RouteErrorBoundaryState {
+  failed: boolean
+  forKey: string
+}
+
+/**
+ * Route-level failure UI.
+ *
+ * A tool page that throws while rendering used to take the whole app down:
+ * with no boundary, React unmounts the tree and the user is left with a blank
+ * screen or, where a page happened to render the caught message itself, a raw
+ * exception string. The commonest source is a request answered with the SPA
+ * index page instead of the payload — a data endpoint that 200s `text/html`
+ * (`Unexpected token '<', "<!doctype "... is not valid JSON`) or, after a
+ * deploy, a lazy route chunk whose hashed URL no longer exists. Neither is
+ * something to show a user verbatim, and both are usually transient.
+ *
+ * Retry reloads rather than resetting state, because `lazy()` memoizes the
+ * rejected import promise: clearing the error would re-render the same failed
+ * chunk without ever re-fetching it. The header stays mounted above this, so
+ * navigating to another tool is also a way out.
+ */
+class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, RouteErrorBoundaryState> {
+  state: RouteErrorBoundaryState = { failed: false, forKey: this.props.resetKey }
+
+  static getDerivedStateFromError(): Partial<RouteErrorBoundaryState> {
+    return { failed: true }
+  }
+
+  static getDerivedStateFromProps(
+    props: RouteErrorBoundaryProps,
+    state: RouteErrorBoundaryState,
+  ): RouteErrorBoundaryState | null {
+    if (props.resetKey === state.forKey) return null
+    return { failed: false, forKey: props.resetKey }
+  }
+
+  render() {
+    if (!this.state.failed) return this.props.children
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-24 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">This page didn&rsquo;t load.</h1>
+        <p className="mt-3 text-muted-foreground">
+          Something went wrong fetching the data for this tool. It&rsquo;s usually temporary.
+        </p>
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <Button data-testid="app.route-error.retry" onClick={() => window.location.reload()}>
+            <RotateCw />
+            Try again
+          </Button>
+          <Link
+            to="/"
+            data-testid="app.route-error.home"
+            className="text-sm text-primary hover:underline"
+          >
+            Back to the tools
+          </Link>
+        </div>
+      </div>
+    )
+  }
 }
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -103,7 +172,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           <AccountNav />
         </nav>
       </header>
-      {children}
+      <RouteErrorBoundary resetKey={pathname}>{children}</RouteErrorBoundary>
     </div>
   )
 }
