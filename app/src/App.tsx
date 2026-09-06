@@ -1,6 +1,6 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { Component, lazy, Suspense, useEffect, type ReactNode } from 'react'
 import { BrowserRouter, Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
-import { KeyRound, LogIn } from 'lucide-react'
+import { KeyRound, LogIn, RotateCw, TriangleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
 import { Button } from '@/components/ui/button'
@@ -49,6 +49,76 @@ function NotFound() {
   )
 }
 
+interface RouteErrorBoundaryProps {
+  /** Changing this clears a caught error — one broken route must not trap the rest. */
+  resetKey: string
+  children: ReactNode
+}
+
+interface RouteErrorBoundaryState {
+  error: Error | null
+  resetKey: string
+}
+
+/**
+ * Route-level error boundary.
+ *
+ * Every page below the router is code-split and loads its own data, so a chunk
+ * that fails to download or a render that throws had nowhere to land: React
+ * unmounts a tree whose error nobody catches, which leaves the reader looking
+ * at a placeholder that never resolves or at nothing at all, with the only
+ * account of what happened in a console they will not open. Catch it here and
+ * say which failure it was, next to a way out of it.
+ */
+class RouteErrorBoundary extends Component<RouteErrorBoundaryProps, RouteErrorBoundaryState> {
+  constructor(props: RouteErrorBoundaryProps) {
+    super(props)
+    this.state = { error: null, resetKey: props.resetKey }
+  }
+
+  static getDerivedStateFromError(error: unknown): Partial<RouteErrorBoundaryState> {
+    return { error: error instanceof Error ? error : new Error(String(error)) }
+  }
+
+  static getDerivedStateFromProps(
+    props: RouteErrorBoundaryProps,
+    state: RouteErrorBoundaryState,
+  ): Partial<RouteErrorBoundaryState> | null {
+    if (props.resetKey === state.resetKey) return null
+    return { error: null, resetKey: props.resetKey }
+  }
+
+  render() {
+    const { error } = this.state
+    if (!error) return this.props.children
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-24" data-testid="app.route-error.panel">
+        <p role="alert" className="flex items-center gap-2 text-[15px] text-loss">
+          <TriangleAlert className="size-4 shrink-0" />
+          This page couldn&rsquo;t load.
+        </p>
+        <p className="mt-2 font-mono text-sm break-words text-muted-foreground">
+          {error.message || 'Unknown error'}
+        </p>
+        <div className="mt-6 flex items-center gap-4">
+          <Button
+            data-testid="app.route-error.reload"
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.reload()}
+          >
+            <RotateCw />
+            Reload the page
+          </Button>
+          <Link to="/" data-testid="app.route-error.home" className="text-sm text-primary hover:underline">
+            Back to the tools
+          </Link>
+        </div>
+      </div>
+    )
+  }
+}
+
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `text-sm transition-colors ${
     isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
@@ -57,7 +127,10 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 function Shell({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()
   useEffect(() => {
-    if (usesTickerCatalog(pathname)) loadCatalog()
+    // Fire-and-forget, so the rejection has to be handled here: an unhandled
+    // one is a page error the user never sees an explanation for, and a
+    // warm-up nobody is waiting on is never worth one.
+    if (usesTickerCatalog(pathname)) void loadCatalog().catch(() => {})
   }, [pathname])
 
   // "/" focuses the nearest ticker/asset search input (Linear-style).
@@ -195,27 +268,40 @@ function AccountNav() {
   )
 }
 
-export default function App() {
+/**
+ * The boundary sits outside Suspense so it catches a route chunk that fails to
+ * load as well as anything the route throws while rendering.
+ */
+function RoutedPages() {
+  const { pathname } = useLocation()
   return (
-    <BrowserRouter>
-      <ShellAuthProvider>
-        <Shell>
-        <Suspense fallback={<PageSkeleton />}>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/backtest" element={<Backtest />} />
-            <Route path="/allocation" element={<Allocation />} />
-            <Route path="/income" element={<Income />} />
+    <RouteErrorBoundary resetKey={pathname}>
+      <Suspense fallback={<PageSkeleton />}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/backtest" element={<Backtest />} />
+          <Route path="/allocation" element={<Allocation />} />
+          <Route path="/income" element={<Income />} />
           <Route path="/projections" element={<Projections />} />
           <Route path="/montecarlo" element={<Montecarlo />} />
           <Route path="/stock" element={<Stock />} />
           <Route path="/stock/:symbol" element={<Stock />} />
           <Route path="/links" element={<Links />} />
           <Route path="/xray" element={<Xray />} />
-            <Route path="/styleguide" element={<Styleguide />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+          <Route path="/styleguide" element={<Styleguide />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </RouteErrorBoundary>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <ShellAuthProvider>
+        <Shell>
+          <RoutedPages />
           <Toaster position="bottom-right" />
         </Shell>
       </ShellAuthProvider>
