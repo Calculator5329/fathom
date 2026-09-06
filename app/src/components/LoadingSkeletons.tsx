@@ -114,6 +114,31 @@ function EntrySkeleton() {
 }
 
 /**
+ * The metric cards + chart card a results panel settles into: the chart lives
+ * in a bordered card with a title row, a tall growth chart and a short
+ * drawdown strip under it, so the placeholder is about as tall as the real
+ * thing rather than a bare 384px block.
+ */
+function MetricsAndChartSkeleton({ cards }: { cards: number }) {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {Array.from({ length: cards }, (_, i) => (
+          <Skeleton key={i} className="h-24 rounded-xl" />
+        ))}
+      </div>
+      <div className="mt-6 rounded-xl border bg-card py-4 shadow-sm">
+        <div className="px-5">
+          <Skeleton className="h-5 w-40 rounded-md" />
+          <Skeleton className="mt-4 h-80 rounded-md" />
+          <Skeleton className="mt-1 h-40 rounded-md" />
+        </div>
+      </div>
+    </>
+  )
+}
+
+/**
  * Working shape: the docked builder rail plus a results column of metric
  * cards and charts, mirroring the pages that settle there.
  */
@@ -163,31 +188,6 @@ export function PageSkeleton({ shape }: { shape?: RouteSkeletonShape } = {}) {
     default:
       return <PageShellSkeleton />
   }
-}
-
-/**
- * The metric cards + chart card a results panel settles into: the chart lives
- * in a bordered card with a title row, a tall growth chart and a short
- * drawdown strip under it, so the placeholder is about as tall as the real
- * thing rather than a bare 384px block.
- */
-function MetricsAndChartSkeleton({ cards }: { cards: number }) {
-  return (
-    <>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {Array.from({ length: cards }, (_, i) => (
-          <Skeleton key={i} className="h-24 rounded-xl" />
-        ))}
-      </div>
-      <div className="mt-6 rounded-xl border bg-card py-4 shadow-sm">
-        <div className="px-5">
-          <Skeleton className="h-5 w-40 rounded-md" />
-          <Skeleton className="mt-4 h-80 rounded-md" />
-          <Skeleton className="mt-1 h-40 rounded-md" />
-        </div>
-      </div>
-    </>
-  )
 }
 
 /**
