@@ -126,7 +126,10 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 function Shell({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()
   useEffect(() => {
-    if (usesTickerCatalog(pathname)) loadCatalog()
+    // Fire-and-forget, so the rejection has to be handled here: an unhandled
+    // one is a page error the user never sees an explanation for, and a
+    // warm-up nobody is waiting on is never worth one.
+    if (usesTickerCatalog(pathname)) void loadCatalog().catch(() => {})
   }, [pathname])
 
   // "/" focuses the nearest ticker/asset search input (Linear-style).
