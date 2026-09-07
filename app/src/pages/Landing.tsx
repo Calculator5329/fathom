@@ -55,6 +55,7 @@ const ACCOUNT_TOOLS = [
  */
 function HeroSparkline() {
   const [path, setPath] = useState<string | null>(null)
+  const [failed, setFailed] = useState(false)
   useEffect(() => {
     let cancelled = false
     loadSeries('SPY')
@@ -82,35 +83,47 @@ function HeroSparkline() {
           .join('')
         setPath(d)
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled) setFailed(true)
+      })
     return () => {
       cancelled = true
     }
   }, [])
-  if (!path) return null
+  // The wrapper owns the height whether or not the series has arrived, so the
+  // tool grid below never moves when the async data resolves.
   return (
-    <svg
-      viewBox="0 0 1000 100"
-      preserveAspectRatio="none"
-      className="animate-enter mt-8 h-28 w-full"
-      aria-hidden
-    >
-      <defs>
-        <linearGradient id="hero-spark-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.22" />
-          <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={`${path}L1000,100L0,100Z`} fill="url(#hero-spark-fill)" />
-      <path
-        d={path}
-        fill="none"
-        stroke="var(--primary)"
-        strokeWidth="1.75"
-        opacity="0.8"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
+    <div className="mt-8 h-28 w-full">
+      {path ? (
+        <svg
+          viewBox="0 0 1000 100"
+          preserveAspectRatio="none"
+          className="animate-enter h-full w-full"
+          aria-hidden
+        >
+          <defs>
+            <linearGradient id="hero-spark-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d={`${path}L1000,100L0,100Z`} fill="url(#hero-spark-fill)" />
+          <path
+            d={path}
+            fill="none"
+            stroke="var(--primary)"
+            strokeWidth="1.75"
+            opacity="0.8"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      ) : failed ? null : (
+        // Quiet placeholder while the series loads: holds the box and marks
+        // the chart baseline without the pulse of a full skeleton under the
+        // hero. On failure the box stays reserved but empty.
+        <div className="h-full w-full rounded-sm border-b border-border/60 bg-gradient-to-b from-transparent to-muted/30" />
+      )}
+    </div>
   )
 }
 
