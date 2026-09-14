@@ -18,7 +18,7 @@
   it also reported is already fixed on main (`label: { show: false }`) and
   only needs the pending deploy.
 
-## 2026-08-26 — Public-repo presentation pass
+## 2026-08-26: Public-repo presentation pass
 
 - Deleted the vestigial `stock-analysis/` Vite starter from the working tree. It
   was a counter-template scaffold superseded by `app/` in July 2026 and had no
@@ -35,7 +35,7 @@
   share-basis problem in EDGAR companyfacts and how `resolveShares` in
   `app/src/fundamentals/charts.ts` resolves it. Linked from the README.
 
-## 2026-07-26 — App documentation cleanup
+## 2026-07-26: App documentation cleanup
 
 - Replaced the generic Vite starter text in `app/README.md` with a
   Fathom-specific guide to the client purpose, structure, local verification,
@@ -43,12 +43,12 @@
 - Preserved the superseded starter README under
   `docs/internal/archive/2026-07-26/vite-app-readme.md`.
 
-## 2026-07-02 — Project context bootstrap
+## 2026-07-02: Project context bootstrap
 
 - Added project README with architecture overview (Vite + Cloud Run, dual backtest modes).
-- Added `DATA_SOURCES_TICKERS.md` — documents master-site yfinance JSON, stock-site download script, portfolio-quarterly-reports CSV, Alpha Vantage weekly data, finance-master Yahoo ingest, and proposed Cloud Run schema.
-- Added `DATA_SOURCES_ASSET_CLASSES.md` — documents Shiller, Fama-French portfolios, STKDATD, retirement-sim normalized pipeline, and asset-class vs ticker mode design.
-- Added `SOURCE_PROJECTS.md` — index of all related repos on Desktop with reuse guidance.
+- Added `DATA_SOURCES_TICKERS.md`: documents master-site yfinance JSON, stock-site download script, portfolio-quarterly-reports CSV, Alpha Vantage weekly data, finance-master Yahoo ingest, and proposed Cloud Run schema.
+- Added `DATA_SOURCES_ASSET_CLASSES.md`: documents Shiller, Fama-French portfolios, STKDATD, retirement-sim normalized pipeline, and asset-class vs ticker mode design.
+- Added `SOURCE_PROJECTS.md`: index of all related repos on Desktop with reuse guidance.
 - Created `context/` with:
   - Copied master-site long-term files (~5 MB) → `context/reference-data/asset-classes/`
   - Copied retirement-sim `shiller.csv` → `context/reference-data/shiller/`

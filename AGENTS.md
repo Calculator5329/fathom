@@ -1,4 +1,4 @@
-# Codex agent guardrails — Fathom (stock-analysis-project)
+# Codex agent guardrails: Fathom (stock-analysis-project)
 
 You are typically invoked as a subagent for well-scoped mechanical work (data pipelines,
 scripts, sweeps, QA). The orchestrating session (Claude) reviews and commits your output.
@@ -7,12 +7,12 @@ scripts, sweeps, QA). The orchestrating session (Claude) reviews and commits you
 
 1. **Never run git commands.** No commits, no staging, no branches. Your caller commits.
 2. **Never run cloud commands** (gcloud/gsutil/firebase). Cloud mutations are handled outside
-   your sandbox; if a task seems to need one, write the script and STOP — report the command
+   your sandbox; if a task seems to need one, write the script and STOP, then report the command
    you would have run.
 3. **Stay inside the directories named in your prompt.** Default writable areas: `scripts/`,
    `data/`, `app/public/data/`. Never modify `app/src/engine/` (portfolio math is
    test-guarded and owned by the orchestrator) unless the prompt explicitly assigns it.
-4. **Never print or write secrets.** Root `.env` holds API tokens — read keys you need, never
+4. **Never print or write secrets.** Root `.env` holds API tokens. Read keys you need, never
    echo values into logs, reports, or generated files.
 5. **Read-only areas:** `context/` (reference datasets), the legacy archive under
    `~/projects/finance/finance-master-workspace/master-site/` and anything else outside this repo.
@@ -34,6 +34,7 @@ scripts, sweeps, QA). The orchestrating session (Claude) reviews and commits you
 
 ## Context documents
 
-- `CLAUDE.md` — architecture map, invariants, environment gotchas (applies to you too).
-- `docs/VISION.md` — roadmap; `docs/internal/PLAN.md` — original spec; `docs/data-notes.md` — data
-  provenance and adjustment-semantics evidence (read before any price-data task).
+- `CLAUDE.md`: architecture map, invariants, environment gotchas (applies to you too).
+- `docs/VISION.md` is the roadmap, `docs/internal/PLAN.md` the original spec, and
+  `docs/data-notes.md` holds data provenance and adjustment-semantics evidence (read
+  before any price-data task).

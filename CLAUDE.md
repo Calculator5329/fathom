@@ -1,4 +1,4 @@
-# Fathom — stock-analysis-project
+# Fathom (stock-analysis-project)
 
 All-things-stocks analysis suite (backtesting, allocation, projections, Monte Carlo).
 Companion app to the personal-finance project at `~/projects/finance/finance-master`
@@ -10,19 +10,19 @@ product spec, [docs/data-notes.md](docs/data-notes.md) before touching data.
 
 ## Docs map (handoff suite, 2026-07-05)
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system overview, stack, directory map, pipelines,
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): system overview, stack, directory map, pipelines,
   exact run/test/deploy commands. Start here if you're new.
-- [docs/HANDOFF_ROADMAP.md](docs/HANDOFF_ROADMAP.md) — Now/Next/Later task list with acceptance
+- [docs/HANDOFF_ROADMAP.md](docs/HANDOFF_ROADMAP.md): Now/Next/Later task list with acceptance
   criteria. (Named to avoid case-colliding with `docs/roadmap.md`, which is Ethan's untracked
-  pre-project draft — don't touch that one.) [docs/VISION.md](docs/VISION.md) holds decision history.
-- [docs/internal/IDEAS.md](docs/internal/IDEAS.md) — ranked expansion backlog with first steps.
-- [docs/internal/](docs/internal/) — process files (handoff notes, original plan, agent plans,
+  pre-project draft, so don't touch that one.) [docs/VISION.md](docs/VISION.md) holds decision history.
+- [docs/internal/IDEAS.md](docs/internal/IDEAS.md): ranked expansion backlog with first steps.
+- [docs/internal/](docs/internal/): process files (handoff notes, original plan, agent plans,
   one-off reports). Moved out of `docs/` on 2026-08-26 so the public docs directory reads as
   project documentation. [docs/notes/](docs/notes/) holds standalone engineering write-ups.
 
 ## Definition of done (every change)
 
-1. `npx vitest run` AND `npx tsc -b` green from `app/` — no exceptions.
+1. `npx vitest run` AND `npx tsc -b` green from `app/`, with no exceptions.
 2. Engine/sim/projection math changes: hand-computed fixtures added AND the real-data golden
    regressions stay green (see invariant 1).
 3. UI changes verified in the running preview via DOM assertions (screenshots time out).
@@ -35,34 +35,34 @@ product spec, [docs/data-notes.md](docs/data-notes.md) before touching data.
 - Dev server: use the preview tooling with `.claude/launch.json` ("app"); port 5173 is taken by
   another project, autoPort is on and vite reads `process.env.PORT`.
 - Tests: `npx vitest run` from `app/`. Typecheck: `npx tsc -b` from `app/`. BOTH must pass before
-  every commit. PowerShell cwd sometimes resets between calls — `Set-Location` with absolute path
-  and verify with `Get-Location` before any npm command.
+  every commit. PowerShell cwd sometimes resets between calls, so use `Set-Location` with an
+  absolute path and verify with `Get-Location` before any npm command.
 - Fetch ticker data: `node scripts/fetch-tiingo.mjs SPY QQQ ...` (skips existing; Tiingo free tier
-  ≈50 unique symbols/hour, 1000 req/day — batches self-throttle but big batches will 429 and retry).
+  ≈50 unique symbols/hour, 1000 req/day; batches self-throttle but big batches will 429 and retry).
 - Rebuild catalog: `node scripts/build-catalog.mjs`. Asset classes: `node scripts/build-asset-classes.mjs`.
 - Sync data to cloud: `gcloud storage cp --cache-control="public, max-age=3600" data/tickers/*.json
   app/public/data/tickers/catalog.json gs://ethan-488900-fathom-data/tickers/`.
 
 ## Architecture (what lives where)
 
-- `app/` — Vite + React 19 + TS + Tailwind v4 + shadcn (radix). Routes: `/`, `/backtest`,
+- `app/`: Vite + React 19 + TS + Tailwind v4 + shadcn (radix). Routes: `/`, `/backtest`,
   `/allocation`, `/styleguide`.
-- `app/src/engine/` — THE backtest engine. Pure TS, zero deps, fully unit-tested. All portfolio
+- `app/src/engine/`: THE backtest engine. Pure TS, zero deps, fully unit-tested. All portfolio
   math lives here and ONLY here.
-- `app/src/data/` — catalog + series loaders (local `public/data` in dev, GCS bucket in prod via
+- `app/src/data/`: catalog + series loaders (local `public/data` in dev, GCS bucket in prod via
   `VITE_DATA_BASE_URL`), asset-class adapter.
-- `app/src/projections/` — Tool 3: projection model (pure, tested), Firestore store, editor.
-  `app/src/auth/AuthContext.tsx` — Firebase Google auth. IMPORTANT: AuthProvider is scoped to the
-  `/projections` route (not main.tsx) so the Firebase SDK stays out of the initial bundle — keep
+- `app/src/projections/` holds Tool 3: projection model (pure, tested), Firestore store, editor.
+  `app/src/auth/AuthContext.tsx`: Firebase Google auth. IMPORTANT: AuthProvider is scoped to the
+  `/projections` route (not main.tsx) so the Firebase SDK stays out of the initial bundle. Keep
   it that way. `app/src/lib/firebase.ts` holds the PUBLIC web config (safe in client; security is
   rules + auth). Firestore rules in `firestore.rules` (per-uid access, deployed).
-- `server/` — Cloud Run API `fathom-api` (us-central1): `/api/health`, `/api/search`,
+- `server/`: Cloud Run API `fathom-api` (us-central1): `/api/health`, `/api/search`,
   `/api/ticker/:SYM` (admits unknown tickers: Tiingo → bucket → catalog), `/api/refresh`
   (token-gated nightly). Deploy: `gcloud run deploy fathom-api --source server ...` (see git log
-  for full flags). Secrets in Secret Manager (`tiingo-token`, `fathom-refresh-token`) — NEVER
+  for full flags). Secrets in Secret Manager (`tiingo-token`, `fathom-refresh-token`). NEVER
   commit or print them; root `.env` is gitignored.
-- `scripts/` — data pipeline (fetch, catalog, asset classes, archive analysis).
-- `data/` — asset-class JSONs committed; `data/tickers/` gitignored (source of truth = GCS bucket
+- `scripts/`: data pipeline (fetch, catalog, asset classes, archive analysis).
+- `data/`: asset-class JSONs committed; `data/tickers/` gitignored (source of truth = GCS bucket
   `ethan-488900-fathom-data`, public read). Cloud Scheduler `fathom-nightly-refresh` runs 10:30pm
   ET weekdays.
 - GCP project `ethan-488900`; gcloud is authenticated locally.
@@ -74,11 +74,11 @@ product spec, [docs/data-notes.md](docs/data-notes.md) before touching data.
    GFC drawdown −50..−58% troughing 2009-03, real US stocks 1871–2023 CAGR ≈6.9%). Metrics use
    Portfolio Visualizer conventions (monthly returns ×√12); metrics come from the TWR index, never
    from raw values when flows exist.
-2. **Nightly refresh is FULL refetch per ticker, never append** — adjusted closes rebase whenever a
+2. **Nightly refresh is FULL refetch per ticker, never append.** Adjusted closes rebase whenever a
    dividend is paid; appending silently corrupts history.
 3. **URL is the canonical backtest state** (`?p1=VTI:60,BND:40&...`), but the editor keeps local
    state so transient shapes (empty portfolio, zero-weight row) survive editing. Structural edits
-   PUSH history; tweaks REPLACE. Don't regress this — it has burned us twice.
+   PUSH history; tweaks REPLACE. Don't regress this; it has burned us twice.
 4. **Tools 1–2 (backtest, allocation) never require login.** Ever. Auth arrives only with
    user-owned data (projections, portfolios) per VISION.md.
 5. **Series data lives in GCS, not Firestore** (1MB doc limit + cost). Firestore is only for small
@@ -86,13 +86,13 @@ product spec, [docs/data-notes.md](docs/data-notes.md) before touching data.
 6. **Stale-while-revalidate in the hooks:** results panels must never unmount during recompute or
    mid-edit; keep last good results and dim.
 
-## Design system — Ledger Dark (tokens in app/src/index.css)
+## Design system: Ledger Dark (tokens in app/src/index.css)
 
 Near-black green-cast canvas, 4-step surface ladder, hairline borders, ONE emerald accent
 (never flooded), `--loss` red is the only other chromatic. Rules Ethan enforces:
-- Text floor 15px (text-xs/sm are remapped — don't use raw smaller sizes).
+- Text floor 15px (text-xs/sm are remapped, so don't use raw smaller sizes).
 - `tnum` class (tabular numerals) on every number; mono font for tickers/dates/values.
-- DENSE cards — he has rejected airy padding twice. Card defaults are py-4/gap-3/px-5.
+- DENSE cards. He has rejected airy padding twice. Card defaults are py-4/gap-3/px-5.
 - Progressive disclosure: ≤7 interactive elements initially; row actions on hover; Advanced
   collapsed; controls appear when needed.
 - Charts: use `--chart-1..5`/`--gain`/`--loss` CSS vars via `cssVar()`; ECharts hover emphasis is
@@ -102,25 +102,25 @@ Near-black green-cast canvas, 4-step surface ladder, hairline borders, ONE emera
 
 ## Environment gotchas (each cost real time once)
 
-- NEVER edit source files via PowerShell string-replace — it mangles UTF-8 (use file tools; prefer
+- NEVER edit source files via PowerShell string-replace; it mangles UTF-8 (use file tools; prefer
   `&mdash;`-style entities in JSX text).
 - shadcn CLI: `components.json` exists; use `npx shadcn@latest add <name> -y`. Do NOT run `init`
   (goes interactive / create-project mode). If Vite errors "Failed to resolve import tslib",
   delete `app/node_modules/.vite` and restart.
-- Radix Select and native `<select>` both fail inside Radix Popover — the calendar uses a custom
+- Radix Select and native `<select>` both fail inside Radix Popover, so the calendar uses a custom
   portal-free `CaptionDropdown` in `app/src/components/ui/calendar.tsx`. Reuse that pattern for
   any dropdown inside a popover.
-- `/healthz` is reserved by Google's frontend on run.app — service health is `/api/health`.
+- `/healthz` is reserved by Google's frontend on run.app; service health is `/api/health`.
 - Secrets via PowerShell pipes pick up trailing CRLF (Tiingo 403s). Write with
   `[IO.File]::WriteAllText` and `.trim()` defensively server-side.
 - TS 6: `baseUrl` is deprecated; path aliases are configured without it.
 
-## Working style (project-specific — universal rules in global `~/.claude/CLAUDE.md`)
+## Working style (project-specific; universal rules in global `~/.claude/CLAUDE.md`)
 
 Global covers git hygiene (never `git add -A`), the Codex delegation recipe, verify-in-preview
 (DOM-assert when the screenshot tool times out), and design defaults. This repo adds:
 - **Pushes are allowed under workspace policy.** Remote `origin =
-  https://github.com/Calculator5329/fathom.git` is a PUBLIC repo (AGPL) — commit locally, then
+  https://github.com/Calculator5329/fathom.git` is a PUBLIC repo (AGPL), so commit locally, then
   **push**. Because it's public: never commit tokens, personal financial figures, or Ethan's
   untracked files (they are untracked on purpose).
 - Cloud mutations (gcloud IAM, buckets, deploys) stay with Claude directly, never inside Codex
