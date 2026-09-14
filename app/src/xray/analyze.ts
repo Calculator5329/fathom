@@ -77,16 +77,29 @@ export function analyzePositions(
   }
 
   const sharesMode = positions.some((p) => p.shares != null)
+  // Mixed lists ("AAPL 12 / VTI 40% / BRK-B 5"): the share rows are priced in
+  // dollars and each percent row must end up as that share of the WHOLE
+  // portfolio, so the total is the priced dollars grossed up by the percent
+  // rows: total = priced / (1 - pct/100). A percent total of 100 or more
+  // leaves nothing for the priced rows, so we cap it just below and let the
+  // weights renormalise rather than divide by zero.
+  const pricedValue = rows.reduce((s, r) => s + (r.shares != null ? r.value : 0), 0)
+  const pctSum = Math.min(
+    rows.reduce((s, r) => s + (r.shares == null ? r.value : 0), 0),
+    99.9,
+  )
   const totalValue = sharesMode
-    ? rows.reduce((s, r) => s + r.value, 0)
+    ? pricedValue / (1 - pctSum / 100)
     : 10_000 // weights-only portfolios get a nominal base
-  const holdings: HoldingRow[] = rows.map((r) => ({
-    ...r,
-    value: sharesMode ? r.value : (r.value / 100) * totalValue,
-    weight: sharesMode
-      ? (r.value / (totalValue || 1)) * 100
-      : r.value, // in weight mode `value` held the raw percent
-  }))
+  const holdings: HoldingRow[] = rows.map((r) => {
+    // in weight mode (and for percent rows in a mixed list) `value` holds the raw percent
+    const value = r.shares != null ? r.value : (r.value / 100) * totalValue
+    return {
+      ...r,
+      value,
+      weight: (value / (totalValue || 1)) * 100,
+    }
+  })
   holdings.sort((a, b) => b.weight - a.weight)
 
   // Harmonic blend: P/E of the basket = 1 / Σ(w × E/P) over covered holdings.

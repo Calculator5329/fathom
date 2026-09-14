@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { TickerSeries } from '@/engine'
-import { inferOpeningPositions, reconstructHistory } from '../analyze'
+import { analyzePositions, inferOpeningPositions, reconstructHistory } from '../analyze'
 import { detectBrokerFromCsv, parsePositions, parseTrades } from '../parse'
 import {
   SCHWAB_ACTIVITY_CSV,
@@ -354,5 +354,37 @@ describe('reconstructHistory', () => {
     expect(r.values[1]).toBe(10 * 110 + 20 * 50)
     expect(r.values[2]).toBe(10 * 120 + 20 * 55)
     expect(r.irr).toBeGreaterThan(0)
+  })
+})
+
+describe('analyzePositions', () => {
+  const flat100 = (ticker: string) => mk(ticker, [['2026-01-02', 100], ['2026-01-03', 100]])
+
+  it('values percent rows as a share of the whole portfolio when mixed with share counts', () => {
+    // 12 AAPL at $100 = $1,200 and 5 BRK-B at $100 = $500 are priced; VTI 40%
+    // must be 40% of the total, not $40 (the bug: 40 was taken as dollars
+    // and VTI came out at 0.6%). total = 1,700 / (1 - 0.4) = 2,833.33.
+    const series = new Map([['AAPL', flat100('AAPL')], ['VTI', flat100('VTI')], ['BRK-B', flat100('BRK-B')]])
+    const r = analyzePositions(
+      [{ ticker: 'AAPL', shares: 12 }, { ticker: 'VTI', weight: 40 }, { ticker: 'BRK-B', shares: 5 }],
+      series,
+      new Map(),
+    )
+    const w = Object.fromEntries(r.holdings.map((h) => [h.ticker, h.weight]))
+    expect(r.totalValue).toBeCloseTo(2833.33, 1)
+    expect(w.VTI).toBeCloseTo(40, 5)
+    expect(w.AAPL).toBeCloseTo((1200 / 2833.33) * 100, 2)
+    expect(w['BRK-B']).toBeCloseTo((500 / 2833.33) * 100, 2)
+    expect(r.holdings.reduce((s, h) => s + h.weight, 0)).toBeCloseTo(100, 5)
+  })
+
+  it('keeps pure share lists and pure percent lists unchanged', () => {
+    const series = new Map([['AAPL', flat100('AAPL')], ['VTI', flat100('VTI')]])
+    const shares = analyzePositions([{ ticker: 'AAPL', shares: 3 }, { ticker: 'VTI', shares: 1 }], series, new Map())
+    expect(shares.totalValue).toBe(400)
+    expect(shares.holdings.find((h) => h.ticker === 'AAPL')?.weight).toBeCloseTo(75, 5)
+    const pct = analyzePositions([{ ticker: 'AAPL', weight: 60 }, { ticker: 'VTI', weight: 40 }], series, new Map())
+    expect(pct.totalValue).toBe(10_000)
+    expect(pct.holdings.find((h) => h.ticker === 'VTI')?.value).toBeCloseTo(4000, 5)
   })
 })

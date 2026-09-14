@@ -27,7 +27,7 @@ const SECTIONS: Section[] = [
       {
         name: 'Qualtrim insights',
         desc: 'Dividend and fundamentals research',
-        url: 'https://www.qualtrim.com/app/insights',
+        url: 'https://www.qualtrim.com/',
       },
       {
         name: 'Compound interest calculator',

@@ -196,7 +196,9 @@ export function endingHistogramOption(result: SimResult): EChartsCoreOption {
       ...(base.xAxis as object),
       type: 'category',
       data: labels,
-      axisLabel: { ...(base.xAxis as { axisLabel: object }).axisLabel, interval: 3 },
+      // Let ECharts thin the labels to what fits: a fixed every-third label
+      // ran the phone axis together ("$0$991.1$1.98M...").
+      axisLabel: { ...(base.xAxis as { axisLabel: object }).axisLabel, interval: 'auto', hideOverlap: true },
     },
     yAxis: {
       ...(base.yAxis as object),
