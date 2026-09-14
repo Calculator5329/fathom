@@ -88,7 +88,7 @@ re-import and explicitly choose whether normalized inputs are remembered.
 
 ---
 
-## Feature A — all-broker CSV import
+## Feature A: all-broker CSV import
 
 ### User story
 
@@ -125,17 +125,17 @@ the broker selector exists only inside the resolver when needed.
 
 Use a wide `Dialog` over the X-ray page, with a three-step rail:
 
-1. **Files** — each file row shows a safe browser-only label (`File 1`, not the
+1. **Files**: each file row shows a safe browser-only label (`File 1`, not the
    persisted filename), detected broker, detected kind, row count, and status.
    Duplicate file fingerprints are blocked. Overlapping activity date ranges
    warn but are not silently deduplicated.
-2. **Map** — skipped entirely when a preset produces a high-confidence valid
+2. **Map**: skipped entirely when a preset produces a high-confidence valid
    mapping. For unknown files, show a dense table with source header, three
    sample values, and destination field selector. Required fields are marked.
    Activity imports then show a second compact action-value mapper: each unique
    source action maps to Buy, Sell, Dividend, Foreign tax, Deposit, Withdrawal,
    or Ignore. The mapper must never display unrelated sensitive columns.
-3. **Review** — show normalized counts (holdings, buys, sells, dividends, flows,
+3. **Review**: show normalized counts (holdings, buys, sells, dividends, flows,
    ignored rows), date range, tickers, and blocking errors/warnings. Preview at
    most five normalized rows with original row numbers. A positions-versus-
    reconstructed-shares reconciliation appears when both file kinds exist.
@@ -333,7 +333,7 @@ npx tsc -b
 
 ---
 
-## Feature B — valuation percentile bands
+## Feature B: valuation percentile bands
 
 ### User story
 
@@ -525,16 +525,16 @@ disjoint. Every code lane ends with `npx vitest run` and `npx tsc -b` from
 
 | Phase / lane | Depends on | Owns paths | Deliverable and acceptance |
 |---|---|---|---|
-| **A1 — import contracts + CSV decoder** | — | `app/src/xray/import/types.ts`, `app/src/xray/import/csv.ts`, `app/src/xray/__tests__/import-csv.test.ts`, `app/package.json`, `app/package-lock.json` | Lazy/worker-safe standards-compliant decoder, limits, canonical import/report contracts, hostile-CSV fixtures; no analysis behavior change |
-| **A2 — detection + generic mapper** | A1 | `app/src/xray/import/detect.ts`, `app/src/xray/import/mapping.ts`, `app/src/xray/import/normalize.ts`, `app/src/xray/__tests__/import-generic.test.ts` | File-kind scoring, semantic mappings, action classifier, privacy filtering, deterministic reports; generic unknown CSV reaches canonical inputs |
-| **A3 — Fidelity preset regression** | A2 | `app/src/xray/import/presets/fidelity.ts`, `app/src/xray/__tests__/import-fidelity.test.ts`, `app/src/xray/__fixtures__/fidelity-*` | Existing Fidelity positions/activity outcomes preserved, including flows and sweep noise; all fixtures synthetic |
-| **A4 — Schwab preset** | A2 | `app/src/xray/import/presets/schwab.ts`, `app/src/xray/__tests__/import-schwab.test.ts`, `app/src/xray/__fixtures__/schwab-*` | Positions and transactions normalize through shared contracts; verified real shape recorded without committing personal data |
-| **A5 — Vanguard preset** | A2 | `app/src/xray/import/presets/vanguard.ts`, `app/src/xray/__tests__/import-vanguard.test.ts`, `app/src/xray/__fixtures__/vanguard-*` | Holdings and activity normalize through shared contracts; verified real shape recorded without committing personal data |
-| **A6 — import workspace UI** | A2–A5 | `app/src/components/xray/BrokerImportWorkspace.tsx`, `app/src/components/xray/ColumnMapper.tsx`, `app/src/components/xray/ImportReview.tsx`, `app/src/xray/import/import.worker.ts` | Known files skip to Review, unknown files map accessibly, progress stays responsive, no sensitive columns rendered |
-| **A7 — X-ray integration + local privacy migration** | A6 | `app/src/pages/Xray.tsx`, `app/src/xray/storage.ts`, `app/src/xray/masterfile.ts`, `app/src/xray/__tests__/storage.test.ts` | Unified import drives existing results; raw localStorage persistence removed; consented normalized IndexedDB persistence, Forget, safe export, last-good-results behavior |
-| **B1 — valuation band math** | — | `app/src/fundamentals/valuationBands.ts`, `app/src/fundamentals/__tests__/valuationBands.test.ts` | Type-7 percentiles, midrank, eligibility/minimum rules, hand-computed fixtures; no chart/page changes |
-| **B2 — valuation chart + Research UI** | B1 | `app/src/fundamentals/charts.ts`, `app/src/pages/Stock.tsx`, `app/src/fundamentals/__tests__/valuation-bands-chart.test.ts` | Tokenized 10/25/50/75/90 regions, latest-FY summary, insufficient-history state, all existing valuation regressions green |
-| **Q1 — integrated QA and durable docs** | A7, B2 | `README.md`, `docs/ARCHITECTURE.md`, `docs/VISION.md`, `docs/HANDOFF_ROADMAP.md` | Full test/typecheck/build, preview DOM matrix, privacy wording and supported-format claims match reality, completed roadmap items dated without inferring acceptance |
+| **A1, import contracts + CSV decoder** |, | `app/src/xray/import/types.ts`, `app/src/xray/import/csv.ts`, `app/src/xray/__tests__/import-csv.test.ts`, `app/package.json`, `app/package-lock.json` | Lazy/worker-safe standards-compliant decoder, limits, canonical import/report contracts, hostile-CSV fixtures; no analysis behavior change |
+| **A2, detection + generic mapper** | A1 | `app/src/xray/import/detect.ts`, `app/src/xray/import/mapping.ts`, `app/src/xray/import/normalize.ts`, `app/src/xray/__tests__/import-generic.test.ts` | File-kind scoring, semantic mappings, action classifier, privacy filtering, deterministic reports; generic unknown CSV reaches canonical inputs |
+| **A3, Fidelity preset regression** | A2 | `app/src/xray/import/presets/fidelity.ts`, `app/src/xray/__tests__/import-fidelity.test.ts`, `app/src/xray/__fixtures__/fidelity-*` | Existing Fidelity positions/activity outcomes preserved, including flows and sweep noise; all fixtures synthetic |
+| **A4, Schwab preset** | A2 | `app/src/xray/import/presets/schwab.ts`, `app/src/xray/__tests__/import-schwab.test.ts`, `app/src/xray/__fixtures__/schwab-*` | Positions and transactions normalize through shared contracts; verified real shape recorded without committing personal data |
+| **A5, Vanguard preset** | A2 | `app/src/xray/import/presets/vanguard.ts`, `app/src/xray/__tests__/import-vanguard.test.ts`, `app/src/xray/__fixtures__/vanguard-*` | Holdings and activity normalize through shared contracts; verified real shape recorded without committing personal data |
+| **A6, import workspace UI** | A2–A5 | `app/src/components/xray/BrokerImportWorkspace.tsx`, `app/src/components/xray/ColumnMapper.tsx`, `app/src/components/xray/ImportReview.tsx`, `app/src/xray/import/import.worker.ts` | Known files skip to Review, unknown files map accessibly, progress stays responsive, no sensitive columns rendered |
+| **A7, X-ray integration + local privacy migration** | A6 | `app/src/pages/Xray.tsx`, `app/src/xray/storage.ts`, `app/src/xray/masterfile.ts`, `app/src/xray/__tests__/storage.test.ts` | Unified import drives existing results; raw localStorage persistence removed; consented normalized IndexedDB persistence, Forget, safe export, last-good-results behavior |
+| **B1, valuation band math** |, | `app/src/fundamentals/valuationBands.ts`, `app/src/fundamentals/__tests__/valuationBands.test.ts` | Type-7 percentiles, midrank, eligibility/minimum rules, hand-computed fixtures; no chart/page changes |
+| **B2, valuation chart + Research UI** | B1 | `app/src/fundamentals/charts.ts`, `app/src/pages/Stock.tsx`, `app/src/fundamentals/__tests__/valuation-bands-chart.test.ts` | Tokenized 10/25/50/75/90 regions, latest-FY summary, insufficient-history state, all existing valuation regressions green |
+| **Q1, integrated QA and durable docs** | A7, B2 | `README.md`, `docs/ARCHITECTURE.md`, `docs/VISION.md`, `docs/HANDOFF_ROADMAP.md` | Full test/typecheck/build, preview DOM matrix, privacy wording and supported-format claims match reality, completed roadmap items dated without inferring acceptance |
 
 A1/A2 precede preset work. A3, A4, and A5 can run in parallel because they own
 disjoint preset/test/fixture files. B1 can run in parallel with all importer

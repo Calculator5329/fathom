@@ -17,9 +17,9 @@
 
 Three-layer frontend (inherited from workspace rules):
 
-- **UI** — components only; observes stores
-- **Store** — portfolio config, backtest orchestration
-- **Service** — HTTP client to Cloud Run; no MobX in services
+- **UI**: components only; observes stores
+- **Store**: portfolio config, backtest orchestration
+- **Service**: HTTP client to Cloud Run; no MobX in services
 
 ---
 
@@ -60,7 +60,7 @@ interface TickerBar {
 }
 ```
 
-### yfinance JSON (ingest format — master-site)
+### yfinance JSON (ingest format, master-site)
 
 See `context/samples/ticker-json/VTI.json`. Map epoch-ms `Date` → ISO date.
 
@@ -139,4 +139,4 @@ Normalized Shiller ingest: `context/reference-data/shiller/shiller.csv`
 |------|----------|-----------|
 | 2026-07-02 | Reference 1GB ticker archive by path, copy only ~5MB asset-class + samples | Avoid repo bloat; full ingest via Cloud Run job |
 | 2026-07-02 | Two explicit backtest modes | Different data depth (1871 vs 1970) and UX |
-| 2026-07-02 | Total return must use real dividends/splits | finance-master backtest README — no synthetic yields |
+| 2026-07-02 | Total return must use real dividends/splits | finance-master backtest README, no synthetic yields |

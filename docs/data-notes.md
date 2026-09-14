@@ -177,7 +177,7 @@ Legacy archive path: `~/projects/finance/finance-master-workspace/master-site/pu
 - KO: DISAGREE - ratio CV is 0.4482% with 6023 days beyond 0.5% of the median ratio.
 
 **Interpretation (2026-07-03):** SPY and AAPL agree to within 0.1%. KO's 0.45% drift
-over a 55-year dividend history is vendor methodology drift — tiny per-dividend
+over a 55-year dividend history is vendor methodology drift, tiny per-dividend
 rounding differences between yfinance and Tiingo compound over ~250 dividend events.
 Max deviation is ~6.6% at the 1970 end of the series. This is expected for
 adjusted-price series from different vendors and confirms the decision: **Tiingo is

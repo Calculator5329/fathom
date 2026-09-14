@@ -1,6 +1,6 @@
-# Asset-Class Historical Data — Sources & Ingestion
+# Asset-Class Historical Data: Sources & Ingestion
 
-Long-horizon monthly (and some daily) return series for **asset-class backtesting** — e.g. US Large Cap, Small Cap, Bonds, Cash, International — over 150+ years. This is the **separate mode** from ticker-level backtests (shorter window, individual symbols).
+Long-horizon monthly (and some daily) return series for **asset-class backtesting**, e.g. US Large Cap, Small Cap, Bonds, Cash, International, over 150+ years. This is the **separate mode** from ticker-level backtests (shorter window, individual symbols).
 
 ## Summary
 
@@ -19,10 +19,10 @@ Long-horizon monthly (and some daily) return series for **asset-class backtestin
 
 ## 1. Shiller data (1871+)
 
-### Raw — master-site
+### Raw: master-site
 
 **Path:** `~/projects/finance/finance-master-workspace/master-site/public/long-term/data.csv`  
-**Source:** Robert Shiller, Yale — [http://www.econ.yale.edu/~shiller/data.htm](http://www.econ.yale.edu/~shiller/data.htm)  
+**Source:** Robert Shiller, Yale, [http://www.econ.yale.edu/~shiller/data.htm](http://www.econ.yale.edu/~shiller/data.htm)  
 **Also:** `ie_data.xls` in same folder (original Excel download)
 
 **Key columns** (see `master-site/src/data/longTermDataService.ts` → `SHILLER_COLUMNS`):
@@ -41,7 +41,7 @@ Long-horizon monthly (and some daily) return series for **asset-class backtestin
 
 **Parser:** `parseShillerData()` in `longTermDataService.ts`
 
-### Normalized — retirement-sim
+### Normalized: retirement-sim
 
 **Path:** `~/projects/finance/retirement-sim/public/data/shiller.csv`  
 **Build:**
@@ -64,7 +64,7 @@ date,spReturn,bondReturn,cashReturn,cpi
 - Cash returns: GS10/4 as T-bill proxy
 - v2 should use FRED TB3MS + proper Treasury total return series
 
-**Engine usage:** `retirement-sim/src/sim/` — Monte Carlo / historical bootstrap over monthly returns.
+**Engine usage:** `retirement-sim/src/sim/`, Monte Carlo / historical bootstrap over monthly returns.
 
 ---
 
@@ -138,6 +138,6 @@ Preset mappings (to define in `docs/tech_spec.md`):
 
 ## Related projects
 
-- **retirement-sim** — cleanest Shiller → monthly returns pipeline (`scripts/build-data.ts`)
-- **master-site** — richest multi-dataset long-term loader (`longTermDataService.ts`)
-- **finance-master TABS_PLAN.md** — retirement tab planned to use Shiller bootstrap from master-site
+- **retirement-sim**: cleanest Shiller → monthly returns pipeline (`scripts/build-data.ts`)
+- **master-site**: richest multi-dataset long-term loader (`longTermDataService.ts`)
+- **finance-master TABS_PLAN.md**: retirement tab planned to use Shiller bootstrap from master-site

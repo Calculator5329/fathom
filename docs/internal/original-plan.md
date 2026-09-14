@@ -5,7 +5,7 @@
 > the working tree on 2026-08-26; it remains in git history. Current state is in
 > [ARCHITECTURE.md](../ARCHITECTURE.md).
 
-Portfolio allocation backtesting website — similar in spirit to PortfolioVisualizer, but built as a dedicated product.
+Portfolio allocation backtesting website: similar in spirit to PortfolioVisualizer, but built as a dedicated product.
 
 ## Architecture (planned)
 
@@ -19,8 +19,8 @@ The Vite app lived in `stock-analysis/` (removed; see the note above). Backend s
 
 ## Two backtest modes
 
-1. **Ticker mode** — Daily (or weekly) OHLCV for individual stocks, ETFs, and mutual funds. Includes dividends and splits where available. Typical history: 1970–present for major tickers; broker-curated daily closes from ~2021 for held symbols.
-2. **Asset-class mode** — Monthly total-return series over 150+ years (Shiller, Fama-French-style portfolios, daily market returns). Used when you want “US Large Cap / Bonds / Cash” style allocations over very long windows.
+1. **Ticker mode**: Daily (or weekly) OHLCV for individual stocks, ETFs, and mutual funds. Includes dividends and splits where available. Typical history: 1970–present for major tickers; broker-curated daily closes from ~2021 for held symbols.
+2. **Asset-class mode**: Monthly total-return series over 150+ years (Shiller, Fama-French-style portfolios, daily market returns). Used when you want “US Large Cap / Bonds / Cash” style allocations over very long windows.
 
 ## Context pulled from existing projects
 
@@ -47,5 +47,5 @@ npm run dev
 
 1. Stand up Cloud Run API skeleton with endpoints for ticker search, price history, and asset-class series.
 2. Design unified schema: daily bars + corporate actions + adjusted close; monthly asset-class returns.
-3. Ingest master-site `stock-data/*.json` (yfinance) into backend storage — primary ticker seed.
+3. Ingest master-site `stock-data/*.json` (yfinance) into backend storage, primary ticker seed.
 4. Wire Vite UI to backtest engine (port patterns from `stock-backtest-2` and `finance-master` domain layer).

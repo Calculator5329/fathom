@@ -1,14 +1,14 @@
-# Fathom owner actions — 2026-07-16 (morning/evening packet)
+# Fathom owner actions: 2026-07-16 (morning/evening packet)
 
 Prepared by `session:fable-long-run-20260716-1900` per D7. Each block is
 copy-paste ready; nothing here has been run by an agent. No secrets appear in
-this file — anything token-shaped stays in Secret Manager or `.env`.
+this file, anything token-shaped stays in Secret Manager or `.env`.
 
 ## 1. Push fathom main (2 min, safe)
 
 Local main holds verified commits (server freshness `12d7203`, UI polish
 `4fbe3ad`, helper-copy TODO `cb37694`, integrated helper-copy lane, D6 design
-package pending gate — see §3). The deployed Cloud Run revision already runs
+package pending gate. See §3). The deployed Cloud Run revision already runs
 this code; pushing just makes git match production.
 
 ```sh
@@ -36,7 +36,7 @@ curl -s https://fathom-api-108003293186.us-central1.run.app/api/freshness | pyth
 - An agent in the loop checks this automatically; nothing needed from you
   unless it cards you a failure.
 
-## 3. Entropy-gate decision (90 sec — also queued in ETHAN-QUEUE)
+## 3. Entropy-gate decision (90 sec, also queued in ETHAN-QUEUE)
 
 Two GREEN fathom docs lanes are stranded by integration entropy-gate false
 positives (a labeled sha256 digest; a kebab-case filename). Either:
@@ -53,7 +53,7 @@ or (option b) approve the gate-FP fix lane on the orchestrator (roadmap
 Dogfood item filed 2026-07-16) and re-integrate afterwards.
 
 - A23 finding: `stock-analysis-project` is a pure ancestor of fathom (7
-  behind, zero unique commits/files) — approved D8 consolidation = archive
+  behind, zero unique commits/files), approved D8 consolidation = archive
   the duplicate, no merge needed. Exact guarded steps are in the lane's
   report (branch `agent/codex/a23-duplicate-divergence-map-20260716`).
 - D6 package: broker-CSV + valuation-bands design doc + mockup sheet on
@@ -76,14 +76,14 @@ frontend Firebase Hosting last deployed 2026-07-05 (stale vs current app).
 2. **Custom domain** (optional): Firebase console → Hosting → Add custom
    domain; DNS A/AAAA records at your registrar; certificate auto-provisions.
 3. **Analytics** (optional, decide privacy posture first): plausible/GA4
-   snippet in `app/index.html` — recommend the privacy-light option; agents
+   snippet in `app/index.html`, recommend the privacy-light option; agents
    can wire whichever you name.
 4. **Alerts** (optional): Cloud Monitoring uptime check on `/api/freshness`
-   expecting 200 (it is 503 mid-cycle by design — set the check window to
+   expecting 200 (it is 503 mid-cycle by design, set the check window to
    05:30–18:00 ET or alert only on 2+ consecutive failures at 06:00 ET).
 
 ## 5. D1 Finance-master cutover (unchanged, when ready)
 
 Canonical runbook: `~/projects/finance/finance-master/docs/FIREBASE-MIGRATION.md`
 (uses the dev-only "Copy owner token" control in Fathom; never paste the token
-into chat or files). Deliberately deferred — no time pressure.
+into chat or files). Deliberately deferred, no time pressure.

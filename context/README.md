@@ -27,7 +27,7 @@ context/
 | `reference-data/asset-classes/chapt26 (1).xlsx` | master-site | Chapter 26 reference data |
 | `reference-data/shiller/shiller.csv` | retirement-sim | `date,spReturn,bondReturn,cashReturn,cpi` |
 
-## External only (do not copy — use paths in `external-paths.json`)
+## External only (do not copy, use paths in `external-paths.json`)
 
 - **Full ticker JSON archive** (~1 GB): `master-site/public/stock-data/*.json`
 - **Daily close matrix**: `portfolio-quarterly-reports/src/data/raw/daily-prices.csv`

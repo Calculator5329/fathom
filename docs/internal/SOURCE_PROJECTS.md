@@ -12,7 +12,7 @@ Finance tools path: `~/projects/finance/`
 | Project | Path | Reuse for |
 |---------|------|-----------|
 | **master-site** | `~/projects/finance/finance-master-workspace/master-site/` | ~1,570 ticker JSON files (yfinance); long-term asset-class CSVs/XLS; `longTermDataService.ts` parsers |
-| **stock-site** | `~/projects/finance/finance-master-workspace/stock-site/` | `download_data.py` — yfinance bulk download script |
+| **stock-site** | `~/projects/finance/finance-master-workspace/stock-site/` | `download_data.py`, yfinance bulk download script |
 | **retirement-sim** | `~/projects/finance/retirement-sim/` | Shiller → monthly returns pipeline (`build-data.ts`); sim engine patterns |
 | **portfolio-quarterly-reports** | `~/projects/finance/finance reports/portfolio-quarterly-reports/` | Authoritative daily close matrix (`daily-prices.csv`) |
 | **finance-master** | `~/projects/finance/finance-master/` | Sidecar ingest pipeline, `priceHistory` schema, Yahoo refresh, backtest tab WIP |
@@ -36,10 +36,10 @@ Finance tools path: `~/projects/finance/`
 
 | File | Path |
 |------|------|
-| MASTER_PLAN.md | `~/projects/finance/finance-master-workspace/MASTER_PLAN.md` — vision for merging 23 projects into finance-master |
+| MASTER_PLAN.md | `~/projects/finance/finance-master-workspace/MASTER_PLAN.md`, vision for merging 23 projects into finance-master |
 | INGESTION.md | `~/projects/finance/finance-master/docs/INGESTION.md` |
 | DATA_AUDIT.md | `~/projects/finance/finance-master/docs/DATA_AUDIT.md` |
-| TABS_PLAN.md | `~/projects/finance/finance-master/docs/TABS_PLAN.md` — Backtest + Retirement specs |
+| TABS_PLAN.md | `~/projects/finance/finance-master/docs/TABS_PLAN.md`, Backtest + Retirement specs |
 | AGENT_COORDINATION.md | `~/projects/finance/finance-master/AGENT_COORDINATION.md` |
 
 ---
@@ -48,7 +48,7 @@ Finance tools path: `~/projects/finance/`
 
 | Project | Path | Notes |
 |---------|------|-------|
-| finance-gui | `~/projects/finance/finance-gui/` | Tax node graph — retirement planning |
+| finance-gui | `~/projects/finance/finance-gui/` | Tax node graph, retirement planning |
 | buys-tracker | `~/projects/finance/buys-tracker/` | `stock-values.csv` wide price export |
 | portfolio-analyzer | `~/projects/finance/portfolio-analyzer/` | Alpha Vantage runtime fetch |
 | finance-projections | `~/projects/finance/finance-projections/` | Life projections CSV, not market OHLCV |
@@ -77,7 +77,7 @@ Finance tools path: `~/projects/finance/`
 
 ## Suggested port order
 
-1. **Data layer** — yfinance JSON ingest + Shiller/asset-class static files (this repo’s `context/` + GCS)
-2. **Backtest engine** — `stock-backtest-2` engine + finance-master domain patterns
-3. **API** — Cloud Run routes modeled on finance-master sidecar `/api/ticker/:s/chart`
-4. **UI** — Vite app: ticker mode + asset-class mode toggle (PortfolioVisualizer-like)
+1. **Data layer**: yfinance JSON ingest + Shiller/asset-class static files (this repo’s `context/` + GCS)
+2. **Backtest engine**: `stock-backtest-2` engine + finance-master domain patterns
+3. **API**: Cloud Run routes modeled on finance-master sidecar `/api/ticker/:s/chart`
+4. **UI**: Vite app: ticker mode + asset-class mode toggle (PortfolioVisualizer-like)

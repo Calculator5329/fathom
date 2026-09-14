@@ -1,6 +1,6 @@
-# Ticker Historical Data — Sources & Ingestion
+# Ticker Historical Data: Sources & Ingestion
 
-How to get daily (and weekly) price history for stocks, ETFs, and mutual funds — including dividends and stock splits — for portfolio backtesting.
+How to get daily (and weekly) price history for stocks, ETFs, and mutual funds, including dividends and stock splits, for portfolio backtesting.
 
 ## Summary: what to use when
 
@@ -21,7 +21,7 @@ How to get daily (and weekly) price history for stocks, ETFs, and mutual funds �
 
 **Path:** `~/projects/finance/finance-master-workspace/master-site/public/stock-data/`  
 **Size:** ~1,570 JSON files, ~1 GB  
-**Not copied into this repo** — reference only.
+**Not copied into this repo**: reference only.
 
 ### Schema (yfinance export shape)
 
@@ -36,10 +36,10 @@ Each `{TICKER}.json` is an array of daily points:
 }
 ```
 
-- `Date` — Unix epoch **milliseconds**
-- `Close` — unadjusted close (use with dividend/split columns for total return)
-- `Dividends` — cash dividend on ex-date (0 if none)
-- `Stock Splits` — split ratio (e.g. `4.0` for 4:1)
+- `Date`: Unix epoch **milliseconds**
+- `Close`: unadjusted close (use with dividend/split columns for total return)
+- `Dividends`: cash dividend on ex-date (0 if none)
+- `Stock Splits`: split ratio (e.g. `4.0` for 4:1)
 
 **Sample files in this repo:** `context/samples/ticker-json/VTI.json`, `SPY.json`
 
@@ -96,7 +96,7 @@ Wide spreadsheet matrix:
 - Cells: daily **close** (or `No Data`)
 
 **Range:** ~2021 → present for held symbols.  
-**Corporate actions:** Not included — close-only.  
+**Corporate actions:** Not included, close-only.  
 **Maintenance:** Broker exports merged via scripts in `portfolio-quarterly-reports/scripts/` (`merge-public-prices.mjs`, etc.).
 
 Ingested by finance-master:
@@ -137,7 +137,7 @@ Uses `TIME_SERIES_WEEKLY_ADJUSTED` → `adjustedClose` embeds dividend + split a
 
 **Sample in this repo:** `context/samples/alpha-vantage-weekly-SPY.json` (if copied)
 
-**Rate limits (free tier):** 25 calls/day, 5/min — plan bulk ingest accordingly.
+**Rate limits (free tier):** 25 calls/day, 5/min, plan bulk ingest accordingly.
 
 ---
 
@@ -176,13 +176,13 @@ corporate_actions(instrument_id, ex_date, type: dividend|split, amount, ratio)
 | Mutual funds often missing from yfinance JSON | Add fund CUSIP/symbol list; try Yahoo + manual CSV |
 | finance-master `priceHistory` drops dividends/splits | Extend ingest or new tables |
 | Alpha Vantage rate limits | Batch job on Cloud Run + object storage |
-| FSKAX and some Fidelity funds missing | Documented in finance-master SMOKE_TEST — need explicit fetch |
+| FSKAX and some Fidelity funds missing | Documented in finance-master SMOKE_TEST, need explicit fetch |
 | Tiingo / Polygon | Not used in any existing project |
 
 ---
 
 ## Related docs
 
-- `finance-master/docs/INGESTION.md` — full sidecar ingest pipeline
-- `finance-master/apps/web/src/ui/backtest/README.md` — dividend/total-return policy
-- `finance-master/packages/schema/src/tables.ts` — current `priceHistory` Drizzle schema
+- `finance-master/docs/INGESTION.md`: full sidecar ingest pipeline
+- `finance-master/apps/web/src/ui/backtest/README.md`, dividend/total-return policy
+- `finance-master/packages/schema/src/tables.ts`: current `priceHistory` Drizzle schema

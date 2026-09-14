@@ -1,15 +1,15 @@
-# Fathom — Handoff Roadmap (Now / Next / Later)
+# Fathom: Handoff Roadmap (Now / Next / Later)
 
 _Written 2026-07-05. Each item is scoped so a context-free agent can execute it in one
 session. Read [ARCHITECTURE.md](ARCHITECTURE.md) first, then root `CLAUDE.md` (hard
 rules), then [VISION.md](VISION.md) for the decision history behind these items._
 
 **Why this file and not `docs/roadmap.md`:** that file is Ethan's pre-project draft
-(stale — it describes a MobX/Recharts plan that never happened) and is on the
+(stale, it describes a MobX/Recharts plan that never happened) and is on the
 do-not-touch list in CLAUDE.md; Windows is case-insensitive so `ROADMAP.md` would
 collide with it. This file and VISION.md are the living roadmap.
 
-**Legend:** `[CLOUD]` = needs gcloud/firebase auth, bucket writes, deploys, or secrets —
+**Legend:** `[CLOUD]` = needs gcloud/firebase auth, bucket writes, deploys, or secrets,
 an autonomous agent should prepare the work and PARK the cloud step for Ethan's approval
 rather than run it. `[ETHAN]` = needs a decision or manual console step from Ethan.
 
@@ -76,12 +76,12 @@ committed with focused staging (never `git add -A`), then pushed.
   methodology copy. Full verification also repaired the pre-existing preset
   tie that classified Vanguard position exports as Schwab.)* Make the
   two helper messages more minimal/out of the way: "Using max available
-  history — limited by ADBE, inception Aug 1986." (AllocationBuilder.tsx,
+  history: limited by ADBE, inception Aug 1986." (AllocationBuilder.tsx,
   BuilderPanel.tsx) and "Every rolling period in history as one trial. All
   figures in today's dollars." (Montecarlo.tsx). Keep the information
   reachable (muted/secondary treatment or disclosure), respect the 15px
   floor and theme tokens. Number-input spinner removal is ALREADY DONE
-  (`4fbe3ad`, app/src/index.css `appearance:none` — CSS-only, so keyboard
+  (`4fbe3ad`, app/src/index.css `appearance:none`, CSS-only, so keyboard
   ArrowUp/ArrowDown increments are untouched); any follow-up must preserve
   that behavior. _Accept: both messages visually subordinate on their pages,
   vitest + tsc green, DOM-verified in preview._ (Filed from board notes
@@ -104,10 +104,10 @@ committed with focused staging (never `git add -A`), then pushed.
   _Accept: `/api/freshness` returns HTTP 200 with `refreshed === catalogSize`,
   `failureCount === 0`, and a current `freshThrough` date after the full cycle._
   _Progress 2026-07-16 06:30Z (verified live, not assumed): Ethan's deploy is
-  real — revision `fathom-api-00006-pqw` (created 06:10:25Z) serves 100% and
+  real: revision `fathom-api-00006-pqw` (created 06:10:25Z) serves 100% and
   exposes `/api/freshness`; scheduler shows the exact cron/timezone above,
   ENABLED. The 02:30Z fire predated the deploy (old code: 27/75, 48× 429), so
-  the endpoint correctly reports 503 until the first full new-code cycle —
+  the endpoint correctly reports 503 until the first full new-code cycle,
   batches fire 18:30/20:30/22:30 ET Jul 16 + 00:30 ET Jul 17; bucket catalog
   is 88 tickers → 4 batches. Acceptance check runs after 00:35 ET Jul 17._
 
@@ -126,12 +126,12 @@ committed with focused staging (never `git add -A`), then pushed.
   signed-out, and empty-token behavior. This supports finance-master's
   owner-gated migration without making Fathom a personal-finance data plane.
 
-- [x] **Protect the work — remote backup.** VERIFIED 2026-07-05: the repo is pushed to
+- [x] **Protect the work, remote backup.** VERIFIED 2026-07-05: the repo is pushed to
   `https://github.com/Calculator5329/fathom` (origin, up to date at `5327ab3`). The
-  original concern ("no remote — best work exists only on this machine") is resolved.
+  original concern ("no remote, best work exists only on this machine") is resolved.
   Residual actions below.
 - [ ] **Ratify repo visibility + push discipline.** `[ETHAN]` The GitHub repo is
-  currently **PUBLIC** (consistent with the AGPL license and recruiter-ready README —
+  currently **PUBLIC** (consistent with the AGPL license and recruiter-ready README,
   likely intentional, but never explicitly ratified). Ask Ethan: keep public, or flip
   private? Either way, update CLAUDE.md's working-style section if the answer changes
   anything. _Accept: Ethan's decision recorded in VISION.md; every local commit is
@@ -143,13 +143,13 @@ committed with focused staging (never `git add -A`), then pushed.
   `9c59d70`), so local and origin are not identical. Nothing in CLAUDE.md
   needed changing, since the answer kept the existing state.)*
 - [x] **CI: GitHub Actions for vitest + tsc.** *(done 2026-07-10)* No cloud secrets
-  needed — tests run on committed data. Workflow: checkout, Node 22, `npm ci` in
+  needed: tests run on committed data. Workflow: checkout, Node 22, `npm ci` in
   `app/`, `npx vitest run`,
   `npx tsc -b`. _Accept: workflow file committed; a push to `main` shows a green check
   on GitHub; no secrets referenced._
 - [ ] **Flag stale untracked docs to Ethan.** `[ETHAN]` `docs/roadmap.md`,
   `docs/original-plan.md`, `docs/tech_spec.md`, `docs/changelog.md` are his untracked
-  drafts, superseded by VISION/PLAN/this file. Do NOT edit or delete them — ask whether
+  drafts, superseded by VISION/PLAN/this file. Do NOT edit or delete them, ask whether
   to archive. _Accept: Ethan answered; outcome noted in VISION.md._
 - [x] **Monte Carlo: nominal display toggle.** _(done 2026-07-10, burndown w2)_ Sim is
   correctly real-only internally; add a display-layer toggle that re-inflates outputs
@@ -162,7 +162,7 @@ committed with focused staging (never `git add -A`), then pushed.
 
 - [ ] **X-ray: support a second broker's CSV (Schwab or Vanguard).** Extend
   `app/src/xray/parse.ts` behind a format-sniffing layer; Fidelity behavior must stay
-  byte-identical (existing parser tests untouched and green). Needs sample CSVs —
+  byte-identical (existing parser tests untouched and green). Needs sample CSVs,
   synthesize fixtures from the brokers' documented export formats if no real files.
   _Accept: new-format fixture tests pass; Fidelity regression tests unchanged._
 - [x] **Research: valuation ratios vs their own history (percentile bands).** _(completed and rendered locally 2026-09-04; parent session owns integration, no deployment)_ VISION
@@ -187,16 +187,16 @@ committed with focused staging (never `git add -A`), then pushed.
 ## Later
 
 - [ ] **Extract the engine as a shared package.** `app/src/engine/` is pure TS /
-  zero-dep by design — publishable nearly as-is. Consumers: finance-master
+  zero-dep by design, publishable nearly as-is. Consumers: finance-master
   (deep-link integration could deepen) and retirement-sim. See IDEAS.md #1 for the
   plan; do NOT start before Ethan ratifies the repo/package boundary. `[ETHAN]`
-- [ ] **N-asset efficient frontier** (currently two-asset) — quadratic-programming-free
+- [ ] **N-asset efficient frontier** (currently two-asset), quadratic-programming-free
   approach (random portfolios + hull) keeps it client-side.
 - [ ] **More asset classes** (international equity, gold, REITs) via provenance-checked
   pipeline scripts per the established pattern (validation stats, data-notes.md entry).
-- [ ] **Screener over the fundamentals lake** — see IDEAS.md #3.
+- [ ] **Screener over the fundamentals lake**. See IDEAS.md #3.
 - [ ] **Alerts (price/valuation thresholds).** `[CLOUD]` Needs a scheduled job +
-  email/push channel — park infrastructure for approval.
+  email/push channel, park infrastructure for approval.
 - [ ] **Simulated leverage** (PLAN v1.5): daily return × leverage − borrow − ER with an
   explicit "Simulated" badge; validate against cached TQQQ/UPRO.
 - [ ] **Product publishing pass** `[ETHAN]` `[CLOUD]`: custom domain, analytics,
@@ -205,11 +205,11 @@ committed with focused staging (never `git add -A`), then pushed.
 ## Standing rejections (do not build)
 
 - Backtest→Monte Carlo handoff button (Ethan rejected 2026-07-04).
-- `useUrlSyncedState` hook (judged unnecessary — PUSH/REPLACE semantics are page logic).
-- Login walls on Backtest/Allocation — never.
-- Personal budgets/net-worth features — those belong to finance-master.
+- `useUrlSyncedState` hook (judged unnecessary, PUSH/REPLACE semantics are page logic).
+- Login walls on Backtest/Allocation: never.
+- Personal budgets/net-worth features: those belong to finance-master.
 
-## Verified recovery work — 2026-09-05
+## Verified recovery work: 2026-09-05
 
 - [x] A35 transient ticker-search recovery (2026-09-05): failed HTTP, network,
   JSON and rate-limit responses no longer remain cached for the page session.
@@ -218,6 +218,6 @@ committed with focused staging (never `git add -A`), then pushed.
   Full verification: 170 Vitest tests pass, nine existing skips; `npx tsc -b`
   passes. Four failure-recovery probes failed before repair; all five probes
   now pass with intercepted synthetic.invalid requests and controlled time.
-# 2026-09-05 — Private finance research bridge
+# 2026-09-05: Private finance research bridge
 
 Saved projections can be explicitly exported as JSON from the signed-in projection list. The export contains assumptions, notes, source timestamps and outcomes from the existing projection engine. Finance Master imports these into private versioned review storage; holdings and balances never flow into Fathom. This implements Ethan's approved connected-finance direction. Hosted deployment remains separate.
