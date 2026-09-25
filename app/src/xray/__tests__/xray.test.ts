@@ -31,10 +31,11 @@ describe('parsePositions', () => {
   it('parses a Fidelity Portfolio_Positions CSV (real export shape)', () => {
     const csv = [
       "Account Number,Account Name,Symbol,Description,Quantity,Last Price,Last Price Change,Current Value,Today's Gain/Loss Dollar,Today's Gain/Loss Percent,Total Gain/Loss Dollar,Total Gain/Loss Percent,Percent Of Account,Cost Basis Total,Average Cost Basis,Type",
-      'Z00000000,Growth Portfolio,META,META PLATFORMS INC CLASS A COMMON STOCK,28.12,$582.90,-$30.01,$16391.14,-$842.48,-4.89%,+$9521.31,+138.59%,21.98%,$6869.83,$244.30,Margin,',
-      'Z00000000,Growth Portfolio,AMZN,AMAZON.COM INC,61.575,$242.67,+$0.97,$14942.40,+$59.01,+0.39%,+$3178.97,+27.02%,20.04%,$11763.43,$191.04,Margin,',
-      'Z00000000,Growth Portfolio,SPAXX**,HELD IN MONEY MARKET,,,,$770.41,,,,,1.03%,,,Cash,',
-      'Z00000000,Growth Portfolio,Pending activity,,,,,$136.75,,,,,,,,,',
+      'Z00000000,Sample Account,VTI,VANGUARD TOTAL STOCK MARKET ETF,10,$200.00,+$1.00,$2000.00,+$10.00,+0.50%,+$100.00,+5.26%,50.00%,$1900.00,$190.00,Cash,',
+      'Z00000000,Sample Account,VXUS,VANGUARD TOTAL INTL STOCK ETF,10,$60.00,+$0.50,$600.00,+$5.00,+0.84%,+$50.00,+9.09%,15.00%,$550.00,$55.00,Cash,',
+      'Z00000000,Sample Account,BND,VANGUARD TOTAL BOND MARKET ETF,10,$70.00,-$0.10,$700.00,-$1.00,-0.14%,+$0.00,+0.00%,17.50%,$700.00,$70.00,Cash,',
+      'Z00000000,Sample Account,SPAXX**,HELD IN MONEY MARKET,,,,$100.00,,,,,2.50%,,,Cash,',
+      'Z00000000,Sample Account,Pending activity,,,,,$50.00,,,,,,,,,',
       '',
       '"The data and information in this spreadsheet is provided to you solely for your use, and is not for distribution."',
       '"Date downloaded Jul-05-2026 1:45 a.m ET"',
@@ -42,8 +43,9 @@ describe('parsePositions', () => {
     const { positions, errors } = parsePositions(csv)
     expect(errors).toEqual([])
     expect(positions).toEqual([
-      { ticker: 'META', shares: 28.12 },
-      { ticker: 'AMZN', shares: 61.575 },
+      { ticker: 'VTI', shares: 10 },
+      { ticker: 'VXUS', shares: 10 },
+      { ticker: 'BND', shares: 10 },
     ])
   })
 })
@@ -75,23 +77,23 @@ describe('parseTrades', () => {
     const csv = [
       'Run Date,Action,Symbol,Description,Type,Price ($),Quantity,Commission ($),Fees ($),Accrued Interest ($),Amount ($),Cash Balance ($),Settlement Date',
       '',
-      '07-06-2026,JOURNALED JNL VS A/C TYPES (Cash),,No Description,Cash,"",0,"","","",-113.25,Processing,""',
-      '07-02-2026,YOU BOUGHT SOFI TECHNOLOGIES INC COM (SOFI) (Margin),SOFI,SOFI TECHNOLOGIES INC COM,Margin,18.02,4,"","","",-72.1,657.16,07-06-2026',
-      '07-02-2026,YOU SOLD PAYPAL HLDGS INC COM (PYPL) (Margin),PYPL,PAYPAL HLDGS INC COM,Margin,45.16,-5,"","","",225.8,729.26,07-06-2026',
-      '07-01-2026,DIVIDEND RECEIVED NIKE INC CLASS B COM NPV (NKE) (Margin),NKE,NIKE INC CLASS B COM NPV,Margin,"",0,"","","",7.59,760.52,""',
-      '06-30-2026,REINVESTMENT FIDELITY GOVERNMENT MONEY MARKET (SPAXX) (Cash),SPAXX,FIDELITY GOVERNMENT MONEY MARKET,Cash,1,0.51,"","","",-0.51,749.93,""',
-      '06-11-2026,YOU BOUGHT EX-DIV DATE 06/15/26RECORD DATE 06/15/26PAYABLE DTE 06/25/26 META PLATFORMS INC CLASS A COMMON STOCK (META) (Margin),META,META PLATFORMS INC CLASS A COMMON STOCK,Margin,559.74,0.15,"","","",-83.96,-4.06,06-12-2026',
+      '07-06-2026,JOURNALED JNL VS A/C TYPES (Cash),,No Description,Cash,"",0,"","","",-100,Processing,""',
+      '07-02-2026,YOU BOUGHT VANGUARD TOTAL STOCK MARKET ETF (VTI) (Margin),VTI,VANGUARD TOTAL STOCK MARKET ETF,Margin,200,10,"","","",-2000,1000,07-06-2026',
+      '07-02-2026,YOU SOLD VANGUARD TOTAL BOND MARKET ETF (BND) (Margin),BND,VANGUARD TOTAL BOND MARKET ETF,Margin,70,-10,"","","",700,1700,07-06-2026',
+      '07-01-2026,DIVIDEND RECEIVED VANGUARD TOTAL INTL STOCK ETF (VXUS) (Margin),VXUS,VANGUARD TOTAL INTL STOCK ETF,Margin,"",0,"","","",10,1000,""',
+      '06-30-2026,REINVESTMENT FIDELITY GOVERNMENT MONEY MARKET (SPAXX) (Cash),SPAXX,FIDELITY GOVERNMENT MONEY MARKET,Cash,1,0.5,"","","",-0.5,990,""',
+      '06-11-2026,YOU BOUGHT EX-DIV DATE 06/15/26RECORD DATE 06/15/26PAYABLE DTE 06/25/26 VANGUARD TOTAL INTL STOCK ETF (VXUS) (Margin),VXUS,VANGUARD TOTAL INTL STOCK ETF,Margin,60,0.5,"","","",-30,990,06-12-2026',
       '"Brokerage services are provided by Fidelity Brokerage Services LLC (FBS), 900 Salem Street, Smithfield, RI 02917."',
     ].join('\n')
     const { trades, skipped, dividends, cashFlows } = parseTrades(csv)
     expect(trades).toEqual([
-      { date: '2026-06-11', ticker: 'META', side: 'buy', shares: 0.15, price: 559.74 },
-      { date: '2026-07-02', ticker: 'SOFI', side: 'buy', shares: 4, price: 18.02 },
-      { date: '2026-07-02', ticker: 'PYPL', side: 'sell', shares: 5, price: 45.16 },
+      { date: '2026-06-11', ticker: 'VXUS', side: 'buy', shares: 0.5, price: 60 },
+      { date: '2026-07-02', ticker: 'VTI', side: 'buy', shares: 10, price: 200 },
+      { date: '2026-07-02', ticker: 'BND', side: 'sell', shares: 10, price: 70 },
     ])
     // Dividend row is CAPTURED now, not skipped; journal, SPAXX
     // reinvestment, and the disclaimer line remain skipped.
-    expect(dividends).toEqual([{ date: '2026-07-01', ticker: 'NKE', amount: 7.59 }])
+    expect(dividends).toEqual([{ date: '2026-07-01', ticker: 'VXUS', amount: 10 }])
     expect(cashFlows).toEqual([])
     expect(skipped).toBe(3)
   })
@@ -99,22 +101,22 @@ describe('parseTrades', () => {
   it('captures EFT deposits/withdrawals and foreign tax clawbacks', () => {
     const csv = [
       'Run Date,Action,Symbol,Description,Type,Price ($),Quantity,Commission ($),Fees ($),Accrued Interest ($),Amount ($),Cash Balance ($),Settlement Date',
-      '06-26-2026,Electronic Funds Transfer Received (Cash),,No Description,Cash,"",0,"","","",250,292.07,""',
-      '05-29-2026,Electronic Funds Transfer Paid (Cash),,No Description,Cash,"",0,"","","",-250,328.72,""',
-      '07-02-2026,DIRECT DEPOSIT ELAN CARDSVCRedemption (Cash),,No Description,Cash,"",0,"","","",9.89,770.41,""',
-      '05-05-2026,FOREIGN TAX PAID ASML HOLDING NV EUR0.09 NY REGISTRY ... (ASML) (Margin),ASML,ASML HOLDING NV,Margin,"",0,"","","",-0.76,66.64,""',
-      '05-05-2026,DIVIDEND RECEIVED ASML HOLDING NV EUR0.09 NY REGISTRY ... (ASML) (Margin),ASML,ASML HOLDING NV,Margin,"",0,"","","",5.07,67.4,""',
-      '07-02-2026,YOU BOUGHT SOFI TECHNOLOGIES INC COM (SOFI) (Margin),SOFI,SOFI TECHNOLOGIES INC COM,Margin,18.02,4,"","","",-72.1,657.16,07-06-2026',
+      '06-26-2026,Electronic Funds Transfer Received (Cash),,No Description,Cash,"",0,"","","",1000,2000,""',
+      '05-29-2026,Electronic Funds Transfer Paid (Cash),,No Description,Cash,"",0,"","","",-500,1000,""',
+      '07-02-2026,DIRECT DEPOSIT SAMPLE PAYROLL (Cash),,No Description,Cash,"",0,"","","",100,2100,""',
+      '05-05-2026,FOREIGN TAX PAID VANGUARD TOTAL INTL STOCK ETF (VXUS) (Margin),VXUS,VANGUARD TOTAL INTL STOCK ETF,Margin,"",0,"","","",-1,1009,""',
+      '05-05-2026,DIVIDEND RECEIVED VANGUARD TOTAL INTL STOCK ETF (VXUS) (Margin),VXUS,VANGUARD TOTAL INTL STOCK ETF,Margin,"",0,"","","",10,1010,""',
+      '07-02-2026,YOU BOUGHT VANGUARD TOTAL STOCK MARKET ETF (VTI) (Margin),VTI,VANGUARD TOTAL STOCK MARKET ETF,Margin,200,10,"","","",-2000,100,07-06-2026',
     ].join('\n')
     const { trades, dividends, cashFlows } = parseTrades(csv)
     expect(trades).toHaveLength(1)
     expect(cashFlows).toEqual([
-      { date: '2026-05-29', amount: -250 },
-      { date: '2026-06-26', amount: 250 },
-      { date: '2026-07-02', amount: 9.89 },
+      { date: '2026-05-29', amount: -500 },
+      { date: '2026-06-26', amount: 1000 },
+      { date: '2026-07-02', amount: 100 },
     ])
-    // Dividend + its tax clawback both land on ASML (net 4.31).
-    expect(dividends.reduce((s, d) => s + d.amount, 0)).toBeCloseTo(4.31, 6)
+    // Dividend + its tax clawback both land on VXUS (net 9).
+    expect(dividends.reduce((s, d) => s + d.amount, 0)).toBeCloseTo(9, 6)
   })
 })
 

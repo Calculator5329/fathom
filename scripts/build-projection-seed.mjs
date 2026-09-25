@@ -9,7 +9,8 @@ const outputDir = path.join(root, 'app', 'public', 'data')
 const seedJsonPath = path.join(outputDir, 'projection-seed-2026-07-03.json')
 const seedPagePath = path.join(outputDir, 'seed-projections.html')
 
-const targetEmail = '5329548871.eg@gmail.com'
+// Owner email comes from the environment so no real address lives in this public repo.
+const targetEmail = process.env.FATHOM_SEED_EMAIL ?? 'dev@example.com'
 const targetUid = 'bFVdRJo3X2VOd0ryyjwx1M0KR6Y2'
 const expectedCount = 17
 

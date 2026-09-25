@@ -39,7 +39,8 @@ function firestoreFields(value) {
 function validateSeed(seed) {
   assert(seed.targetProjectId === 'ethan-488900', `Unexpected project: ${seed.targetProjectId}`)
   assert(seed.targetUid === 'bFVdRJo3X2VOd0ryyjwx1M0KR6Y2', `Unexpected target uid: ${seed.targetUid}`)
-  assert(seed.targetEmail === '5329548871.eg@gmail.com', `Unexpected target email: ${seed.targetEmail}`)
+  const expectedEmail = process.env.FATHOM_SEED_EMAIL ?? 'dev@example.com'
+  assert(seed.targetEmail === expectedEmail, `Unexpected target email: ${seed.targetEmail} (set FATHOM_SEED_EMAIL)`)
   assert(seed.documentPath === `users/${seed.targetUid}/projections/{TICKER}`, 'Unexpected document path template')
   assert(Array.isArray(seed.projections), 'Seed missing projections array')
   assert(seed.projections.length === 17, `Expected 17 projections, found ${seed.projections.length}`)
