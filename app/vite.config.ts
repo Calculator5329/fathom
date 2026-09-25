@@ -3,9 +3,26 @@ import path from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import agentHandles from 'agent-handles/vite'
 import fs from 'node:fs'
 import type { Plugin } from 'vite'
+
+function isMissingAgentHandles(error: unknown): boolean {
+  return error instanceof Error &&
+    'code' in error &&
+    error.code === 'ERR_MODULE_NOT_FOUND' &&
+    error.message.includes('agent-handles')
+}
+
+async function optionalAgentHandles(): Promise<Plugin[]> {
+  try {
+    const { default: agentHandles } = await import('agent-handles/vite')
+    return [agentHandles()]
+  } catch (error) {
+    if (!isMissingAgentHandles(error)) throw error
+    console.info('[fathom] Optional agent-handles plugin unavailable; continuing without it.')
+    return []
+  }
+}
 
 // Dev data. The app reads `${BASE_URL}data/...`; production serves it from
 // the GCS bucket, dev has nothing under public/data, so every loader used to
@@ -31,8 +48,8 @@ function devData(): Plugin {
   }
 }
 
-export default defineConfig({
-  plugins: [react(), tailwindcss(), agentHandles(), devData()],
+export default defineConfig(async () => ({
+  plugins: [react(), tailwindcss(), ...(await optionalAgentHandles()), devData()],
   // Playwright owns tests/ (generated journey specs); vitest owns src/.
   test: {
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
@@ -40,7 +57,7 @@ export default defineConfig({
   server: {
     port: Number(process.env.PORT) || 5173,
     proxy: {
-      '/data': { target: DATA_BUCKET, changeOrigin: true, rewrite: (p) => p.replace(/^\/data/, '') },
+      '/data': { target: DATA_BUCKET, changeOrigin: true, rewrite: (p: string) => p.replace(/^\/data/, '') },
     },
   },
   resolve: {
@@ -48,4 +65,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-})
+}))
