@@ -151,7 +151,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
         <nav className="mx-auto flex h-14 max-w-7xl items-center gap-4 overflow-x-auto px-6 sm:gap-6">
           <Link to="/" data-testid="app.nav.home" className="font-mono text-base font-semibold tracking-tight">
@@ -176,6 +176,32 @@ function Shell({ children }: { children: React.ReactNode }) {
         </nav>
       </header>
       <RouteErrorBoundary resetKey={pathname}>{children}</RouteErrorBoundary>
+      <footer aria-label="More by Ethan" className="mx-auto mt-auto w-full max-w-7xl border-t border-border/60 px-6 py-5 text-center text-sm text-muted-foreground">
+        <span className="mr-2">More by Ethan:</span>
+        <a data-testid="app.footer.projects" href="https://calculator5329.github.io" className="text-primary hover:underline">
+          Projects
+        </a>{' '}
+        ·{' '}
+        <a data-testid="app.footer.gatesai" href="https://gatesai.web.app/" title="A local-first AI chat desktop app that runs on cloud models or fully local Ollama." className="text-primary hover:underline">
+          GatesAI Chat
+        </a>{' '}
+        ·{' '}
+        <a data-testid="app.footer.agent-handles" href="https://agent-handles.web.app" title="Makes a web app's interface addressable by AI agents, with a receipt for each action." className="text-primary hover:underline">
+          Agent Handles
+        </a>{' '}
+        ·{' '}
+        <a data-testid="app.footer.neon-vector-defense" href="https://neon-vector-defense-7.web.app/?demo=1" title="A sci-fi tower defense game with a deterministic simulation core, exact replays and headless balance sims." className="text-primary hover:underline">
+          Neon Vector Defense
+        </a>{' '}
+        ·{' '}
+        <a data-testid="app.footer.n2k" href="https://n2k-almanac-v3.web.app" title="An equation almanac and solver for the N2K dice game, served from a compact binary file in a Web Worker." className="text-primary hover:underline">
+          N2K Almanac
+        </a>{' '}
+        ·{' '}
+        <a data-testid="app.footer.github" href="https://github.com/Calculator5329" className="text-primary hover:underline">
+          GitHub
+        </a>
+      </footer>
     </div>
   )
 }
