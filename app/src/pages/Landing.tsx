@@ -25,12 +25,12 @@ const TOOLS = [
   {
     to: '/montecarlo',
     title: 'Monte Carlo',
-    body: 'Test a retirement plan against every market era in history — success odds, safe withdrawal rates, worst cases.',
+    body: 'Test a retirement plan against every market era in history: success odds, safe withdrawal rates, worst cases.',
   },
   {
     to: '/stock',
     title: 'Stock research',
-    body: 'Long-run price with market-era context and fundamentals from SEC filings — revenue, margins, valuation.',
+    body: 'Long-run price with market-era context and fundamentals from SEC filings: revenue, margins, valuation.',
   },
 ]
 
@@ -44,7 +44,7 @@ const ACCOUNT_TOOLS = [
   {
     to: '/xray',
     title: 'Portfolio X-ray',
-    body: 'Paste positions or your trade history — blended valuation, concentration, and your real TWR and IRR. Stays in your browser.',
+    body: 'Paste positions or your trade history for blended valuation, concentration, and your real TWR and IRR. Stays in your browser.',
   },
 ]
 
