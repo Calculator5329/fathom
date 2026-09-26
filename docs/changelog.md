@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-26: the handles registry caught up and now stays current
+
+- `app/testid-registry.json` had fallen three weeks behind the source. Nine
+  identities in the code were missing from it: the shared footer links, the
+  route-error buttons and the Projections export. Nothing regenerated it, and
+  `npx agent-handles scan check` was the only thing that would have said so.
+- Regenerated on agent-handles' new registry shape: each entry now says which
+  drive verbs its element takes (`type` for the ticker search, `click` for the
+  rebalance dropdown, `fill` for the number fields, nothing for a readout).
+  123 of 124 entries carry one: 100 click, 8 type, 11 fill (initial amount,
+  fee rate, horizon and the other number inputs, where typed keys would not
+  produce a value), 4 display.
+  From here on the dev server rewrites the file on every save, so it no longer
+  depends on someone remembering the command.
+- The ratchet's floors for `Links.tsx` and `Stock.tsx` moved from 1 to 0 (both
+  are now fully identified) and the journey spec was recompiled with the
+  current compiler. All 13 journeys pass (29.7 s), with `vitest` (182)
+  and `tsc -b` green. Playwright output (`test-results/`) is now ignored.
+
 ## 2026-09-13: X-ray mixed weights, links, phone histogram
 
 - `/xray` now values a percent line correctly when it is mixed with share

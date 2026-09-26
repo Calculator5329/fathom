@@ -3,28 +3,28 @@
   "predicateVersion": 4,
   "grammar": "area.component.element[.qualifier]",
   "generatedFrom": "src/**/*.{tsx,jsx} and journeys/manifest.json",
-  "sourceDigest": "sha256:4512af4ad89b4e1662d14bea783ee74b8ca5aeff0068bc85d2b3ee1d1d6a37fb",
+  "sourceDigest": "sha256:b4ec5b1c45c9a862b94aa5a5c619091ecaa8f5d431868ff735cb93b8ae802bca",
   "journeyCoverage": {
     "controlPath": 7,
     "urlPath": 6
   },
   "coverage": {
-    "controlCandidates": 146,
-    "definiteCandidates": 145,
+    "controlCandidates": 155,
+    "definiteCandidates": 154,
     "reviewRequiredCandidates": 1,
-    "identifiedCandidates": 145,
+    "identifiedCandidates": 154,
     "nonInteractiveCandidates": 0,
     "unreachableCandidates": 0,
     "unresolvedCandidates": 1,
     "invalidIdentityMigrations": 0,
-    "interactiveElements": 146,
-    "identifiedInteractive": 145,
+    "interactiveElements": 155,
+    "identifiedInteractive": 154,
     "unidentifiedInteractive": 1,
     "maximumUnidentifiedInteractive": 1
   },
   "interactionFingerprint": {
     "algorithm": "candidate-site-sha256/v1",
-    "digest": "sha256:caddd949e0f92b0a9a4ec167c67ea7506a528d6d536f7df6cf44d900d31cee06",
+    "digest": "sha256:2d1a80c2e276a9c210a6df6c63f92ce817d88aa6f19cf2e5d303192307ba12bb",
     "sites": [
       "candidate:053009bd4265ca32",
       "candidate:05929ea82baa8454",
@@ -39,6 +39,7 @@
       "candidate:125ddee1902ba01b",
       "candidate:125ebe2c7e783afb",
       "candidate:16fb3a383cdbcc23",
+      "candidate:18259a04d61b5c74",
       "candidate:195e3d5ab3c77d71",
       "candidate:1a479125203c3cb0",
       "candidate:1a8a07877aa567b2",
@@ -71,6 +72,7 @@
       "candidate:46570e92c785fc5b",
       "candidate:46710936d0f4bf60",
       "candidate:4a53896dff7619fb",
+      "candidate:4c3fe3a801255e9d",
       "candidate:4ce1ff81204ae0ea",
       "candidate:4d00e4008019a54a",
       "candidate:4de0129e86e8fe80",
@@ -78,9 +80,11 @@
       "candidate:52784aebc7e50ac2",
       "candidate:5584d329b917085d",
       "candidate:57cb473fb40cc2d7",
+      "candidate:586b370fdc5cbb5a",
       "candidate:5cd67cb9ed7ffebc",
       "candidate:5fb3950a891ea032",
       "candidate:6544a3e8c77863fa",
+      "candidate:65ef7c6c3bc7cbdb",
       "candidate:667967f24878bd8d",
       "candidate:66f3910fc9730802",
       "candidate:6784b33e36fafb21",
@@ -137,11 +141,13 @@
       "candidate:bb5458b2c76875fe",
       "candidate:bdab89f5cd90c107",
       "candidate:c002a011ca93e8fa",
+      "candidate:c073bb949843e93b",
       "candidate:c0c5697a954a55dd",
       "candidate:c38d27c0f396cb52",
       "candidate:c44d562d635a4842",
       "candidate:c544ae4b13224ffe",
       "candidate:c79a960cde5afcf6",
+      "candidate:c849ffe88ef2720a",
       "candidate:cb04a52831127672",
       "candidate:cd3eb2f95bf049ca",
       "candidate:cfc1b58f0199fdd4",
@@ -155,8 +161,10 @@
       "candidate:e10d1117bc836746",
       "candidate:e45035dc9a5b5995",
       "candidate:e58a9ba93cbe9656",
+      "candidate:e7a1634852ec7faa",
       "candidate:e97be566f4267a9b",
       "candidate:e9cd0c6c30a99b76",
+      "candidate:e9f2a01375d58a96",
       "candidate:ed6e4211e633f66f",
       "candidate:f04ab9189090dc93",
       "candidate:f0c6702121124708",
@@ -169,6 +177,7 @@
       "candidate:f77f12f2acaeb998",
       "candidate:f8588a3f22606150",
       "candidate:fb40e2d8dc6294d8",
+      "candidate:fb6387332d63e028",
       "candidate:fb96e13ab154a078",
       "candidate:fbaf9738120832cf",
       "candidate:ff4f55d3c5fcb94d"
@@ -234,805 +243,1380 @@
       "file": "src/components/AssetClassPicker.tsx",
       "line": 51,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "type",
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "allocation.builder.add-portfolio",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 207,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "allocation.builder.advanced-toggle",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 272,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "allocation.builder.inflation-toggle",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 228,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Switch",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "allocation.builder.initial-amount",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 293,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "allocation.builder.monthly-contribution",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 316,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "allocation.builder.rebalance-annual",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 351,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "allocation.builder.rebalance-monthly",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 353,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "allocation.builder.rebalance-none",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 350,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "allocation.builder.rebalance-quarterly",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 352,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "allocation.builder.rebalance-trigger",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 346,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "allocation.layout.builder-toggle",
       "file": "src/pages/Allocation.tsx",
       "line": 96,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
+    },
+    {
+      "id": "app.footer.agent-handles",
+      "file": "src/App.tsx",
+      "line": 189,
+      "element": "jsx-prop",
+      "attribute": "data-testid",
+      "tag": "a",
+      "actions": [
+        "click"
+      ]
+    },
+    {
+      "id": "app.footer.gatesai",
+      "file": "src/App.tsx",
+      "line": 185,
+      "element": "jsx-prop",
+      "attribute": "data-testid",
+      "tag": "a",
+      "actions": [
+        "click"
+      ]
+    },
+    {
+      "id": "app.footer.github",
+      "file": "src/App.tsx",
+      "line": 201,
+      "element": "jsx-prop",
+      "attribute": "data-testid",
+      "tag": "a",
+      "actions": [
+        "click"
+      ]
+    },
+    {
+      "id": "app.footer.n2k",
+      "file": "src/App.tsx",
+      "line": 197,
+      "element": "jsx-prop",
+      "attribute": "data-testid",
+      "tag": "a",
+      "actions": [
+        "click"
+      ]
+    },
+    {
+      "id": "app.footer.neon-vector-defense",
+      "file": "src/App.tsx",
+      "line": 193,
+      "element": "jsx-prop",
+      "attribute": "data-testid",
+      "tag": "a",
+      "actions": [
+        "click"
+      ]
+    },
+    {
+      "id": "app.footer.projects",
+      "file": "src/App.tsx",
+      "line": 181,
+      "element": "jsx-prop",
+      "attribute": "data-testid",
+      "tag": "a",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.header.account",
       "file": "src/App.tsx",
-      "line": 139,
+      "line": 251,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.header.copy-owner-token",
       "file": "src/App.tsx",
-      "line": 153,
+      "line": 265,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.header.sign-in",
       "file": "src/App.tsx",
-      "line": 124,
+      "line": 236,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.header.sign-out",
       "file": "src/App.tsx",
-      "line": 168,
+      "line": 280,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.nav.allocation",
       "file": "src/App.tsx",
-      "line": 77,
+      "line": 163,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "NavLink",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.nav.backtest",
       "file": "src/App.tsx",
-      "line": 74,
+      "line": 160,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "NavLink",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.nav.home",
       "file": "src/App.tsx",
-      "line": 71,
+      "line": 157,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Link",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.nav.income",
       "file": "src/App.tsx",
-      "line": 80,
+      "line": 166,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "NavLink",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.nav.links",
       "file": "src/App.tsx",
-      "line": 116,
+      "line": 228,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "NavLink",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.nav.montecarlo",
       "file": "src/App.tsx",
-      "line": 83,
+      "line": 169,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "NavLink",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.nav.projections",
       "file": "src/App.tsx",
-      "line": 110,
+      "line": 222,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "NavLink",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.nav.stock",
       "file": "src/App.tsx",
-      "line": 86,
+      "line": 172,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "NavLink",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.nav.xray",
       "file": "src/App.tsx",
-      "line": 113,
+      "line": 225,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "NavLink",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.not-found.home",
       "file": "src/App.tsx",
-      "line": 35,
+      "line": 44,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Link",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "app.palette.input",
       "file": "src/components/CommandPalette.tsx",
       "line": 88,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "CommandInput",
+      "actions": [
+        "type",
+        "fill",
+        "press"
+      ]
+    },
+    {
+      "id": "app.route-error.home",
+      "file": "src/App.tsx",
+      "line": 110,
+      "element": "jsx-prop",
+      "attribute": "data-testid",
+      "tag": "Link",
+      "actions": [
+        "click"
+      ]
+    },
+    {
+      "id": "app.route-error.retry",
+      "file": "src/App.tsx",
+      "line": 104,
+      "element": "jsx-prop",
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.builder.add-portfolio",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 228,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.builder.advanced-toggle",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 277,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.builder.benchmark-none",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 373,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.builder.benchmark-trigger",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 369,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.builder.initial-amount",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 301,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "backtest.builder.monthly-contribution",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 323,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "backtest.builder.rebalance-annual",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 357,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.builder.rebalance-monthly",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 359,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.builder.rebalance-none",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 356,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.builder.rebalance-quarterly",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 358,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.builder.rebalance-trigger",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 352,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.builder.reinvest-toggle",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 387,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Switch",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.layout.builder-toggle",
       "file": "src/pages/Backtest.tsx",
       "line": 108,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.results.copy-link",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 247,
+      "line": 279,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.results.export-csv",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 236,
+      "line": 267,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.results.log-scale",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 260,
+      "line": 298,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Switch",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.results.tab-annual",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 272,
+      "line": 310,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.results.tab-holdings",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 278,
+      "line": 316,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.results.tab-income",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 277,
+      "line": 315,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.results.tab-risk",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 273,
+      "line": 311,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "backtest.results.tab-rolling",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 274,
+      "line": 312,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "dev.voice.confirm",
       "file": "src/dev/VoiceNavigation.tsx",
       "line": 50,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "dev.voice.draft",
       "file": "src/dev/VoiceNavigation.tsx",
       "line": 45,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "input",
+      "actions": [
+        "type",
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "dev.voice.listen",
       "file": "src/dev/VoiceNavigation.tsx",
       "line": 46,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "dev.voice.proposal",
       "file": "src/dev/VoiceNavigation.tsx",
       "line": 49,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "p",
+      "actions": []
     },
     {
       "id": "dev.voice.receipt",
       "file": "src/dev/VoiceNavigation.tsx",
       "line": 51,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "p",
+      "actions": []
     },
     {
       "id": "income.setup.load-sample",
       "file": "src/pages/Income.tsx",
       "line": 301,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "income.setup.total-value",
       "file": "src/pages/Income.tsx",
       "line": 115,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "montecarlo.plan.annual-saving",
       "file": "src/pages/Montecarlo.tsx",
       "line": 191,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "montecarlo.plan.fee-rate",
       "file": "src/pages/Montecarlo.tsx",
       "line": 258,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "montecarlo.plan.horizon",
       "file": "src/pages/Montecarlo.tsx",
       "line": 207,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "montecarlo.plan.method-bootstrap",
       "file": "src/pages/Montecarlo.tsx",
       "line": 276,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "montecarlo.plan.method-historical",
       "file": "src/pages/Montecarlo.tsx",
       "line": 275,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "montecarlo.plan.method-trigger",
       "file": "src/pages/Montecarlo.tsx",
       "line": 271,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "montecarlo.plan.starting-balance",
       "file": "src/pages/Montecarlo.tsx",
       "line": 158,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "montecarlo.plan.strategy-trigger",
       "file": "src/pages/Montecarlo.tsx",
       "line": 236,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "montecarlo.plan.withdrawal-rate",
       "file": "src/pages/Montecarlo.tsx",
       "line": 223,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "montecarlo.plan.years-to-retire",
       "file": "src/pages/Montecarlo.tsx",
       "line": 172,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "montecarlo.portfolio.picker",
       "file": "src/pages/Montecarlo.tsx",
       "line": 141,
       "element": "jsx-prop",
-      "attribute": "testId"
+      "attribute": "testId",
+      "tag": "AssetClassPicker"
     },
     {
       "id": "projections.editor.add-notes",
       "file": "src/projections/ProjectionEditor.tsx",
       "line": 339,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "projections.editor.delete",
       "file": "src/projections/ProjectionEditor.tsx",
       "line": 165,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "projections.editor.manual-price-toggle",
       "file": "src/projections/ProjectionEditor.tsx",
       "line": 201,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Switch",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "projections.editor.notes",
       "file": "src/projections/ProjectionEditor.tsx",
       "line": 331,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "textarea",
+      "actions": [
+        "type",
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "projections.editor.save",
       "file": "src/projections/ProjectionEditor.tsx",
       "line": 170,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "projections.hero.sign-in",
       "file": "src/pages/Projections.tsx",
-      "line": 189,
+      "line": 190,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
+    },
+    {
+      "id": "projections.list.export",
+      "file": "src/pages/Projections.tsx",
+      "line": 231,
+      "element": "jsx-prop",
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "projections.list.new",
       "file": "src/pages/Projections.tsx",
-      "line": 211,
+      "line": 212,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "stock.header.backtest",
       "file": "src/pages/Stock.tsx",
       "line": 279,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "stock.header.project",
       "file": "src/pages/Stock.tsx",
       "line": 282,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "stock.header.projection-peek",
       "file": "src/pages/Stock.tsx",
       "line": 265,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "stock.header.switch-ticker",
       "file": "src/pages/Stock.tsx",
       "line": 252,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "stock.header.ticker-switcher",
       "file": "src/pages/Stock.tsx",
       "line": 233,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "div",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "stock.price-chart.log-scale",
       "file": "src/pages/Stock.tsx",
       "line": 331,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Switch",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "stock.valuation.details",
       "file": "src/pages/Stock.tsx",
       "line": 455,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "summary",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "stock.valuation.quantiles",
       "file": "src/pages/Stock.tsx",
       "line": 458,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "p",
+      "actions": []
     },
     {
       "id": "stock.valuation.sample",
       "file": "src/pages/Stock.tsx",
       "line": 424,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "p",
+      "actions": []
     },
     {
       "id": "styleguide.buttons.destructive",
       "file": "src/pages/Styleguide.tsx",
       "line": 163,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.buttons.disabled",
       "file": "src/pages/Styleguide.tsx",
       "line": 164,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.buttons.ghost",
       "file": "src/pages/Styleguide.tsx",
       "line": 155,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.buttons.outline",
       "file": "src/pages/Styleguide.tsx",
       "line": 159,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.buttons.primary",
       "file": "src/pages/Styleguide.tsx",
       "line": 150,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.buttons.secondary",
       "file": "src/pages/Styleguide.tsx",
       "line": 154,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.form.rebalance-annual",
       "file": "src/pages/Styleguide.tsx",
       "line": 217,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.form.rebalance-monthly",
       "file": "src/pages/Styleguide.tsx",
       "line": 219,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.form.rebalance-none",
       "file": "src/pages/Styleguide.tsx",
       "line": 216,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.form.rebalance-quarterly",
       "file": "src/pages/Styleguide.tsx",
       "line": 218,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.form.rebalance-trigger",
       "file": "src/pages/Styleguide.tsx",
       "line": 212,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.form.reinvest",
       "file": "src/pages/Styleguide.tsx",
       "line": 226,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Switch",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.form.ticker",
       "file": "src/pages/Styleguide.tsx",
       "line": 207,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "type",
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "styleguide.tabs.annual",
       "file": "src/pages/Styleguide.tsx",
       "line": 250,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.tabs.income",
       "file": "src/pages/Styleguide.tsx",
       "line": 253,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.tabs.risk",
       "file": "src/pages/Styleguide.tsx",
       "line": 252,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "styleguide.tabs.rolling",
       "file": "src/pages/Styleguide.tsx",
       "line": 251,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "ui.calendar.next-month",
       "file": "src/components/ui/calendar.tsx",
       "line": 159,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "ui.calendar.previous-month",
       "file": "src/components/ui/calendar.tsx",
       "line": 158,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "ui.dialog.close",
       "file": "src/components/ui/dialog.tsx",
       "line": 112,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "ui.ticker-picker.search",
       "file": "src/components/backtest/TickerPicker.tsx",
       "line": 69,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "type",
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "xray.holdings.backtest-mix",
       "file": "src/pages/Xray.tsx",
       "line": 769,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "xray.inputs.activity",
       "file": "src/pages/Xray.tsx",
       "line": 482,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "textarea",
+      "actions": [
+        "type",
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "xray.inputs.analyze-positions",
       "file": "src/pages/Xray.tsx",
       "line": 467,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "xray.inputs.file",
       "file": "src/pages/Xray.tsx",
       "line": 507,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "input",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "xray.inputs.import-csvs",
       "file": "src/pages/Xray.tsx",
       "line": 470,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "xray.inputs.import-csvs.activity",
       "file": "src/pages/Xray.tsx",
       "line": 493,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "xray.inputs.positions",
       "file": "src/pages/Xray.tsx",
       "line": 459,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "textarea",
+      "actions": [
+        "type",
+        "fill",
+        "press"
+      ]
     },
     {
       "id": "xray.inputs.reconstruct-history",
       "file": "src/pages/Xray.tsx",
       "line": 490,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "xray.inputs.tab-activity",
       "file": "src/pages/Xray.tsx",
       "line": 452,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "xray.inputs.tab-positions",
       "file": "src/pages/Xray.tsx",
       "line": 451,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "TabsTrigger",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "xray.inputs.toggle",
       "file": "src/pages/Xray.tsx",
       "line": 438,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "id": "xray.insights.export-master",
       "file": "src/pages/Xray.tsx",
       "line": 742,
       "element": "jsx-prop",
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     }
   ],
   "patterns": [
@@ -1040,205 +1624,343 @@
       "pattern": "allocation.asset-picker.option-*",
       "file": "src/components/AssetClassPicker.tsx",
       "line": 85,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "allocation.builder.balance-p*",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 74,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "allocation.builder.picker-p*",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 142,
-      "attribute": "testId"
+      "attribute": "testId",
+      "tag": "AssetClassPicker"
     },
     {
       "pattern": "allocation.builder.remove-p*",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 122,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "allocation.builder.weight-p*",
       "file": "src/components/allocation/AllocationBuilder.tsx",
       "line": 101,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "pattern": "app.palette.ticker-*",
       "file": "src/components/CommandPalette.tsx",
       "line": 101,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "CommandItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "app.palette.tool-*",
       "file": "src/components/CommandPalette.tsx",
       "line": 115,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "CommandItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "backtest.builder.balance-p*",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 82,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "backtest.builder.benchmark-*",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 375,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "backtest.builder.picker-p*",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 152,
-      "attribute": "testId"
+      "attribute": "testId",
+      "tag": "TickerPicker"
     },
     {
       "pattern": "backtest.builder.remove-p*",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 135,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "backtest.builder.weight-p*",
       "file": "src/components/backtest/BuilderPanel.tsx",
       "line": 122,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "pattern": "backtest.results.rolling-window-*",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 330,
-      "attribute": "data-testid"
+      "line": 368,
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "income.holdings.remove-*",
       "file": "src/pages/Income.tsx",
       "line": 152,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "income.setup.weight-*",
       "file": "src/pages/Income.tsx",
       "line": 136,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "pattern": "landing.tools.card-*",
       "file": "src/pages/Landing.tsx",
-      "line": 135,
-      "attribute": "data-testid"
+      "line": 148,
+      "attribute": "data-testid",
+      "tag": "Link",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "links.resources.open-*",
       "file": "src/pages/Links.tsx",
       "line": 111,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "a",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "montecarlo.plan.strategy-*",
       "file": "src/pages/Montecarlo.tsx",
       "line": 241,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "SelectItem",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "montecarlo.portfolio.remove-*",
       "file": "src/pages/Montecarlo.tsx",
       "line": 129,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "montecarlo.portfolio.weight-*",
       "file": "src/pages/Montecarlo.tsx",
       "line": 113,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "pattern": "projections.editor.field-*",
       "file": "src/projections/ProjectionEditor.tsx",
       "line": 71,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "pattern": "projections.editor.scenario-*",
       "file": "src/projections/ProjectionEditor.tsx",
       "line": 260,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "fill",
+        "press"
+      ]
     },
     {
       "pattern": "projections.list.row-*",
       "file": "src/pages/Projections.tsx",
-      "line": 243,
-      "attribute": "data-testid"
+      "line": 248,
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "styleguide.rows.edit-*",
       "file": "src/pages/Styleguide.tsx",
       "line": 189,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "styleguide.rows.remove-*",
       "file": "src/pages/Styleguide.tsx",
       "line": 192,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "ui.calendar.day-*",
       "file": "src/components/ui/calendar.tsx",
       "line": 304,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "ui.calendar.dropdown-*",
       "file": "src/components/ui/calendar.tsx",
       "line": 258,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "ui.date-picker.clear-*",
       "file": "src/components/backtest/DatePicker.tsx",
       "line": 138,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "ui.date-picker.input-*",
       "file": "src/components/backtest/DatePicker.tsx",
       "line": 113,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Input",
+      "actions": [
+        "type",
+        "fill",
+        "press"
+      ]
     },
     {
       "pattern": "ui.date-picker.open-*",
       "file": "src/components/backtest/DatePicker.tsx",
       "line": 150,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "ui.echart.export-*",
       "file": "src/components/charts/EChart.tsx",
       "line": 139,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "ui.segmented.option-*",
       "file": "src/components/ui/segmented.tsx",
       "line": 25,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "Button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "ui.ticker-picker.option-*",
       "file": "src/components/backtest/TickerPicker.tsx",
       "line": 100,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     },
     {
       "pattern": "xray.holdings.ticker-*",
       "file": "src/pages/Xray.tsx",
       "line": 792,
-      "attribute": "data-testid"
+      "attribute": "data-testid",
+      "tag": "button",
+      "actions": [
+        "click"
+      ]
     }
   ],
   "invalidIdentities": [],
@@ -1250,7 +1972,7 @@
     {
       "id": "candidate:4de0129e86e8fe80",
       "file": "src/App.tsx",
-      "line": 35,
+      "line": 44,
       "element": "Link",
       "classification": "definite",
       "evidence": [
@@ -1260,9 +1982,33 @@
       "disposition": "identified"
     },
     {
+      "id": "candidate:4c3fe3a801255e9d",
+      "file": "src/App.tsx",
+      "line": 104,
+      "element": "Button",
+      "classification": "definite",
+      "evidence": [
+        "configured-wrapper:Button"
+      ],
+      "identified": true,
+      "disposition": "identified"
+    },
+    {
       "id": "candidate:6784b33e36fafb21",
       "file": "src/App.tsx",
-      "line": 71,
+      "line": 108,
+      "element": "Link",
+      "classification": "definite",
+      "evidence": [
+        "configured-wrapper:Link"
+      ],
+      "identified": true,
+      "disposition": "identified"
+    },
+    {
+      "id": "candidate:18259a04d61b5c74",
+      "file": "src/App.tsx",
+      "line": 157,
       "element": "Link",
       "classification": "definite",
       "evidence": [
@@ -1274,7 +2020,7 @@
     {
       "id": "candidate:916fee7436252b84",
       "file": "src/App.tsx",
-      "line": 74,
+      "line": 160,
       "element": "NavLink",
       "classification": "definite",
       "evidence": [
@@ -1286,7 +2032,7 @@
     {
       "id": "candidate:a281f25ae4beebd9",
       "file": "src/App.tsx",
-      "line": 77,
+      "line": 163,
       "element": "NavLink",
       "classification": "definite",
       "evidence": [
@@ -1298,7 +2044,7 @@
     {
       "id": "candidate:bb5458b2c76875fe",
       "file": "src/App.tsx",
-      "line": 80,
+      "line": 166,
       "element": "NavLink",
       "classification": "definite",
       "evidence": [
@@ -1310,7 +2056,7 @@
     {
       "id": "candidate:a4469b0dde33df06",
       "file": "src/App.tsx",
-      "line": 83,
+      "line": 169,
       "element": "NavLink",
       "classification": "definite",
       "evidence": [
@@ -1322,7 +2068,7 @@
     {
       "id": "candidate:07986a44669162bc",
       "file": "src/App.tsx",
-      "line": 86,
+      "line": 172,
       "element": "NavLink",
       "classification": "definite",
       "evidence": [
@@ -1332,9 +2078,81 @@
       "disposition": "identified"
     },
     {
+      "id": "candidate:e9f2a01375d58a96",
+      "file": "src/App.tsx",
+      "line": 181,
+      "element": "a",
+      "classification": "definite",
+      "evidence": [
+        "a[href]"
+      ],
+      "identified": true,
+      "disposition": "identified"
+    },
+    {
+      "id": "candidate:e7a1634852ec7faa",
+      "file": "src/App.tsx",
+      "line": 185,
+      "element": "a",
+      "classification": "definite",
+      "evidence": [
+        "a[href]"
+      ],
+      "identified": true,
+      "disposition": "identified"
+    },
+    {
+      "id": "candidate:586b370fdc5cbb5a",
+      "file": "src/App.tsx",
+      "line": 189,
+      "element": "a",
+      "classification": "definite",
+      "evidence": [
+        "a[href]"
+      ],
+      "identified": true,
+      "disposition": "identified"
+    },
+    {
+      "id": "candidate:65ef7c6c3bc7cbdb",
+      "file": "src/App.tsx",
+      "line": 193,
+      "element": "a",
+      "classification": "definite",
+      "evidence": [
+        "a[href]"
+      ],
+      "identified": true,
+      "disposition": "identified"
+    },
+    {
+      "id": "candidate:fb6387332d63e028",
+      "file": "src/App.tsx",
+      "line": 197,
+      "element": "a",
+      "classification": "definite",
+      "evidence": [
+        "a[href]"
+      ],
+      "identified": true,
+      "disposition": "identified"
+    },
+    {
+      "id": "candidate:c073bb949843e93b",
+      "file": "src/App.tsx",
+      "line": 201,
+      "element": "a",
+      "classification": "definite",
+      "evidence": [
+        "a[href]"
+      ],
+      "identified": true,
+      "disposition": "identified"
+    },
+    {
       "id": "candidate:9ff9797ed1035e47",
       "file": "src/App.tsx",
-      "line": 110,
+      "line": 222,
       "element": "NavLink",
       "classification": "definite",
       "evidence": [
@@ -1346,7 +2164,7 @@
     {
       "id": "candidate:b0e2eb47f790dcf7",
       "file": "src/App.tsx",
-      "line": 113,
+      "line": 225,
       "element": "NavLink",
       "classification": "definite",
       "evidence": [
@@ -1358,7 +2176,7 @@
     {
       "id": "candidate:16fb3a383cdbcc23",
       "file": "src/App.tsx",
-      "line": 116,
+      "line": 228,
       "element": "NavLink",
       "classification": "definite",
       "evidence": [
@@ -1370,7 +2188,7 @@
     {
       "id": "candidate:c002a011ca93e8fa",
       "file": "src/App.tsx",
-      "line": 123,
+      "line": 235,
       "element": "Button",
       "classification": "definite",
       "evidence": [
@@ -1382,7 +2200,7 @@
     {
       "id": "candidate:7614c19fcef270b2",
       "file": "src/App.tsx",
-      "line": 137,
+      "line": 249,
       "element": "button",
       "classification": "definite",
       "evidence": [
@@ -1394,7 +2212,7 @@
     {
       "id": "candidate:6544a3e8c77863fa",
       "file": "src/App.tsx",
-      "line": 152,
+      "line": 264,
       "element": "Button",
       "classification": "definite",
       "evidence": [
@@ -1406,7 +2224,7 @@
     {
       "id": "candidate:e9cd0c6c30a99b76",
       "file": "src/App.tsx",
-      "line": 167,
+      "line": 279,
       "element": "Button",
       "classification": "definite",
       "evidence": [
@@ -1850,7 +2668,7 @@
     {
       "id": "candidate:b93ebca6132c6b44",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 233,
+      "line": 264,
       "element": "Button",
       "classification": "definite",
       "evidence": [
@@ -1862,7 +2680,7 @@
     {
       "id": "candidate:34248d45bc50b122",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 247,
+      "line": 278,
       "element": "Button",
       "classification": "definite",
       "evidence": [
@@ -1874,7 +2692,7 @@
     {
       "id": "candidate:f44f056f624d85c2",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 260,
+      "line": 298,
       "element": "Switch",
       "classification": "definite",
       "evidence": [
@@ -1886,7 +2704,7 @@
     {
       "id": "candidate:dc68db01f1f39c68",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 272,
+      "line": 310,
       "element": "TabsTrigger",
       "classification": "definite",
       "evidence": [
@@ -1898,7 +2716,7 @@
     {
       "id": "candidate:f77f12f2acaeb998",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 273,
+      "line": 311,
       "element": "TabsTrigger",
       "classification": "definite",
       "evidence": [
@@ -1910,7 +2728,7 @@
     {
       "id": "candidate:fb40e2d8dc6294d8",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 274,
+      "line": 312,
       "element": "TabsTrigger",
       "classification": "definite",
       "evidence": [
@@ -1922,7 +2740,7 @@
     {
       "id": "candidate:24c98adfae568907",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 277,
+      "line": 315,
       "element": "TabsTrigger",
       "classification": "definite",
       "evidence": [
@@ -1934,7 +2752,7 @@
     {
       "id": "candidate:7f81da0bee1f6bf9",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 278,
+      "line": 316,
       "element": "TabsTrigger",
       "classification": "definite",
       "evidence": [
@@ -1946,7 +2764,7 @@
     {
       "id": "candidate:125ebe2c7e783afb",
       "file": "src/components/backtest/ResultsPanel.tsx",
-      "line": 328,
+      "line": 366,
       "element": "Button",
       "classification": "definite",
       "evidence": [
@@ -2234,7 +3052,7 @@
     {
       "id": "candidate:5cd67cb9ed7ffebc",
       "file": "src/pages/Landing.tsx",
-      "line": 135,
+      "line": 148,
       "element": "Link",
       "classification": "definite",
       "evidence": [
@@ -2414,7 +3232,7 @@
     {
       "id": "candidate:6b5ee7e821de55a1",
       "file": "src/pages/Projections.tsx",
-      "line": 189,
+      "line": 190,
       "element": "Button",
       "classification": "definite",
       "evidence": [
@@ -2426,7 +3244,19 @@
     {
       "id": "candidate:323282db3d64aa2c",
       "file": "src/pages/Projections.tsx",
-      "line": 211,
+      "line": 212,
+      "element": "Button",
+      "classification": "definite",
+      "evidence": [
+        "configured-wrapper:Button"
+      ],
+      "identified": true,
+      "disposition": "identified"
+    },
+    {
+      "id": "candidate:c849ffe88ef2720a",
+      "file": "src/pages/Projections.tsx",
+      "line": 231,
       "element": "Button",
       "classification": "definite",
       "evidence": [
@@ -2438,7 +3268,7 @@
     {
       "id": "candidate:21ae788c7678b87e",
       "file": "src/pages/Projections.tsx",
-      "line": 241,
+      "line": 246,
       "element": "button",
       "classification": "definite",
       "evidence": [
