@@ -6,11 +6,13 @@ import tailwindcss from '@tailwindcss/vite'
 import fs from 'node:fs'
 import type { Plugin } from 'vite'
 
+// Only a missing checkout counts. A file missing inside the checkout has the
+// same code but says "Cannot find module", and should fail the build loudly.
 function isMissingAgentHandles(error: unknown): boolean {
   return error instanceof Error &&
     'code' in error &&
     error.code === 'ERR_MODULE_NOT_FOUND' &&
-    error.message.includes('agent-handles')
+    error.message.startsWith("Cannot find package 'agent-handles'")
 }
 
 async function optionalAgentHandles(): Promise<Plugin[]> {

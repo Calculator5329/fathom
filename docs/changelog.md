@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-06: a broken agent-handles checkout fails the build instead of hiding
+
+- `app/vite.config.ts` loads agent-handles only when the sibling checkout is
+  there. It skipped any "module not found" error that mentioned
+  agent-handles, including a file missing inside a checkout that is there.
+  In that case the dev server started without the plugin and nothing checked
+  the registry. Now only Node's "Cannot find package 'agent-handles'"
+  counts as optional. Every other error fails the build.
+
 ## 2026-09-26: the handles registry caught up and now stays current
 
 - `app/testid-registry.json` had fallen three weeks behind the source. Nine
